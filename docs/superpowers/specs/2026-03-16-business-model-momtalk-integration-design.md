@@ -196,7 +196,7 @@ the token against the `bml_sessions` table.
    ```typescript
    window.ReactNativeWebView?.postMessage(JSON.stringify({
      type: 'bml.session.created',
-     payload: { childId, sessionToken }
+     payload: { childId, status: 'ok' }
    }));
    ```
 
@@ -451,6 +451,47 @@ Review delivery channels:
 (via AppState listener). This ensures sync even if realtime subscription was disconnected.
 Realtime is an optimization, not a requirement.
 
+### Portal Error & Offline Handling
+
+- All `/api/progress` writes are **optimistic**: save to localStorage first, then POST to API.
+- If the API call fails (network error, 500), the portal retries up to 3 times with exponential backoff.
+- If all retries fail, progress stays in localStorage and syncs on next successful API call.
+- **Session expiry**: If a 401 is returned, the portal shows a friendly "Session expired" screen with options to re-enter kid code or relaunch from app. No data is lost (localStorage backup).
+
+### New Supabase Tables (Phase 2 prerequisite)
+
+```sql
+-- Session tokens for portal auth (service role access only, no RLS)
+CREATE TABLE bml_sessions (
+  token UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES profiles(id),
+  child_id UUID NOT NULL,
+  child_context JSONB NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_bml_sessions_expires ON bml_sessions(expires_at);
+
+-- One-time auth codes from app launch (service role access only, no RLS)
+CREATE TABLE bml_auth_codes (
+  code UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id UUID NOT NULL REFERENCES profiles(id),
+  child_id UUID NOT NULL,
+  child_context JSONB NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT false,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX idx_bml_auth_codes_expires ON bml_auth_codes(expires_at);
+
+-- Cleanup: Supabase cron or pg_cron to purge expired rows daily
+-- DELETE FROM bml_sessions WHERE expires_at < now();
+-- DELETE FROM bml_auth_codes WHERE expires_at < now();
+```
+
+Both tables use RLS disabled (service role only access from Vercel functions).
+The app's own Supabase client never queries these tables directly.
+
 ### Progress Sync (Supabase)
 
 ```
@@ -468,7 +509,7 @@ module_data rows:
 
 | Endpoint | Method | Purpose |
 |---|---|---|
-| `/api/auth/token` | POST | Validate JWT from app, return session + child context |
+| `/api/auth/code` | POST | Exchange one-time auth code from app for session + child context |
 | `/api/auth/kid-code` | POST | Validate kid code, return session + child context |
 | `/api/progress` | GET | Fetch child progress (requires session) |
 | `/api/progress` | POST | Save lesson result (requires session) |
@@ -476,7 +517,7 @@ module_data rows:
 
 ### New Hooks
 
-- `useChildContext()` — Fetches child context from JWT/kid-code, caches in React state. Returns `{ child, isGuest, isLoading }`.
+- `useChildContext()` — Fetches child context from auth code or kid code, caches in React state. Returns `{ child, isGuest, isLoading }`.
 - `useProgress()` — CRUD operations on Supabase progress data. Returns `{ progress, saveLesson, getQuizScore }`.
 - `useAdaptive()` — Derives `difficultyLevel`, `themeContext`, and `pacing` from child context.
 
@@ -594,7 +635,7 @@ This prevents breaking existing data when interfaces evolve.
 | **5** | MomTalk app module (Zustand store, context extractor, event bus) | Phase 2, 3 |
 | **6** | WebView bridge (postMessage sync) | Phase 3, 5 |
 | **7** | Momo nudges (prompt template) | Phase 5 |
-| **8** | kids_CEO mission unlocks | Phase 5, 7 |
+| **8** | kids_CEO mission unlocks | Phase 5 |
 | **9** | Spaced learning (SM-2 scheduler + review quiz) | Phase 2, 5 |
 | **10** | Interest theming (Layer 2) — deferred, lower priority | Phase 4 |
 
