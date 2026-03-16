@@ -24,14 +24,21 @@ MomTalk App (React Native / Expo)
 │   └── Spaced learning scheduler
 │
 ├── Launches portal via WebView or deep link
-│   └── Passes: short-lived JWT (profileId, childId, context)
+│   └── Passes: one-time auth code (exchanged for session token)
 │
 businessmodel.momtalk.ai (Vite + React + TypeScript)
-├── Auth: JWT from app OR 6-digit kid code
+├── Auth: one-time code from app OR 6-digit kid code
 ├── Adaptive content engine (age difficulty, interest theming, pacing)
-├── Progress persistence: reads/writes Supabase module_data
+├── Progress persistence: ALL access via Vercel API functions (never direct Supabase)
+├── WebView bridge: postMessage for real-time app sync
 └── Spaced review mini-quiz component
 ```
+
+### Key Principle: Portal Never Talks to Supabase Directly
+
+All database access from the portal goes through Vercel serverless functions (`/api/*`).
+These functions use a Supabase service role key (server-side only). The portal client
+has no Supabase credentials.
 
 ---
 
@@ -108,7 +115,9 @@ registerModuleContextExtractor({
   contextCategories: ['education', 'gamification', 'children'],
   extractContext: () => {
     const state = useBusinessModelStore.getState();
-    const activeChild = state.childProgress[selectedChildId];
+    // selectedChildId comes from MomTalk's global kidsMissionStore or app-level child selector
+    const selectedChildId = useKidsMissionStore.getState().selectedChildId;
+    const activeChild = selectedChildId ? state.childProgress[selectedChildId] : null;
     return {
       bizLessonsCompleted: activeChild?.lessonsCompleted.length ?? 0,
       bizCurrentLesson: activeChild?.currentLesson ?? null,
@@ -133,45 +142,93 @@ registerModuleContextExtractor({
 **Listens:**
 - `kids-ceo.mission.completed` → Check if mission was a business-model-unlocked mission, update `unlockedMissions` status
 
+**Error handling:** Event emissions are fire-and-forget. If kids_CEO is not installed or the
+listener throws, the lesson completion flow is not affected. Mission creation failures are
+logged but do not block progress saving. The `try/catch` wraps only the mission creation,
+not the core progress update.
+
 ---
 
 ## 2. Kid Authentication — Dual Mode
 
+### Session Token Design
+
+Both auth modes result in the same **session token** — an opaque token stored in the `bml_sessions`
+Supabase table (accessed only by Vercel functions via service role key).
+
+```typescript
+interface BMLSession {
+  token: string;               // crypto.randomUUID(), stored as primary key
+  profileId: string;
+  childId: string;
+  childContext: {              // snapshot at session creation
+    childName: string;
+    childAge: number;
+    interests: string[];
+    personality: string[];
+    ceoLevel: number;
+    ceoPoints: number;
+  };
+  expiresAt: string;           // 24 hours from creation
+  createdAt: string;
+}
+```
+
+Portal stores the session token in `sessionStorage` (not localStorage — cleared on tab close).
+Every `/api/*` call includes `Authorization: Bearer <sessionToken>`. Vercel functions validate
+the token against the `bml_sessions` table.
+
 ### Mode A: App Launch (Primary)
 
 1. Parent taps "Business Model Learning" module in MomTalk app.
-2. App generates a short-lived JWT (5-min expiry) signed with a shared secret (env var `BML_JWT_SECRET`).
-3. JWT payload:
-   ```json
-   {
-     "profileId": "uuid",
-     "childId": "uuid",
-     "childName": "string",
-     "childAge": 7,
-     "interests": ["robotics", "LEGO"],
-     "personality": ["creative", "independent"],
-     "ceoLevel": 3,
-     "ceoPoints": 450,
-     "exp": 1710600000
-   }
+2. App calls MomTalk backend (`/api/bml/create-session`) which generates:
+   - A one-time auth code (UUID, 2-min expiry, stored in `bml_auth_codes` table)
+   - The backend signs it — **no secrets in the mobile app bundle** (asymmetric: server signs, portal verifies via public key; or simpler: opaque code looked up server-side).
+3. App opens `businessmodel.momtalk.ai/auth?code=<one-time-code>`.
+4. Portal's `/api/auth/code` endpoint:
+   - Looks up the one-time code in `bml_auth_codes`
+   - Validates it's not expired and not yet used
+   - Marks it as used (single-use)
+   - Creates a `BMLSession` (24-hour expiry)
+   - Returns `{ sessionToken, childContext }`
+5. Portal stores session token in `sessionStorage`, strips code from URL via `history.replaceState()`.
+6. **WebView bridge:** If running in WebView, portal also posts session confirmation:
+   ```typescript
+   window.ReactNativeWebView?.postMessage(JSON.stringify({
+     type: 'bml.session.created',
+     payload: { childId, sessionToken }
+   }));
    ```
-4. Opens `businessmodel.momtalk.ai?token=<jwt>` in WebView or system browser.
-5. Portal decodes JWT, stores in session, fetches full progress from Supabase.
 
 ### Mode B: Kid Code (Standalone)
 
 1. Parent opens MomTalk → Business Model Learning settings → "Generate Kid Code."
-2. App creates a 6-character alphanumeric code (uppercase, no ambiguous chars like 0/O, 1/I/L).
-3. Code stored in Supabase `module_data` with key `kid-code:<code>`, value `{ profileId, childId, expiresAt }`. 30-day expiry.
+2. App creates a 6-character alphanumeric code (uppercase, no ambiguous chars like 0/O/1/I/L — charset: `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, 30 chars, ~30^6 = 729M combinations).
+3. Code stored in Supabase `module_data` with key `kid-code:<code>`, value `{ profileId, childId, expiresAt }`. 30-day expiry. Codes are reusable within the expiry window.
 4. Kid visits portal → types code on landing page.
-5. Portal calls `/api/auth/kid-code` → looks up code in Supabase → returns child context + session token.
-6. Session token (24-hour expiry) used for subsequent API calls.
+5. Portal calls `POST /api/auth/kid-code` → Vercel function:
+   - Looks up code in Supabase (service role key)
+   - **Rate limiting:** Max 5 failed attempts per IP per 10 minutes (Upstash Redis or Vercel KV). Returns 429 after limit.
+   - If valid: creates a `BMLSession` (24-hour expiry), returns `{ sessionToken, childContext }`
+   - If invalid: returns 401 with generic "Invalid code" message (no enumeration hints)
+6. Portal stores session token in `sessionStorage`.
 
 ### Guest Mode (No Auth)
 
 - Portal still works without login.
-- Default: age 7, generic examples, no progress saved.
-- "Save your progress" prompt after first quiz encourages connecting via app or kid code.
+- Default: age 7, generic examples, no progress saved to server.
+- Progress stored in `localStorage` only.
+- After first quiz: "Want to save your progress?" prompt with options:
+  - "Open from MomTalk app" (instructions)
+  - "Enter your kid code" (code input)
+  - "Continue as guest" (dismiss)
+
+### Security Notes
+
+- **No secrets in mobile app:** Auth codes are generated server-side. The mobile app never holds signing keys.
+- **No PII in URLs:** One-time codes are opaque UUIDs, not JWTs containing child data. Codes are stripped from URL after use.
+- **Rate limiting:** Kid code endpoint is rate-limited to prevent brute force.
+- **Session scope:** Session tokens grant access only to the specific child's business model progress — no broader Supabase access.
 
 ---
 
@@ -366,18 +423,33 @@ Review delivery channels:
 
 ### Lesson Completion Flow
 
+**Path 1 — WebView (instant, via postMessage bridge):**
 ```
 1. Kid completes lesson on portal
-2. Portal → POST /api/progress { profileId, childId, lessonId, score, skills }
-3. Vercel function → upsert Supabase module_data
-4. Supabase realtime subscription fires
-5. MomTalk app Zustand store updates childProgress
-6. Context cache invalidated (contextEvents.ts)
-7. moduleBus.emit('business-model.lesson.completed', payload)
-8. kids_CEO listener → creates real-world mission
-9. Spaced learning scheduler → queues first review at +1 day
-10. Next Flomy chat → Momo has business context available
+2. Portal → POST /api/progress (saves to Supabase via Vercel function)
+3. Portal → window.ReactNativeWebView.postMessage({ type: 'bml.lesson.completed', payload })
+4. MomTalk WebView handler receives message → updates Zustand store
+5. Context cache invalidated
+6. moduleBus.emit('business-model.lesson.completed', payload)
+7. kids_CEO listener → creates real-world mission
+8. Spaced learning scheduler → queues first review at +1 day
 ```
+
+**Path 2 — System browser / app not running (deferred sync):**
+```
+1. Kid completes lesson on portal
+2. Portal → POST /api/progress (saves to Supabase via Vercel function)
+3. Next time MomTalk app comes to foreground:
+   - businessModelStore.loadProgress() re-fetches from Supabase
+   - Detects new completions since last sync
+   - Fires pending events (lesson.completed, etc.)
+   - kids_CEO missions created, spaced reviews queued
+4. Additionally: Supabase realtime subscription (if active) provides faster sync
+```
+
+**Foreground sync fallback:** The store's `loadProgress()` is called on `app.foreground` event
+(via AppState listener). This ensures sync even if realtime subscription was disconnected.
+Realtime is an optimization, not a requirement.
 
 ### Progress Sync (Supabase)
 
@@ -474,7 +546,64 @@ When no auth is present:
 
 ---
 
-## 9. Unchanged
+## 9. Vercel Config Changes
+
+Update `vercel.json` to support the integration:
+
+1. **Remove `X-Frame-Options: SAMEORIGIN`** — it blocks WebView embedding from the MomTalk app.
+   Replace with CSP `frame-ancestors` directive:
+   ```json
+   { "key": "Content-Security-Policy", "value": "frame-ancestors 'self' momtalk://* exp://*" }
+   ```
+
+2. **Add CORS for `/api` routes** (if needed for cross-origin fetch from app):
+   ```json
+   { "source": "/api/(.*)", "headers": [
+     { "key": "Access-Control-Allow-Origin", "value": "https://momtalk.ai" },
+     { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+     { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+   ]}
+   ```
+
+---
+
+## 10. Data Versioning
+
+All JSON blobs stored in `module_data` include a `schemaVersion` field:
+
+```typescript
+interface VersionedData<T> {
+  schemaVersion: number;     // increment on breaking changes
+  data: T;
+}
+```
+
+On read, the store checks `schemaVersion` and runs migration functions if needed.
+This prevents breaking existing data when interfaces evolve.
+
+---
+
+## 11. Implementation Phases
+
+| Phase | Scope | Depends on |
+|---|---|---|
+| **1** | Guest mode: localStorage progress, no auth | — |
+| **2** | Vercel API functions + Supabase connection + session management | Phase 1 |
+| **3** | App launch auth (one-time code) + kid code auth | Phase 2 |
+| **4** | Adaptive content Layer 1 (age-based difficulty) + Layer 3 (pacing) | Phase 1 |
+| **5** | MomTalk app module (Zustand store, context extractor, event bus) | Phase 2, 3 |
+| **6** | WebView bridge (postMessage sync) | Phase 3, 5 |
+| **7** | Momo nudges (prompt template) | Phase 5 |
+| **8** | kids_CEO mission unlocks | Phase 5, 7 |
+| **9** | Spaced learning (SM-2 scheduler + review quiz) | Phase 2, 5 |
+| **10** | Interest theming (Layer 2) — deferred, lower priority | Phase 4 |
+
+**MomoMentorBubble** on the portal uses canned messages (pre-written tips per lesson step),
+not live AI calls. AI-powered Momo lives in the MomTalk app's Flomy chat only.
+
+---
+
+## 12. Unchanged
 
 - Portal visual design, MomTalk styling, all existing CSS
 - Module card grid on portal landing page
