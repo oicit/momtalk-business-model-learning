@@ -1,0 +1,484 @@
+# Business Model Learning <> MomTalk Integration — Design Spec
+
+**Date:** 2026-03-16
+**Status:** Approved
+**Domain:** businessmodel.momtalk.ai
+**Related modules:** kids-ceo, flomy-chat
+
+---
+
+## Overview
+
+Integrate the Business Model Learning portal (businessmodel.momtalk.ai) with MomTalk's context management system. The portal delivers interactive business lessons; the MomTalk app provides kid profiles, AI mentoring (Momo), mission integration (kids_CEO), and spaced learning follow-ups.
+
+## Architecture
+
+```
+MomTalk App (React Native / Expo)
+├── business-model-learning module
+│   ├── Zustand store (progress, spaced review queue, unlocked missions)
+│   ├── Context extractor → contributes to FullContext
+│   ├── Momo AI prompt: momo-business-mentor
+│   ├── Event bus: emits lesson.completed, quiz.scored, review.due
+│   ├── Listens: kids-ceo.mission.completed
+│   └── Spaced learning scheduler
+│
+├── Launches portal via WebView or deep link
+│   └── Passes: short-lived JWT (profileId, childId, context)
+│
+businessmodel.momtalk.ai (Vite + React + TypeScript)
+├── Auth: JWT from app OR 6-digit kid code
+├── Adaptive content engine (age difficulty, interest theming, pacing)
+├── Progress persistence: reads/writes Supabase module_data
+└── Spaced review mini-quiz component
+```
+
+---
+
+## 1. New Module: `business-model-learning`
+
+### Registration
+
+- **Slug:** `business-model-learning`
+- **Category:** `business`
+- **UI slots:** `home-card` (progress widget), `tab` (optional)
+- **Dependencies:** `kids-ceo` (optional, for mission unlocks)
+- **is_core:** false
+- **is_premium:** false
+
+### Zustand Store
+
+```typescript
+interface BusinessModelLearningState {
+  profileId: string | null;
+  childProgress: Record<string, ChildLessonProgress>;
+  spacedReviewQueue: SpacedReviewItem[];
+  unlockedMissions: UnlockedMission[];
+  kidCodes: Record<string, KidCode>;
+
+  // Actions
+  loadProgress: (profileId: string) => Promise<void>;
+  saveProgress: (childId: string, lessonId: string, data: LessonResult) => Promise<void>;
+  scheduleReview: (childId: string, lessonId: string) => void;
+  generateKidCode: (childId: string) => Promise<string>;
+  getDueReviews: (childId: string) => SpacedReviewItem[];
+}
+
+interface ChildLessonProgress {
+  childId: string;
+  lessonsCompleted: string[];
+  quizScores: Record<string, number>;       // lessonId → score 0-100
+  currentLesson: string | null;
+  totalXP: number;
+  skillMastery: Record<string, number>;     // skill → mastery 0-1
+  lastActiveAt: string;
+}
+
+interface SpacedReviewItem {
+  id: string;
+  lessonId: string;
+  childId: string;
+  nextReviewDate: string;                   // ISO date
+  interval: number;                          // days
+  repetition: number;                        // times reviewed
+  easeFactor: number;                        // SM-2 algorithm
+}
+
+interface UnlockedMission {
+  missionId: string;
+  lessonId: string;
+  childId: string;
+  createdAt: string;
+  status: 'pending' | 'accepted' | 'completed';
+}
+
+interface KidCode {
+  code: string;
+  childId: string;
+  profileId: string;
+  expiresAt: string;                         // 30-day expiry
+}
+```
+
+### Context Extractor
+
+```typescript
+registerModuleContextExtractor({
+  moduleSlug: 'business-model-learning',
+  contextCategories: ['education', 'gamification', 'children'],
+  extractContext: () => {
+    const state = useBusinessModelStore.getState();
+    const activeChild = state.childProgress[selectedChildId];
+    return {
+      bizLessonsCompleted: activeChild?.lessonsCompleted.length ?? 0,
+      bizCurrentLesson: activeChild?.currentLesson ?? null,
+      bizTopSkill: getTopSkill(activeChild?.skillMastery),
+      bizTotalXP: activeChild?.totalXP ?? 0,
+      bizNextReviewDue: getNextDueReview(state.spacedReviewQueue, selectedChildId),
+      bizLastQuizScore: getLastQuizScore(activeChild),
+      bizLastLessonTitle: getLastLessonTitle(activeChild),
+    };
+  },
+  relevantPrompts: ['momo-business-mentor', 'flomy-chat', 'flomy-greeting'],
+});
+```
+
+### Event Bus
+
+**Emits:**
+- `business-model.lesson.completed` → `{ childId, lessonId, lessonTitle, score, xpEarned }`
+- `business-model.quiz.scored` → `{ childId, lessonId, score, skillsAssessed }`
+- `business-model.review.due` → `{ childId, lessonId, dueDate }`
+
+**Listens:**
+- `kids-ceo.mission.completed` → Check if mission was a business-model-unlocked mission, update `unlockedMissions` status
+
+---
+
+## 2. Kid Authentication — Dual Mode
+
+### Mode A: App Launch (Primary)
+
+1. Parent taps "Business Model Learning" module in MomTalk app.
+2. App generates a short-lived JWT (5-min expiry) signed with a shared secret (env var `BML_JWT_SECRET`).
+3. JWT payload:
+   ```json
+   {
+     "profileId": "uuid",
+     "childId": "uuid",
+     "childName": "string",
+     "childAge": 7,
+     "interests": ["robotics", "LEGO"],
+     "personality": ["creative", "independent"],
+     "ceoLevel": 3,
+     "ceoPoints": 450,
+     "exp": 1710600000
+   }
+   ```
+4. Opens `businessmodel.momtalk.ai?token=<jwt>` in WebView or system browser.
+5. Portal decodes JWT, stores in session, fetches full progress from Supabase.
+
+### Mode B: Kid Code (Standalone)
+
+1. Parent opens MomTalk → Business Model Learning settings → "Generate Kid Code."
+2. App creates a 6-character alphanumeric code (uppercase, no ambiguous chars like 0/O, 1/I/L).
+3. Code stored in Supabase `module_data` with key `kid-code:<code>`, value `{ profileId, childId, expiresAt }`. 30-day expiry.
+4. Kid visits portal → types code on landing page.
+5. Portal calls `/api/auth/kid-code` → looks up code in Supabase → returns child context + session token.
+6. Session token (24-hour expiry) used for subsequent API calls.
+
+### Guest Mode (No Auth)
+
+- Portal still works without login.
+- Default: age 7, generic examples, no progress saved.
+- "Save your progress" prompt after first quiz encourages connecting via app or kid code.
+
+---
+
+## 3. Adaptive Content Engine
+
+Three layers, all driven by child context received at session start.
+
+### Layer 1: Age-Based Difficulty
+
+| Property | Ages 5-6 | Ages 7-8 | Ages 9-12 |
+|---|---|---|---|
+| Vocabulary | Simple, emoji-heavy | Business terms introduced with definitions | Full business language |
+| Quiz style | Tap-to-pick, 2-3 options | Multiple choice, 4 options | Open-ended + calculations |
+| Content depth | Story-driven concepts | Concepts + basic numbers | Full analysis, real math |
+| Lesson length | 5-8 screens | 8-12 screens | 12-15 screens |
+| Momo presence | Constant guide | Intro + check-ins | Available on-demand |
+
+Implementation: Each lesson component receives a `difficultyLevel: 'easy' | 'medium' | 'hard'` prop derived from `childAge`.
+
+### Layer 2: Interest Theming
+
+Child's `interests[]` from MomTalk profile drive example selection.
+
+```typescript
+interface ThemeContext {
+  childName: string;
+  interests: string[];
+  personality: string[];
+  examples: ThemedExample[];    // pre-selected based on interests
+}
+
+// Example mapping
+const INTEREST_THEMES: Record<string, LessonTheme> = {
+  'robotics': { items: ['LEGO Mindstorms set', 'Arduino kit', 'Robot arm'], currency: 'tech tokens' },
+  'monster-trucks': { items: ['Monster Jam truck', 'Hot Wheels set', 'Racing helmet'], currency: 'fuel points' },
+  'costumes': { items: ['Spider-Man suit', 'Batman cape', 'Princess dress'], currency: 'costume coins' },
+  'swimming': { items: ['Goggles', 'Swim fins', 'Pool float'], currency: 'splash points' },
+  // ... more themes
+};
+```
+
+Fallback: If no matching interests, use generic kid-friendly examples (toys, snacks, games).
+
+Implementation: `themeContext` object passed to lesson components. Components use `themeContext.examples[0]` instead of hardcoded items.
+
+### Layer 3: Adaptive Pacing
+
+Based on quiz performance stored in `skillMastery`.
+
+- Score > 80%: Skip review section, unlock bonus content (advanced tip, real-world challenge).
+- Score 50-80%: Normal flow, review section included.
+- Score < 50%: Extra practice round with simplified questions before advancing.
+- `skillMastery` per concept (pricing, marketing, customer_service, supply_chain, branding, operations): 0.0 to 1.0, updated after each quiz using weighted moving average.
+
+---
+
+## 4. Follow-Up System
+
+### Part A: Momo Nudges
+
+New prompt registered in MomTalk's prompt system:
+
+```typescript
+{
+  id: 'momo-business-mentor',
+  category: 'interaction',
+  template: `You are Momo, {{childName}}'s friendly business mentor from the Business Model Learning Lab.
+
+Context:
+- {{childName}} is {{childAge}} years old
+- Recently completed: {{bizLastLessonTitle}}
+- Last quiz score: {{bizLastQuizScore}}%
+- Strongest business skill: {{bizTopSkill}}
+- Total business XP: {{bizTotalXP}}
+- Time: {{timeOfDay}}, {{isWeekend ? 'weekend' : 'weekday'}}
+
+Instructions:
+- Give a brief, encouraging follow-up (2-3 sentences max)
+- Connect their lesson to something real they could try today
+- If weekend, suggest a hands-on mini-project
+- Match vocabulary to their age
+- If they have a review due, gently mention it
+- Never pressure, always encourage`,
+  contextRequirements: {
+    required: ['children', 'temporal'],
+    optional: ['moduleContext:business-model-learning', 'moduleContext:kids-ceo', 'mood'],
+    exclude: [],
+  },
+}
+```
+
+Trigger: Momo references business lessons in Flomy chat when `bizLessonsCompleted > 0` in context. Not every message — only when contextually relevant (e.g., kid asks about money, parent discusses activities, time-of-day suggests project time).
+
+### Part B: kids_CEO Mission Unlocks
+
+When `business-model.lesson.completed` fires, create a mission in kids_CEO:
+
+```typescript
+const LESSON_MISSIONS: Record<string, MissionTemplate> = {
+  'garage-sale': {
+    title: 'Host a Real Garage Sale',
+    description: 'Put your business skills to work! Plan and run a real garage sale.',
+    category: 'operations',
+    steps: [
+      { title: 'Pick 10 items to sell', description: 'Walk through your room and find things you no longer use' },
+      { title: 'Price each item', description: 'Use what you learned about pricing — think about what buyers would pay' },
+      { title: 'Make signs and ads', description: 'Create at least 2 posters and tell 3 neighbors' },
+      { title: 'Set up your stand', description: 'Organize items neatly with prices visible' },
+      { title: 'Run the sale and count earnings', description: 'Be friendly, make change, and track what sells' },
+    ],
+    rewardMoney: 5.00,
+    rewardPoints: 100,
+    difficulty: 3,
+  },
+  'chick-fil-a': {
+    title: 'Customer Service Challenge',
+    description: 'Practice "my pleasure" service for one whole day!',
+    category: 'team',
+    steps: [
+      { title: 'Greet 5 people with a smile today', description: 'Family, neighbors, or store workers' },
+      { title: 'Say "my pleasure" instead of "you\'re welcome"', description: 'Try it at least 3 times' },
+      { title: 'Help someone without being asked', description: 'Notice what people need and offer help' },
+    ],
+    rewardMoney: 0,
+    rewardPoints: 75,
+    difficulty: 2,
+  },
+  'lemonade-stand': {
+    title: 'Run a Lemonade Stand This Weekend',
+    description: 'Calculate costs, set prices, and sell real lemonade!',
+    category: 'finance',
+    steps: [
+      { title: 'Calculate ingredient costs', description: 'Lemons, sugar, cups — how much does one glass cost to make?' },
+      { title: 'Set your price', description: 'Price higher than cost — that\'s your profit margin!' },
+      { title: 'Pick your location', description: 'Where do the most people walk by?' },
+      { title: 'Make and sell', description: 'Track every sale and count your profit at the end' },
+    ],
+    rewardMoney: 3.00,
+    rewardPoints: 150,
+    difficulty: 3,
+  },
+};
+```
+
+Implementation: Listen to event → call `moduleBus.emit('kids-ceo.mission.create', missionData)`. Mission appears in kids_CEO with a "From: Business Model Lab" badge.
+
+### Part C: Spaced Learning
+
+SM-2 algorithm (simplified):
+
+```typescript
+function scheduleReview(item: SpacedReviewItem, score: number): SpacedReviewItem {
+  // score: 0-5 (0=complete blackout, 5=perfect recall)
+  const quality = Math.round((score / 100) * 5);
+
+  if (quality < 3) {
+    // Failed review — reset
+    return { ...item, repetition: 0, interval: 1, nextReviewDate: addDays(now, 1) };
+  }
+
+  const newRepetition = item.repetition + 1;
+  let newInterval: number;
+
+  if (newRepetition === 1) newInterval = 1;
+  else if (newRepetition === 2) newInterval = 3;
+  else newInterval = Math.round(item.interval * item.easeFactor);
+
+  const newEase = Math.max(1.3,
+    item.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+  );
+
+  return {
+    ...item,
+    repetition: newRepetition,
+    interval: newInterval,
+    easeFactor: newEase,
+    nextReviewDate: addDays(now, newInterval),
+  };
+}
+```
+
+Review schedule after lesson completion: 1 day → 3 days → 1 week → 2 weeks → 1 month.
+
+Review delivery channels:
+1. **Portal:** "Review Due" badge on module card, mini-quiz (3 questions from the lesson).
+2. **App notification:** Push notification from MomTalk: "Time for a quick business review!"
+3. **Momo nudge:** In Flomy chat, Momo mentions: "Want to do a quick review of your Garage Sale lesson?"
+
+---
+
+## 5. Data Flow
+
+### Lesson Completion Flow
+
+```
+1. Kid completes lesson on portal
+2. Portal → POST /api/progress { profileId, childId, lessonId, score, skills }
+3. Vercel function → upsert Supabase module_data
+4. Supabase realtime subscription fires
+5. MomTalk app Zustand store updates childProgress
+6. Context cache invalidated (contextEvents.ts)
+7. moduleBus.emit('business-model.lesson.completed', payload)
+8. kids_CEO listener → creates real-world mission
+9. Spaced learning scheduler → queues first review at +1 day
+10. Next Flomy chat → Momo has business context available
+```
+
+### Progress Sync (Supabase)
+
+```
+module_data rows:
+  { profile_id, module_slug: 'business-model-learning', data_key: 'progress:<childId>', data_value: ChildLessonProgress }
+  { profile_id, module_slug: 'business-model-learning', data_key: 'reviews:<childId>', data_value: SpacedReviewItem[] }
+  { profile_id, module_slug: 'business-model-learning', data_key: 'kid-code:<code>', data_value: { profileId, childId, expiresAt } }
+```
+
+---
+
+## 6. Portal Changes
+
+### New API Endpoints (Vercel Serverless)
+
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/api/auth/token` | POST | Validate JWT from app, return session + child context |
+| `/api/auth/kid-code` | POST | Validate kid code, return session + child context |
+| `/api/progress` | GET | Fetch child progress (requires session) |
+| `/api/progress` | POST | Save lesson result (requires session) |
+| `/api/reviews` | GET | Fetch due reviews for child |
+
+### New Hooks
+
+- `useChildContext()` — Fetches child context from JWT/kid-code, caches in React state. Returns `{ child, isGuest, isLoading }`.
+- `useProgress()` — CRUD operations on Supabase progress data. Returns `{ progress, saveLesson, getQuizScore }`.
+- `useAdaptive()` — Derives `difficultyLevel`, `themeContext`, and `pacing` from child context.
+
+### New Components
+
+- `KidCodeEntry` — Landing page code input (6-char, large buttons, kid-friendly).
+- `SpacedReviewQuiz` — Mini-quiz component (3 questions, reuses existing quiz UI patterns).
+- `ProgressBar` — Per-lesson and overall progress visualization.
+- `MomoMentorBubble` — Momo speech bubble with contextual tips during lessons.
+
+### Lesson Component Changes
+
+Existing lesson components (GarageSale, ChickFilA) receive new props:
+
+```typescript
+interface LessonProps {
+  difficultyLevel: 'easy' | 'medium' | 'hard';
+  themeContext: ThemeContext;
+  childContext: ChildContext | null;
+  onComplete: (result: LessonResult) => void;
+}
+```
+
+Components use these to:
+- Select vocabulary variants
+- Pick themed examples
+- Adjust quiz difficulty
+- Report completion
+
+---
+
+## 7. MomTalk App Changes
+
+### New Files
+
+- `stores/businessModelStore.ts` — Zustand store (state + actions + context extractor)
+- `lib/prompts/businessModelPrompts.ts` — Momo business mentor prompt template
+- `lib/modules/businessModelMissions.ts` — Mission templates + event listener
+
+### Modified Files
+
+- `lib/prompts/definitions.ts` — Register `momo-business-mentor` prompt
+- `lib/modules/eventBus.ts` — Add business-model event types to union
+- `app/modules/` — New `business-model-learning.tsx` module screen (launch portal, show progress, manage kid codes)
+- `stores/pocketModuleStore.ts` — Register business-model-learning module
+
+### Module Screen (in-app)
+
+The in-app module screen shows:
+- Per-child progress cards (lessons completed, XP, skill radar)
+- "Open Learning Lab" button (launches portal with JWT)
+- Kid code management (generate, view, revoke)
+- Upcoming reviews with "Start Review" button
+- Unlocked missions (links to kids_CEO)
+
+---
+
+## 8. Guest Mode
+
+When no auth is present:
+- Portal works normally with default settings (age 7, generic examples)
+- Progress stored in localStorage only (not synced)
+- After first quiz: "Want to save your progress?" prompt with options:
+  - "Open from MomTalk app" (instructions)
+  - "Enter your kid code" (code input)
+  - "Continue as guest" (dismiss)
+
+---
+
+## 9. Unchanged
+
+- Portal visual design, MomTalk styling, all existing CSS
+- Module card grid on portal landing page
+- Existing lesson content (Garage Sale levels, Chick-fil-A video + quiz)
+- Coming Soon modules on portal
+- Footer, Header components
+- Vercel deployment config
