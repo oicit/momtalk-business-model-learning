@@ -1,0 +1,230 @@
+/* ─── MomTalk Business Model Learning ─── */
+/* Design System: MomTalk Style Guide */
+
+:root {
+  /* Primary Colors */
+  --mt-forest: #2D7B5F;
+  --mt-sage: #5E8C7F;
+  --mt-cream: #F5E6D3;
+  --mt-warm-white: #FFF8F0;
+  --mt-yellow: #F4C430;
+  --mt-sunshine: #FCD34D;
+
+  /* Logo Colors */
+  --mt-pink: #FF6B8A;
+  --mt-pink-med: #FF8FAA;
+  --mt-pink-light: #FFA5B8;
+  --mt-blue: #7DD3FC;
+  --mt-green: #86EFAC;
+  --mt-lavender: #C4B5FD;
+
+  /* Petal Colors */
+  --mt-kids: #86EFAC;
+  --mt-family: #FCD34D;
+  --mt-self: #F9A8D4;
+  --mt-career: #7DD3FC;
+  --mt-partner: #C4B5FD;
+
+  /* Gradients */
+  --gradient-pink: linear-gradient(135deg, #FFE5EC 0%, #FFCCD8 50%, #FFB5C5 100%);
+  --gradient-blue: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 50%, #7DD3FC 100%);
+  --gradient-green: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #86EFAC 100%);
+  --gradient-yellow: linear-gradient(135deg, #FEF9C3 0%, #FDE68A 50%, #FCD34D 100%);
+  --gradient-lavender: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 50%, #C4B5FD 100%);
+  --gradient-warm: linear-gradient(135deg, #FFF8F0 0%, #F5E6D3 50%, #EDCFB3 100%);
+
+  /* Borders */
+  --border-thick: 6px solid var(--mt-forest);
+  --border-medium: 3px solid var(--mt-forest);
+  --border-thin: 2px solid var(--mt-forest);
+
+  /* Radii */
+  --radius-sm: 16px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-xl: 40px;
+  --radius-pill: 100px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(45, 123, 95, 0.12);
+  --shadow-hover: 0 8px 32px rgba(45, 123, 95, 0.2);
+  --shadow-float: 0 12px 40px rgba(45, 123, 95, 0.15);
+
+  /* Font */
+  --font: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--mt-cream);
+  color: var(--mt-forest);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--mt-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mt-sage);
+  border-radius: 4px;
+}
+
+/* ─── Typography ─── */
+h1, h2, h3, h4 {
+  color: var(--mt-forest);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+a {
+  color: var(--mt-forest);
+  text-decoration: none;
+}
+
+/* ─── Animations ─── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes bubbleFloat {
+  0% {
+    transform: translateY(100%) scale(0.3);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120vh) scale(0.8);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  75% { transform: rotate(2deg); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.animate-in-delay-1 { animation-delay: 0.1s; }
+.animate-in-delay-2 { animation-delay: 0.2s; }
+.animate-in-delay-3 { animation-delay: 0.3s; }
+.animate-in-delay-4 { animation-delay: 0.4s; }
+.animate-in-delay-5 { animation-delay: 0.5s; }
+
+/* ─── Back Button (for module pages) ─── */
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--mt-warm-white);
+  border: var(--border-medium);
+  border-radius: var(--radius-pill);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mt-forest);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  background: var(--mt-yellow);
+  transform: translateX(-4px);
+  box-shadow: var(--shadow-card);
+}
+
+/* ─── Mobile Adjustments ─── */
+@media (max-width: 768px) {
+  body {
+    font-size: 15px;
+  }
+}
+
+/* ─── Module Page Wrapper ─── */
+.module-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.module-header {
+  padding: 16px 24px;
+  background: var(--mt-warm-white);
+  border-bottom: var(--border-medium);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.module-header-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.module-content {
+  flex: 1;
+}
