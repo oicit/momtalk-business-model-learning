@@ -4,11 +4,17 @@ import Footer from '../components/Footer';
 import GarageSale from '../modules/GarageSale';
 import { useProgress } from '../hooks/useProgress';
 import { useSpacedReview } from '../hooks/useSpacedReview';
+import { useChildContext } from '../hooks/useChildContext';
+import { useAdaptive } from '../hooks/useAdaptive';
 
 export default function GarageSalePage() {
   const { completeLesson, isCompleted, getScore } = useProgress();
   const { scheduleReview } = useSpacedReview();
   const previousScore = getScore('garage-sale');
+
+  // Adaptive content engine
+  const { child } = useChildContext();
+  const { difficultyLevel, themeContext } = useAdaptive(child);
 
   const handleAllComplete = useCallback(
     (data: { totalLevels: number; xp: number }) => {
@@ -56,7 +62,7 @@ export default function GarageSalePage() {
         </div>
       )}
       <div style={{ flex: 1 }}>
-        <GarageSale onAllComplete={handleAllComplete} />
+        <GarageSale onAllComplete={handleAllComplete} difficultyLevel={difficultyLevel} themeContext={child ? themeContext : null} />
       </div>
       <Footer />
     </div>

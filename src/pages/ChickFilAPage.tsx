@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import MomoMentorBubble from '../components/MomoMentorBubble';
 import { useProgress } from '../hooks/useProgress';
 import { useSpacedReview } from '../hooks/useSpacedReview';
+import { useChildContext } from '../hooks/useChildContext';
+import { useAdaptive } from '../hooks/useAdaptive';
+import { adaptText, getDifficultyConfig, getPacing } from '../lib/difficulty';
 
 const KEY_LESSONS = [
   {
@@ -52,7 +56,21 @@ export default function ChickFilAPage() {
   const { scheduleReview } = useSpacedReview();
   const previousScore = getScore('chick-fil-a');
 
-  const quizQuestions = [
+  // Adaptive content engine
+  const { child } = useChildContext();
+  const { difficultyLevel, themeContext } = useAdaptive(child);
+  const difficultyConfig = getDifficultyConfig(difficultyLevel);
+
+  // Adapt lesson descriptions based on difficulty
+  const adaptedLessons = useMemo(
+    () => KEY_LESSONS.map((lesson) => ({
+      ...lesson,
+      desc: adaptText(lesson.desc, difficultyLevel),
+    })),
+    [difficultyLevel],
+  );
+
+  const allQuizQuestions = [
     {
       q: 'What makes Chick-fil-A\'s customer service special?',
       options: ['Fast delivery', 'Saying "my pleasure"', 'Free toys', 'Drive-through only'],
@@ -74,6 +92,22 @@ export default function ChickFilAPage() {
       correct: 1,
     },
   ];
+
+  // Trim quiz options for easy mode (show only quizOptionsCount options, keeping the correct one)
+  const quizQuestions = useMemo(() => {
+    const maxOptions = difficultyConfig.quizOptionsCount;
+    return allQuizQuestions.map((q) => {
+      if (q.options.length <= maxOptions) return q;
+      // Always keep the correct answer; pick remaining from others
+      const correctOpt = q.options[q.correct];
+      const others = q.options.filter((_, i) => i !== q.correct).slice(0, maxOptions - 1);
+      const trimmed = [...others];
+      // Insert correct answer at a stable position
+      const newCorrectIdx = Math.min(q.correct, trimmed.length);
+      trimmed.splice(newCorrectIdx, 0, correctOpt);
+      return { ...q, options: trimmed, correct: newCorrectIdx };
+    });
+  }, [difficultyConfig.quizOptionsCount]);
 
   const score = quizSubmitted
     ? Object.entries(quizAnswers).reduce(
@@ -109,7 +143,7 @@ export default function ChickFilAPage() {
           maxWidth: 500,
           margin: '0 auto',
         }}>
-          Discover the secrets behind one of America's most beloved restaurant chains
+          {child ? `Hey ${themeContext.childName}! Let's learn about Chick-fil-A!` : 'Discover the secrets behind one of America\'s most beloved restaurant chains'}
         </p>
         {isCompleted('chick-fil-a') && previousScore !== null && (
           <div style={{
@@ -128,6 +162,16 @@ export default function ChickFilAPage() {
           </div>
         )}
       </section>
+
+      {/* Momo Mentor Tip */}
+      <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px' }}>
+        <MomoMentorBubble
+          lessonId="chick-fil-a"
+          step={0}
+          difficulty={difficultyLevel}
+          childName={child ? themeContext.childName : undefined}
+        />
+      </div>
 
       {/* Video Section */}
       <section style={{
@@ -211,7 +255,7 @@ export default function ChickFilAPage() {
           gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
           gap: 16,
         }}>
-          {KEY_LESSONS.map((lesson, i) => (
+          {adaptedLessons.map((lesson, i) => (
             <div
               key={i}
               onClick={() => setExpandedLesson(expandedLesson === i ? null : i)}
@@ -427,6 +471,28 @@ export default function ChickFilAPage() {
                   >
                     Try Again
                   </button>
+
+                  {/* Bonus tip section based on pacing */}
+                  {getPacing(Math.round((score / quizQuestions.length) * 100)).showBonusContent && (
+                    <div style={{
+                      marginTop: 16,
+                      padding: '16px 20px',
+                      background: '#FFF8F0',
+                      borderRadius: 16,
+                      border: '3px solid #2D7B5F',
+                      textAlign: 'left',
+                    }}>
+                      <p style={{ fontWeight: 800, fontSize: 14, color: '#FF6B8A', marginBottom: 6 }}>
+                        BONUS TIP
+                      </p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: '#2D7B5F', lineHeight: 1.6, margin: 0 }}>
+                        {adaptText(
+                          'Chick-fil-A\'s franchise fee is only $10,000 — way less than most chains. But they keep 50% of profits and 15% of revenue. This unique model means operators are deeply invested in each location\'s success!',
+                          difficultyLevel,
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

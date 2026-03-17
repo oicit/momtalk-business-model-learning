@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import MomoMentorBubble from "../components/MomoMentorBubble";
+import { adaptText, getDifficultyConfig } from "../lib/difficulty";
 
 const LEVELS = [
   { id: 0, title: "Welcome", icon: "🚀", color: "#FF6B35" },
@@ -514,7 +516,7 @@ function ChecklistBuilder({ onComplete }) {
 }
 
 // ─── Lesson Content Data ───
-function getLessonContent(levelId) {
+function getLessonContent(levelId, difficulty = 'medium', themeCtx = null) {
   const lessons = {
     0: {
       type: "intro",
@@ -763,11 +765,46 @@ function getLessonContent(levelId) {
     },
     10: { type: "final", buddy: "excited" },
   };
-  return lessons[levelId];
+
+  const lesson = lessons[levelId];
+  if (!lesson) return lesson;
+
+  // Apply themed examples: replace generic item names with child's interest-based ones
+  if (themeCtx && themeCtx.examples && themeCtx.examples.length > 0 && lesson.messages) {
+    const exampleItems = themeCtx.examples;
+    lesson.messages = lesson.messages.map((msg) => {
+      let adapted = msg;
+      // Replace generic "old toys" / "stuff" references with themed examples where natural
+      if (exampleItems[0]) adapted = adapted.replace(/old toys/gi, exampleItems[0].item + "s");
+      if (exampleItems[1]) adapted = adapted.replace(/board games/gi, exampleItems[1].item + "s");
+      return adapted;
+    });
+  }
+
+  // Apply vocabulary adaptation based on difficulty
+  if (lesson.messages) {
+    lesson.messages = lesson.messages.map((msg) => adaptText(msg, difficulty));
+  }
+
+  // Trim quiz options for easy mode
+  if (lesson.quiz) {
+    const maxOptions = getDifficultyConfig(difficulty).quizOptionsCount;
+    lesson.quiz = lesson.quiz.map((q) => {
+      if (q.options.length <= maxOptions) return q;
+      const correctOpt = q.options[q.correctIndex];
+      const others = q.options.filter((_, i) => i !== q.correctIndex).slice(0, maxOptions - 1);
+      const trimmed = [...others];
+      const newCorrectIdx = Math.min(q.correctIndex, trimmed.length);
+      trimmed.splice(newCorrectIdx, 0, correctOpt);
+      return { ...q, options: trimmed, correctIndex: newCorrectIdx };
+    });
+  }
+
+  return lesson;
 }
 
 // ─── Main App ───
-export default function GarageSaleApp({ onAllComplete } = {}) {
+export default function GarageSaleApp({ onAllComplete, difficultyLevel = 'medium', themeContext = null } = {}) {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
@@ -787,7 +824,7 @@ export default function GarageSaleApp({ onAllComplete } = {}) {
   const [showMap, setShowMap] = useState(false);
   const scrollRef = useRef(null);
 
-  const lesson = getLessonContent(currentLevel);
+  const lesson = getLessonContent(currentLevel, difficultyLevel, themeContext);
   const totalXpNeeded = LEVELS.length * (XP_PER_LESSON + XP_PER_QUIZ);
 
   useEffect(() => {
@@ -1038,6 +1075,16 @@ export default function GarageSaleApp({ onAllComplete } = {}) {
                 borderRadius: 4, transition: "width 0.5s ease",
               }} />
             </div>
+
+            {/* Momo Mentor Tip */}
+            {phase === "lesson" && (
+              <MomoMentorBubble
+                lessonId="garage-sale"
+                step={Math.min(currentLevel, 2)}
+                difficulty={difficultyLevel}
+                childName={themeContext?.childName}
+              />
+            )}
 
             {/* Messages */}
             {phase === "lesson" && (
