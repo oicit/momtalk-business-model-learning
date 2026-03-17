@@ -1,6 +1,32 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSupabase } from './_supabase';
-import { validateSession } from './_validate-session';
+import { createClient } from '@supabase/supabase-js';
+
+function getSupabase() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY');
+  return createClient(url, key);
+}
+
+interface SessionData {
+  profileId: string;
+  childId: string;
+  childContext: Record<string, unknown>;
+}
+
+async function validateSession(authHeader: string | undefined): Promise<SessionData | null> {
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const token = authHeader.slice(7);
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('bml_sessions')
+    .select('profile_id, child_id, child_context')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .single();
+  if (error || !data) return null;
+  return { profileId: data.profile_id, childId: data.child_id, childContext: data.child_context as Record<string, unknown> };
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
