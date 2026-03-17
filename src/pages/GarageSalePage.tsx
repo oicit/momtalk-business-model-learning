@@ -3,9 +3,11 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import GarageSale from '../modules/GarageSale';
 import { useProgress } from '../hooks/useProgress';
+import { useSpacedReview } from '../hooks/useSpacedReview';
 
 export default function GarageSalePage() {
   const { completeLesson, isCompleted, getScore } = useProgress();
+  const { scheduleReview } = useSpacedReview();
   const previousScore = getScore('garage-sale');
 
   const handleAllComplete = useCallback(
@@ -22,8 +24,9 @@ export default function GarageSalePage() {
           Branding: 75,
         },
       });
+      scheduleReview('garage-sale');
     },
-    [completeLesson],
+    [completeLesson, scheduleReview],
   );
 
   return (

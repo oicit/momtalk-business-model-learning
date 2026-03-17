@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useProgress } from '../hooks/useProgress';
 import ProgressBadge from '../components/ProgressBadge';
+import { useSpacedReview } from '../hooks/useSpacedReview';
+import SpacedReviewQuiz from '../components/SpacedReviewQuiz';
 
 const MODULES = [
   {
@@ -96,9 +98,16 @@ const BUBBLES = Array.from({ length: 12 }, (_, i) => ({
   ][i % 6],
 }));
 
+const LESSON_NAMES: Record<string, string> = {
+  'chick-fil-a': 'Chick-fil-A: How a Restaurant Works',
+  'garage-sale': 'Garage Sale Business',
+};
+
 export default function Portal() {
   const [loaded, setLoaded] = useState(false);
   const { progress, isCompleted, getScore } = useProgress();
+  const { dueReviews, submitReview } = useSpacedReview();
+  const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoaded(true);
@@ -222,13 +231,109 @@ export default function Portal() {
         </div>
       </section>
 
+      {/* Reviews Due */}
+      {dueReviews.length > 0 && (
+        <section style={{
+          padding: '0 24px 24px',
+          maxWidth: 1100,
+          margin: '0 auto',
+          width: '100%',
+          marginTop: -40,
+          position: 'relative',
+          zIndex: 3,
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #FEF9C3 0%, #FDE68A 100%)',
+            borderRadius: 32,
+            border: '6px solid #2D7B5F',
+            padding: 24,
+            boxShadow: '0 8px 32px rgba(45,123,95,0.15)',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              marginBottom: 16,
+            }}>
+              <span style={{ fontSize: 28 }}>🧠</span>
+              <h2 style={{ fontSize: 20, fontWeight: 900, color: '#2D7B5F', margin: 0 }}>
+                Reviews Due
+              </h2>
+              <span style={{
+                background: '#2D7B5F',
+                color: 'white',
+                padding: '2px 10px',
+                borderRadius: 100,
+                fontSize: 12,
+                fontWeight: 800,
+              }}>
+                {dueReviews.length}
+              </span>
+            </div>
+
+            {activeReviewId ? (
+              (() => {
+                const activeReview = dueReviews.find((r) => r.id === activeReviewId);
+                if (!activeReview) return null;
+                return (
+                  <SpacedReviewQuiz
+                    review={activeReview}
+                    onComplete={(reviewId, scorePercent) => {
+                      submitReview(reviewId, scorePercent);
+                      setTimeout(() => setActiveReviewId(null), 2500);
+                    }}
+                  />
+                );
+              })()
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {dueReviews.map((review) => (
+                  <div
+                    key={review.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      background: 'rgba(255,255,255,0.8)',
+                      borderRadius: 16,
+                      border: '3px solid rgba(45,123,95,0.2)',
+                      padding: '12px 16px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 700, fontSize: 14, color: '#2D7B5F' }}>
+                      {LESSON_NAMES[review.lessonId] || review.lessonId}
+                    </span>
+                    <button
+                      onClick={() => setActiveReviewId(review.id)}
+                      style={{
+                        padding: '8px 20px',
+                        background: '#2D7B5F',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 100,
+                        fontSize: 13,
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                      }}
+                    >
+                      Start Review
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Modules Grid */}
       <section style={{
         padding: '0 24px 60px',
         maxWidth: 1100,
         margin: '0 auto',
         width: '100%',
-        marginTop: -40,
+        marginTop: dueReviews.length > 0 ? 0 : -40,
         position: 'relative',
         zIndex: 2,
       }}>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useProgress } from '../hooks/useProgress';
+import { useSpacedReview } from '../hooks/useSpacedReview';
 
 const KEY_LESSONS = [
   {
@@ -48,6 +49,7 @@ export default function ChickFilAPage() {
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const { completeLesson, isCompleted, getScore } = useProgress();
+  const { scheduleReview } = useSpacedReview();
   const previousScore = getScore('chick-fil-a');
 
   const quizQuestions = [
@@ -369,6 +371,7 @@ export default function ChickFilAPage() {
                         'Operations': finalScore >= 4 ? 95 : 55,
                       },
                     });
+                    scheduleReview('chick-fil-a');
                   }}
                   disabled={Object.keys(quizAnswers).length < quizQuestions.length}
                   style={{
