@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useProgress } from '../hooks/useProgress';
 
 const KEY_LESSONS = [
   {
@@ -46,6 +47,8 @@ export default function ChickFilAPage() {
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<Record<number, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const { completeLesson, isCompleted, getScore } = useProgress();
+  const previousScore = getScore('chick-fil-a');
 
   const quizQuestions = [
     {
@@ -106,6 +109,22 @@ export default function ChickFilAPage() {
         }}>
           Discover the secrets behind one of America's most beloved restaurant chains
         </p>
+        {isCompleted('chick-fil-a') && previousScore !== null && (
+          <div style={{
+            marginTop: 12,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8,
+            background: '#2D7B5F',
+            color: 'white',
+            padding: '8px 20px',
+            borderRadius: 100,
+            fontSize: 14,
+            fontWeight: 800,
+          }}>
+            ✓ Completed — Best Score: {previousScore}%
+          </div>
+        )}
       </section>
 
       {/* Video Section */}
@@ -333,7 +352,24 @@ export default function ChickFilAPage() {
 
               {!quizSubmitted ? (
                 <button
-                  onClick={() => setQuizSubmitted(true)}
+                  onClick={() => {
+                    setQuizSubmitted(true);
+                    const finalScore = Object.entries(quizAnswers).reduce(
+                      (acc, [qi, ai]) => acc + (quizQuestions[Number(qi)]!.correct === ai ? 1 : 0), 0
+                    );
+                    completeLesson({
+                      lessonId: 'chick-fil-a',
+                      score: Math.round((finalScore / quizQuestions.length) * 100),
+                      xpEarned: 100,
+                      completedAt: new Date().toISOString(),
+                      skillScores: {
+                        'Supply Chain': finalScore >= 1 ? 80 : 40,
+                        'Customer Service': finalScore >= 2 ? 90 : 50,
+                        'Brand Building': finalScore >= 3 ? 85 : 45,
+                        'Operations': finalScore >= 4 ? 95 : 55,
+                      },
+                    });
+                  }}
                   disabled={Object.keys(quizAnswers).length < quizQuestions.length}
                   style={{
                     padding: '14px 36px',

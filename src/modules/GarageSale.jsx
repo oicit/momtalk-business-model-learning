@@ -767,7 +767,7 @@ function getLessonContent(levelId) {
 }
 
 // ─── Main App ───
-export default function GarageSaleApp() {
+export default function GarageSaleApp({ onAllComplete } = {}) {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [xp, setXp] = useState(0);
   const [coins, setCoins] = useState(0);
@@ -855,6 +855,11 @@ export default function GarageSaleApp() {
         // Final quiz done
         completeLevel();
         setPhase("results");
+        // Fire completion callback with computed values (state hasn't updated yet)
+        if (onAllComplete) {
+          const finalXp = xp + XP_PER_LESSON; // completeLevel adds XP_PER_LESSON
+          onAllComplete({ totalLevels: 10, xp: finalXp });
+        }
       } else {
         completeLevel();
       }
