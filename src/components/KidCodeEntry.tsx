@@ -54,7 +54,7 @@ export default function KidCodeEntry({ onSuccess }: KidCodeEntryProps) {
         type="text"
         value={code}
         onChange={(e) => handleInput(e.target.value)}
-        placeholder="ABC123"
+        placeholder="ABC234"
         maxLength={6}
         style={{
           width: '100%',
