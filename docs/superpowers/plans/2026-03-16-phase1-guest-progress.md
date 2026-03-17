@@ -62,21 +62,23 @@ interface StoredProgress {
   data: ChildLessonProgress;
 }
 
-const DEFAULT_PROGRESS: ChildLessonProgress = {
-  lessonsCompleted: [],
-  quizScores: {},
-  currentLesson: null,
-  totalXP: 0,
-  skillMastery: {},
-  lastActiveAt: new Date().toISOString(),
-};
+function createDefaultProgress(): ChildLessonProgress {
+  return {
+    lessonsCompleted: [],
+    quizScores: {},
+    currentLesson: null,
+    totalXP: 0,
+    skillMastery: {},
+    lastActiveAt: new Date().toISOString(),
+  };
+}
 
 export function loadProgress(): ChildLessonProgress {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_PROGRESS };
+    if (!raw) return createDefaultProgress();
     const stored: StoredProgress = JSON.parse(raw);
-    if (stored.schemaVersion !== SCHEMA_VERSION) return { ...DEFAULT_PROGRESS };
+    if (stored.schemaVersion !== SCHEMA_VERSION) return createDefaultProgress();
     return stored.data;
   } catch {
     return { ...DEFAULT_PROGRESS };
@@ -220,8 +222,8 @@ export default function ProgressBadge({ completed, score }: ProgressBadgeProps) 
     <div
       style={{
         position: 'absolute',
-        top: -8,
-        right: -8,
+        top: 12,
+        right: 12,
         display: 'flex',
         alignItems: 'center',
         gap: 4,
@@ -349,7 +351,7 @@ The GarageSale module tracks its own state internally (`completedLevels`, `xp`, 
 2. Call it when all levels are completed or when the final quiz is done
 3. GarageSalePage passes the callback from `useProgress`
 
-- [ ] **Step 1: Add onComplete prop to GarageSale module**
+- [ ] **Step 1: Add onAllComplete prop to GarageSale module**
 
 In `src/modules/GarageSale.jsx`, modify the export:
 
@@ -359,22 +361,24 @@ export default function GarageSaleApp() {
 ```
 To:
 ```javascript
-export default function GarageSaleApp({ onLevelComplete, onAllComplete } = {}) {
+export default function GarageSaleApp({ onAllComplete } = {}) {
 ```
 
-Then find the `completeLevel` function (the one that calls `setCompletedLevels`). After `setCompletedLevels(...)`, add:
+Then find the `nextQuiz` function's `if (currentLevel === 9)` branch (around line 854). This is inside `nextQuiz()`, NOT inside `completeLevel()`. After `completeLevel();` and `setPhase("results");`, add the callback. **Important:** React state updates from `completeLevel()` are batched, so `xp` and `coins` still hold pre-update values. Calculate expected final values from known constants:
+
 ```javascript
-if (onLevelComplete) {
-  onLevelComplete({ level: currentLevel, xp, coins: coins + 10 });
-}
+if (currentLevel === 9) {
+  completeLevel();
+  setPhase("results");
+  // Fire completion callback with computed values (state hasn't updated yet)
+  if (onAllComplete) {
+    const finalXp = xp + XP_PER_LESSON; // completeLevel adds XP_PER_LESSON
+    onAllComplete({ totalLevels: 10, xp: finalXp });
+  }
+} else {
 ```
 
-And in the section where `currentLevel === 9` (final level completion), after the existing logic add:
-```javascript
-if (onAllComplete) {
-  onAllComplete({ totalLevels: 10, xp: xp + XP_PER_QUIZ, coins: coins + 50 });
-}
-```
+This replaces the existing `if/else` block for `currentLevel === 9`.
 
 - [ ] **Step 2: Update GarageSalePage to pass callbacks**
 
@@ -392,7 +396,7 @@ export default function GarageSalePage() {
   const previousScore = getScore('garage-sale');
 
   const handleAllComplete = useCallback(
-    (data: { totalLevels: number; xp: number; coins: number }) => {
+    (data: { totalLevels: number; xp: number }) => {
       completeLesson({
         lessonId: 'garage-sale',
         score: 100, // completed all 10 levels
