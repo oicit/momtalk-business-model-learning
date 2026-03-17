@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useProgress } from '../hooks/useProgress';
+import ProgressBadge from '../components/ProgressBadge';
 
 const MODULES = [
   {
@@ -96,6 +98,7 @@ const BUBBLES = Array.from({ length: 12 }, (_, i) => ({
 
 export default function Portal() {
   const [loaded, setLoaded] = useState(false);
+  const { progress, isCompleted, getScore } = useProgress();
 
   useEffect(() => {
     setLoaded(true);
@@ -192,8 +195,8 @@ export default function Portal() {
             }}
           >
             {[
-              { label: 'Modules', value: '6', icon: '📚' },
-              { label: 'Skills', value: '24+', icon: '⚡' },
+              { label: 'Completed', value: `${progress.lessonsCompleted.length}/6`, icon: '📚' },
+              { label: 'XP', value: progress.totalXP > 0 ? `${progress.totalXP}` : '0', icon: '⚡' },
               { label: 'Ages', value: '5-12', icon: '👦' },
             ].map((stat) => (
               <div
@@ -252,7 +255,14 @@ export default function Portal() {
           gap: 24,
         }}>
           {MODULES.map((mod, i) => (
-            <ModuleCard key={mod.id} module={mod} index={i} loaded={loaded} />
+            <ModuleCard
+              key={mod.id}
+              module={mod}
+              index={i}
+              loaded={loaded}
+              completed={isCompleted(mod.id)}
+              score={getScore(mod.id)}
+            />
           ))}
         </div>
       </section>
@@ -401,7 +411,7 @@ interface Module {
   skills: string[];
 }
 
-function ModuleCard({ module: mod, index, loaded }: { module: Module; index: number; loaded: boolean }) {
+function ModuleCard({ module: mod, index, loaded, completed, score }: { module: Module; index: number; loaded: boolean; completed: boolean; score: number | null }) {
   const [hovered, setHovered] = useState(false);
   const isAvailable = mod.status === 'available';
 
@@ -426,6 +436,7 @@ function ModuleCard({ module: mod, index, loaded }: { module: Module; index: num
         overflow: 'hidden',
       }}
     >
+      <ProgressBadge completed={completed} score={score} />
       {/* Emoji + Tag Row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div style={{
