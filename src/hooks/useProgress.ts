@@ -17,7 +17,9 @@ async function fetchServerProgress(token: string): Promise<ChildLessonProgress |
     });
     if (!res.ok) return null;
     const { progress } = await res.json();
-    return progress ?? null;
+    if (!progress) return null;
+    // Server stores wrapped format { schemaVersion, data }
+    return progress.data ?? progress;
   } catch {
     return null;
   }
