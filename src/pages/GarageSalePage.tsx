@@ -6,6 +6,7 @@ import { useProgress } from '../hooks/useProgress';
 import { useSpacedReview } from '../hooks/useSpacedReview';
 import { useChildContext } from '../hooks/useChildContext';
 import { useAdaptive } from '../hooks/useAdaptive';
+import SaveProgressPrompt from '../components/SaveProgressPrompt';
 
 export default function GarageSalePage() {
   const { completeLesson, isCompleted, getScore } = useProgress();
@@ -13,7 +14,7 @@ export default function GarageSalePage() {
   const previousScore = getScore('garage-sale');
 
   // Adaptive content engine
-  const { child } = useChildContext();
+  const { child, isGuest } = useChildContext();
   const { difficultyLevel, themeContext } = useAdaptive(child);
 
   const handleAllComplete = useCallback(
@@ -64,6 +65,11 @@ export default function GarageSalePage() {
       <div style={{ flex: 1 }}>
         <GarageSale onAllComplete={handleAllComplete} difficultyLevel={difficultyLevel} themeContext={child ? themeContext : null} />
       </div>
+      {isCompleted('garage-sale') && (
+        <div style={{ padding: '0 24px 24px', maxWidth: 600, margin: '0 auto', width: '100%' }}>
+          <SaveProgressPrompt isGuest={isGuest} show={true} />
+        </div>
+      )}
       <Footer />
     </div>
   );

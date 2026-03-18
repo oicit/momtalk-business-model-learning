@@ -6,6 +6,7 @@ import { useProgress } from '../hooks/useProgress';
 import { useSpacedReview } from '../hooks/useSpacedReview';
 import { useChildContext } from '../hooks/useChildContext';
 import { useAdaptive } from '../hooks/useAdaptive';
+import SaveProgressPrompt from '../components/SaveProgressPrompt';
 import { adaptText, getDifficultyConfig, getPacing } from '../lib/difficulty';
 
 const KEY_LESSONS = [
@@ -57,7 +58,7 @@ export default function ChickFilAPage() {
   const previousScore = getScore('chick-fil-a');
 
   // Adaptive content engine
-  const { child } = useChildContext();
+  const { child, isGuest } = useChildContext();
   const { difficultyLevel, themeContext } = useAdaptive(child);
   const difficultyConfig = getDifficultyConfig(difficultyLevel);
 
@@ -493,6 +494,8 @@ export default function ChickFilAPage() {
                       </p>
                     </div>
                   )}
+
+                  <SaveProgressPrompt isGuest={isGuest} show={quizSubmitted} />
                 </div>
               )}
             </div>
