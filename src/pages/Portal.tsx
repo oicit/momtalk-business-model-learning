@@ -6,6 +6,7 @@ import { useProgress } from '../hooks/useProgress';
 import ProgressBadge from '../components/ProgressBadge';
 import { useSpacedReview } from '../hooks/useSpacedReview';
 import SpacedReviewQuiz from '../components/SpacedReviewQuiz';
+import { getStoredAuth } from '../lib/auth';
 
 const MODULES = [
   {
@@ -105,6 +106,7 @@ const LESSON_NAMES: Record<string, string> = {
 
 export default function Portal() {
   const [loaded, setLoaded] = useState(false);
+  const isAuthenticated = !!getStoredAuth();
   const { progress, isCompleted, getScore } = useProgress();
   const { dueReviews, submitReview } = useSpacedReview();
   const [activeReviewId, setActiveReviewId] = useState<string | null>(null);
@@ -367,6 +369,7 @@ export default function Portal() {
               loaded={loaded}
               completed={isCompleted(mod.id)}
               score={getScore(mod.id)}
+              isAuthenticated={isAuthenticated}
             />
           ))}
         </div>
@@ -516,7 +519,7 @@ interface Module {
   skills: string[];
 }
 
-function ModuleCard({ module: mod, index, loaded, completed, score }: { module: Module; index: number; loaded: boolean; completed: boolean; score: number | null }) {
+function ModuleCard({ module: mod, index, loaded, completed, score, isAuthenticated }: { module: Module; index: number; loaded: boolean; completed: boolean; score: number | null; isAuthenticated: boolean }) {
   const [hovered, setHovered] = useState(false);
   const isAvailable = mod.status === 'available';
 
@@ -632,14 +635,17 @@ function ModuleCard({ module: mod, index, loaded, completed, score }: { module: 
           transition: 'transform 0.2s ease',
           transform: hovered ? 'translateX(4px)' : 'translateX(0)',
         }}>
-          →
+          {isAuthenticated ? '→' : '🔒'}
         </div>
       )}
     </div>
   );
 
   if (isAvailable) {
-    return <Link to={mod.path} style={{ textDecoration: 'none' }}>{card}</Link>;
+    const href = isAuthenticated
+      ? mod.path
+      : `/auth?redirect=${encodeURIComponent(mod.path)}`;
+    return <Link to={href} style={{ textDecoration: 'none' }}>{card}</Link>;
   }
   return card;
 }

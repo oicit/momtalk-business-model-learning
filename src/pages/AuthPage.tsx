@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import KidCodeEntry from '../components/KidCodeEntry';
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [success, setSuccess] = useState(false);
 
+  // Where to go after auth — default to portal
+  const redirect = searchParams.get('redirect') || '/';
+
   if (success) {
-    // Brief success message then redirect
-    setTimeout(() => navigate('/'), 1500);
+    setTimeout(() => navigate(redirect), 1500);
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header />
