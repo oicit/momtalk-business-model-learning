@@ -9,8 +9,8 @@ function getSupabase() {
 }
 
 const attempts: Record<string, { count: number; resetAt: number }> = {};
-const MAX_ATTEMPTS = 5;
-const WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+const MAX_ATTEMPTS = 20;
+const WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
