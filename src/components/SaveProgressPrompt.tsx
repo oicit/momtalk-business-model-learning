@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 interface SaveProgressPromptProps {
@@ -7,10 +6,9 @@ interface SaveProgressPromptProps {
 }
 
 export default function SaveProgressPrompt({ isGuest, show }: SaveProgressPromptProps) {
-  const [dismissed, setDismissed] = useState(false);
   const navigate = useNavigate();
 
-  if (!isGuest || !show || dismissed) return null;
+  if (!isGuest || !show) return null;
 
   return (
     <div style={{
@@ -72,21 +70,6 @@ export default function SaveProgressPrompt({ isGuest, show }: SaveProgressPrompt
           📱 Open from MomTalk App
         </a>
 
-        <button
-          onClick={() => setDismissed(true)}
-          style={{
-            padding: '8px',
-            background: 'none',
-            border: 'none',
-            color: '#5E8C7F',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}
-        >
-          Continue as guest
-        </button>
       </div>
     </div>
   );
