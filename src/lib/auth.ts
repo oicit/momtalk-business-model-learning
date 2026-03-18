@@ -32,19 +32,6 @@ export function clearAuth(): void {
   sessionStorage.removeItem(SESSION_KEY);
 }
 
-export async function exchangeAuthCode(code: string): Promise<AuthState> {
-  const res = await fetch('/api/auth/code', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code }),
-  });
-  if (!res.ok) throw new Error('Invalid auth code');
-  const data = await res.json();
-  const auth: AuthState = { sessionToken: data.sessionToken, childContext: data.childContext };
-  storeAuth(auth);
-  return auth;
-}
-
 export async function exchangeKidCode(kidCode: string): Promise<AuthState> {
   const res = await fetch('/api/auth/kid-code', {
     method: 'POST',

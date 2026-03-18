@@ -33,7 +33,7 @@ export function useSpacedReview() {
   const scheduleReview = useCallback((lessonId: string) => {
     setReviews((prev) => {
       // Don't duplicate
-      if (prev.some((r) => r.lessonId === lessonId && r.repetition === 0)) return prev;
+      if (prev.some((r) => r.lessonId === lessonId)) return prev;
       return [...prev, createInitialReview(lessonId)];
     });
   }, []);

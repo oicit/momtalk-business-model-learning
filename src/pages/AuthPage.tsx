@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -12,8 +12,14 @@ export default function AuthPage() {
   // Where to go after auth — default to portal
   const redirect = searchParams.get('redirect') || '/';
 
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => navigate(redirect), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [success, navigate, redirect]);
+
   if (success) {
-    setTimeout(() => navigate(redirect), 1500);
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <Header />
