@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Chick-fil-A — More than a chicken sandwich!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Caveat:wght@600;700&family=Permanent+Marker&display=swap" rel="stylesheet">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<link rel="stylesheet" href="styles.css?v=20260511-first100-33" />
+</head>
+<body>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+  }
+</script>
+
+<!-- ============= PROGRESS HUD ============= -->
+<div class="progress" id="progress">
+  <div class="progress__head">
+    <span class="progress__star">
+      <svg viewBox="0 0 24 24" fill="#FFC700" stroke="#1A1A1A" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2 L14.5 8.5 L21 9 L16 13.5 L17.5 21 L12 17 L6.5 21 L8 13.5 L3 9 L9.5 8.5 Z"/></svg>
+    </span>
+    <span class="progress__label">Stickmen Found</span>
+    <span class="progress__count"><b id="progress-count">0</b><span class="progress__total"> / 10</span></span>
+  </div>
+  <div class="progress__slots" id="progress-slots">
+    <div class="progress__slot" data-slot="logo"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="tagline"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="experience"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="facts"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="people"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="menu"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="community"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="commitment"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="flow"><span class="progress__q">?</span></div>
+    <div class="progress__slot" data-slot="quote"><span class="progress__q">?</span></div>
+  </div>
+  <div class="progress__bar"><div class="progress__bar-fill" id="progress-bar"></div></div>
+  <button class="progress__biz-link" data-biz-open>
+    🐔 <span>The Business</span>
+  </button>
+</div>
+
+<!-- ============= STAGE ============= -->
+<main class="stage" id="stage">
+
+  <!-- ============= STICKMAN LOCKS ============= -->
+  <button class="lock" data-lock="logo" aria-label="Click to unlock About">
+    <canvas width="100" height="140" data-mood="wave"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="tagline" aria-label="Click to unlock Our Promise">
+    <canvas width="100" height="140" data-mood="read"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="experience" aria-label="Click to unlock Experience">
+    <canvas width="100" height="140" data-mood="jump"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="facts" aria-label="Click to unlock Facts">
+    <canvas width="100" height="140" data-mood="meditate"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="people" aria-label="Click to unlock People">
+    <canvas width="100" height="140" data-mood="disco"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="menu" aria-label="Click to unlock Menu">
+    <canvas width="100" height="140" data-mood="eat"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="community" aria-label="Click to unlock Community">
+    <canvas width="100" height="140" data-mood="lift"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="commitment" aria-label="Click to unlock Earth Heroes">
+    <canvas width="100" height="140" data-mood="zen"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="flow" aria-label="Click to unlock How We Serve">
+    <canvas width="100" height="140" data-mood="run"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+  <button class="lock" data-lock="quote" aria-label="Click to unlock Founder Quote">
+    <canvas width="100" height="140" data-mood="wiggle"></canvas>
+    <span class="lock__hint">Pick me!</span>
+  </button>
+
+  <!-- Background restaurant photo -->
+  <div class="bg-photo" data-component="restaurant" role="button" tabindex="0" aria-label="Chick-fil-A restaurant building">
+    <img src="assets/restaurant.png" alt="Chick-fil-A restaurant building" />
+    <div class="bg-photo__veil"></div>
+
+    <!-- Hotspots on the restaurant photo -->
+    <button class="hotspot hotspot--building" data-component="building" aria-label="The building"></button>
+    <button class="hotspot hotspot--flag" data-component="flag" aria-label="American flag"></button>
+    <button class="hotspot hotspot--drivethru" data-component="drivethru" aria-label="Drive-thru"></button>
+    <button class="hotspot hotspot--entrance" data-component="entrance" aria-label="Entrance sign"></button>
+  </div>
+
+  <!-- ===== THE FAMOUS COW! ===== -->
+  <button class="cow" data-component="cows" aria-label="The famous Eat Mor Chikin cow">
+    <img src="assets/cow.png" alt="Cow holding EAT MOR CHIKIN sign" class="cow__img" />
+  </button>
+
+  <!-- ===== TOP-LEFT: LOGO + TAGLINE ===== -->
+  <article class="card is-locked card--logo" data-component="logo" tabindex="0">
+    <img src="assets/logo.png" alt="Chick-fil-A logo" class="logo-img" />
+    <span class="card__chip">Pick me!</span>
+  </article>
+
+  <article class="card is-locked card--tagline" data-component="tagline" tabindex="0">
+    <h1 class="tagline__line1">More than a chicken sandwich!</h1>
+    <p class="tagline__line2">It's a hug on a tray.</p>
+    <p class="tagline__body">
+      Welcome to Chick-fil-A<sup>®</sup>! We're a family-run restaurant
+      famous for super-tasty chicken, the friendliest people in red shirts,
+      and helping out our neighborhoods. Come on in!
+    </p>
+    <span class="card__chip">Tell me more →</span>
+  </article>
+
+  <!-- ===== TOP CENTER: EXPERIENCE ===== -->
+  <article class="card is-locked card--experience" data-component="experience" tabindex="0">
+    <h2 class="card__title">Our 4 Superpowers!</h2>
+    <div class="experience__grid">
+      <button class="exp-item" data-component="exp-food" aria-label="Yummy Food">
+        <img src="assets/sandwich.png" alt="" />
+        <span>Yummy Food</span>
+      </button>
+      <button class="exp-item" data-component="exp-hospitality" aria-label="Big Smiles">
+        <img src="assets/cup.png" alt="" />
+        <span>Big Smiles</span>
+      </button>
+      <button class="exp-item" data-component="exp-community" aria-label="Helping Others">
+        <span class="exp-icon">
+          <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true">
+            <path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/>
+          </svg>
+        </span>
+        <span>Helping Others</span>
+      </button>
+      <button class="exp-item" data-component="exp-biblical" aria-label="Sundays Off">
+        <span class="exp-icon">
+          <svg viewBox="0 0 24 24" fill="#5D3A1F" aria-hidden="true">
+            <path d="M10 2h4v6h6v4h-6v10h-4V12H4V8h6z"/>
+          </svg>
+        </span>
+        <span>Sundays Off!</span>
+      </button>
+    </div>
+  </article>
+
+  <!-- ===== TOP-RIGHT: REAL FACTS ===== -->
+  <article class="card is-locked card--facts" data-component="facts" tabindex="0">
+    <h2 class="card__title">Whoa! Did You Know?</h2>
+    <ul class="facts">
+      <li><span class="check">✓</span>We started way back in 1967 in Atlanta, Georgia!</li>
+      <li><span class="check">✓</span>It's a family business — never sold to strangers</li>
+      <li><span class="check">✓</span>We close every Sunday so the team can rest</li>
+      <li><span class="check">✓</span>2,900+ restaurants in 47 states. Whoa!</li>
+      <li><span class="check">✓</span>Every sandwich is made FRESH, today, just for you</li>
+    </ul>
+  </article>
+
+  <!-- ===== LEFT: OUR PEOPLE ===== -->
+  <article class="card is-locked card--people" data-component="people" tabindex="0">
+    <div class="people__head">
+      <span class="people__icon">
+        <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true"><path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3zM8 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3zm0 2c-2.7 0-8 1.3-8 4v3h10v-3c0-1 .4-1.9 1-2.7C10.3 13.4 9.1 13 8 13zm8 0c-.3 0-.7 0-1 .1 1.3.9 2 2.2 2 3.9v3h7v-3c0-2.7-5.3-4-8-4z"/></svg>
+      </span>
+      <h2 class="card__title">Red-Shirt Heroes!</h2>
+    </div>
+    <p>The friendly people who make your day brighter!</p>
+    <img src="assets/team.png" alt="Chick-fil-A team members" class="people__photo" />
+    <div class="people__stat">
+      <strong>85,000+</strong>
+      <span>Team Members</span>
+    </div>
+  </article>
+
+  <!-- ===== LEFT: MENU FAVORITES ===== -->
+  <article class="card is-locked card--menu" data-component="menu" tabindex="0">
+    <h2 class="card__title">Yum! The Greatest Hits!</h2>
+    <div class="menu__grid">
+      <button class="menu-item" data-component="menu-sandwich">
+        <img src="assets/fav-sandwich.png" alt="" />
+        <span>The Famous<br>Chicken Sandwich!</span>
+      </button>
+      <button class="menu-item" data-component="menu-fries">
+        <img src="assets/fav-fries.png" alt="" />
+        <span>Crispy<br>Waffle Fries!</span>
+      </button>
+      <button class="menu-item" data-component="menu-nuggets">
+        <img src="assets/fav-nuggets.png" alt="" />
+        <span>Pop-able<br>Nuggets!</span>
+      </button>
+      <button class="menu-item" data-component="menu-lemonade">
+        <img src="assets/fav-lemonade.png" alt="" />
+        <span>Sunshine<br>Lemonade!</span>
+      </button>
+    </div>
+  </article>
+
+  <!-- ===== RIGHT: COMMUNITY IMPACT ===== -->
+  <article class="card is-locked card--community" data-component="community" tabindex="0">
+    <div class="community__head">
+      <span class="community__icon">
+        <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true"><path d="M20.8 11.5c.4-.4.4-1 0-1.4l-2-2a1 1 0 0 0-1.4 0L13 12.5V14h1.5l3.3-3.3 3 .8zM3 13v8h6v-5h6v5h6v-8L12 4z"/></svg>
+      </span>
+      <h2 class="card__title">We Love Our Neighbors!</h2>
+    </div>
+    <p>We help out around town in so many cool ways!</p>
+    <img src="assets/community.png" alt="Community service" class="community__photo" />
+    <p class="community__caption">
+      Since 1973, we've given out millions of dollars to schools, families, and college scholarships!
+    </p>
+  </article>
+
+  <!-- ===== RIGHT: COMMITMENT ===== -->
+  <article class="card is-locked card--commit" data-component="commitment" tabindex="0">
+    <h2 class="card__title">Earth Heroes!</h2>
+    <p>We care about food, people, AND the planet!</p>
+    <ul class="commit-list">
+      <li>Happy chickens, happy eggs</li>
+      <li>No food gets wasted!</li>
+      <li>Recycle, reuse, take care</li>
+    </ul>
+  </article>
+
+  <!-- ===== BOTTOM: HOW WE SERVE YOU ===== -->
+  <article class="card is-locked card--flow" data-component="flow" tabindex="0">
+    <h2 class="card__title">How a Sandwich Finds You!</h2>
+    <div class="flow">
+      <button class="flow-step" data-component="flow-1">
+        <span class="flow-step__icon">
+          <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true"><path d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm-5 19a1.2 1.2 0 1 1 1.2-1.2A1.2 1.2 0 0 1 12 21zm5-3H7V5h10z"/></svg>
+        </span>
+        <span class="flow-step__label">Tap<br>the App!</span>
+      </button>
+      <span class="flow-arrow">→</span>
+      <button class="flow-step" data-component="flow-2">
+        <span class="flow-step__icon">
+          <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true"><path d="M5 11l1.5-4.5h11L19 11M17.5 16a1.5 1.5 0 1 1 1.5-1.5 1.5 1.5 0 0 1-1.5 1.5m-11 0A1.5 1.5 0 1 1 8 14.5 1.5 1.5 0 0 1 6.5 16M18.9 6A1.5 1.5 0 0 0 17.5 5h-11A1.5 1.5 0 0 0 5.1 6L3 12v8a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h12v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-8z"/></svg>
+        </span>
+        <span class="flow-step__label">Vroom!<br>Drive-Thru!</span>
+      </button>
+      <span class="flow-arrow">→</span>
+      <button class="flow-step" data-component="flow-3">
+        <span class="flow-step__icon">
+          <svg viewBox="0 0 24 24" fill="#B8855B" aria-hidden="true"><path d="M6 2l-2 4v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6l-2-4zm0 4l1-2h10l1 2zm6 6a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"/></svg>
+        </span>
+        <span class="flow-step__label">Sizzle!<br>Cooking!</span>
+      </button>
+      <span class="flow-arrow">→</span>
+      <button class="flow-step" data-component="flow-4">
+        <span class="flow-step__icon flow-step__icon--person">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="9" r="4" fill="#FFD8B5"/>
+            <path d="M6 21v-2a6 6 0 0 1 12 0v2z" fill="#DD0031"/>
+            <path d="M8 7a4 4 0 0 1 8 0v1H8z" fill="#DD0031"/>
+          </svg>
+        </span>
+        <span class="flow-step__label">Here<br>You Go!</span>
+      </button>
+      <span class="flow-arrow">→</span>
+      <button class="flow-step" data-component="flow-5">
+        <span class="flow-step__icon">
+          <svg viewBox="0 0 24 24" fill="#DD0031" aria-hidden="true"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/></svg>
+        </span>
+        <span class="flow-step__label">Yum!<br>Eat & Smile!</span>
+      </button>
+    </div>
+  </article>
+
+  <!-- ===== BOTTOM QUOTE ===== -->
+  <article class="card is-locked card--quote" data-component="quote" tabindex="0">
+    <span class="quote__mark">
+      <svg viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 4c2 0 3 1 3 3s-1 4-3 5-3-1-3-3 1-5 3-5z"/></svg>
+    </span>
+    <p class="quote__text">"We didn't invent the chicken sandwich… just the chicken sandwich restaurant!"</p>
+    <p class="quote__author">— Mr. Truett Cathy, our founder</p>
+  </article>
+
+</main>
+
+<!-- ============= BUSINESS MODEL VIEW (unlocked at 10/10) ============= -->
+<div class="biz" id="biz" aria-hidden="true">
+  <button class="biz__close" aria-label="Back to the fun page" data-biz-close>
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M15 18l-6-6 6-6"/></svg>
+    <span>Back</span>
+  </button>
+
+  <!-- Ambient floating background emojis -->
+  <div class="biz-ambient" id="biz-ambient" aria-hidden="true"></div>
+
+  <!-- Sneaky cow that runs across screen every once in a while -->
+  <div class="biz-roaming-cow" id="roaming-cow" aria-hidden="true">
+    <img src="assets/cow.png" alt="" />
+  </div>
+
+  <!-- ========= HERO ========= -->
+  <section class="ch ch-hero" data-reveal>
+    <div class="ch-sticker">★ You found them all! Now learn the SECRET ★</div>
+    <h1 class="ch-hero__title">How did Chick-fil-A get <span class="rotate-1">SO</span> <span class="rotate-2">BIG</span>?</h1>
+    <p class="ch-hero__sub">Scroll down on a chicken-shaped adventure 🐔 to find out the 7 magic secrets!</p>
+    <div class="hero-scene">
+      <img src="assets/real/restaurant-exterior.jpg" alt="Real Chick-fil-A restaurant exterior at night" class="hero-scene__bg" />
+      <img src="assets/cow.png" alt="" class="hero-scene__cow" />
+    </div>
+    <div class="hero-credit">Real photo · Chick-fil-A storefront, Wikimedia Commons</div>
+    <div class="ch-scroll-cue">scroll down ↓</div>
+  </section>
+
+  <!-- ========= CH 1: THE BIG NUMBER ========= -->
+  <section class="ch ch-1" data-reveal>
+    <div class="ch__tag">Chapter 1</div>
+    <h2>So how BIG are they?</h2>
+    <p class="ch__lead">Tap to find out 👇</p>
+    <button class="biz-counter" id="counter-money" data-target="21">
+      <span class="biz-counter__hint">tap me!</span>
+      <span class="biz-counter__num">$0</span>
+      <span class="biz-counter__label">Billion in chicken sales every year</span>
+    </button>
+    <div class="ch-aside">
+      <strong>That's so much money...</strong>
+      if you stacked $21 billion as $1 bills, the pile would be <strong>1,470 miles tall</strong> 🚀 — that's <strong>5× taller than the Space Station!</strong>
+    </div>
+    <div class="biz-emoji-rain" id="money-rain"></div>
+  </section>
+
+  <!-- ========= CH 1.5: AMERICA'S FAVORITE ========= -->
+  <section class="ch ch-fav" data-reveal>
+    <div class="ch__tag">Chapter 2</div>
+    <h2>America's <span class="rotate-1">#1</span> Favorite!</h2>
+    <p class="ch__lead">For <strong>16 years in a row</strong>, Americans voted Chick-fil-A the most LOVED fast food! 🏆</p>
+
+    <div class="trophy-row">
+      <div class="trophy" data-yr="2009">🏆<span>2009</span></div>
+      <div class="trophy" data-yr="2010">🏆<span>2010</span></div>
+      <div class="trophy" data-yr="2011">🏆<span>2011</span></div>
+      <div class="trophy" data-yr="2012">🏆<span>2012</span></div>
+      <div class="trophy" data-yr="2013">🏆<span>2013</span></div>
+      <div class="trophy" data-yr="2014">🏆<span>2014</span></div>
+      <div class="trophy" data-yr="2015">🏆<span>2015</span></div>
+      <div class="trophy" data-yr="2016">🏆<span>2016</span></div>
+      <div class="trophy" data-yr="2017">🏆<span>2017</span></div>
+      <div class="trophy" data-yr="2018">🏆<span>2018</span></div>
+      <div class="trophy" data-yr="2019">🏆<span>2019</span></div>
+      <div class="trophy" data-yr="2020">🏆<span>2020</span></div>
+      <div class="trophy" data-yr="2021">🏆<span>2021</span></div>
+      <div class="trophy" data-yr="2022">🏆<span>2022</span></div>
+      <div class="trophy" data-yr="2023">🏆<span>2023</span></div>
+      <div class="trophy" data-yr="2024">🏆<span>2024</span></div>
+    </div>
+
+    <div class="ch-aside">
+      <strong>Crazy fact:</strong> Whenever a NEW Chick-fil-A opens, the first <strong>100 people</strong> in line get <strong>FREE Chick-fil-A for a WHOLE YEAR!</strong> 🎉
+      <br>People camp out for <strong>24 hours</strong> in tents to be one of the first 100!
+    </div>
+
+    <!-- Real photo: actual First 100 campers at a Chick-fil-A grand opening -->
+    <div class="campsite campsite--real">
+      <img src="assets/real/first100-campers.jpg" alt="Real campers in tents waiting in line at a Chick-fil-A grand opening" />
+      <div class="campsite__caption">REAL "First 100" campers at a Chick-fil-A grand opening — tents lined up next to the restaurant</div>
+    </div>
+    <div class="hero-credit">Photo by fayettevilleflyer on Flickr · CC BY-NC-SA 2.0</div>
+
+    <!-- (legacy SVG scene below — kept off) -->
+    <div class="campsite" style="display:none">
+      <svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <!-- Night gradient -->
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#1a2a52"/>
+            <stop offset="1" stop-color="#5c3068"/>
+          </linearGradient>
+          <radialGradient id="moonglow" cx=".5" cy=".5">
+            <stop offset="0" stop-color="#FFF4C2" stop-opacity="1"/>
+            <stop offset="1" stop-color="#FFF4C2" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="800" height="280" fill="url(#sky)"/>
+        <!-- Ground -->
+        <rect y="280" width="800" height="80" fill="#3D5443"/>
+        <path d="M0 280 Q200 270 400 280 T800 280 V310 H0 Z" fill="#2F4636"/>
+        <!-- Moon glow + moon -->
+        <circle cx="680" cy="80" r="100" fill="url(#moonglow)"/>
+        <circle cx="680" cy="80" r="38" fill="#FFF4C2"/>
+        <circle cx="664" cy="68" r="6" fill="#E6DFA8" opacity=".6"/>
+        <circle cx="692" cy="92" r="4" fill="#E6DFA8" opacity=".6"/>
+        <!-- Stars -->
+        <g fill="#FFF" class="stars">
+          <circle cx="120" cy="50" r="2"/>
+          <circle cx="200" cy="30" r="1.5"/>
+          <circle cx="280" cy="70" r="2"/>
+          <circle cx="380" cy="45" r="1.5"/>
+          <circle cx="500" cy="60" r="2"/>
+          <circle cx="540" cy="25" r="1"/>
+          <circle cx="50" cy="100" r="1.5"/>
+          <circle cx="350" cy="20" r="1"/>
+        </g>
+        <!-- Chick-fil-A building in background -->
+        <g class="bg-building">
+          <rect x="40" y="170" width="240" height="110" fill="#C9A87C" stroke="#1A1A1A" stroke-width="3"/>
+          <polygon points="40,170 280,170 260,140 60,140" fill="#5A3A2E" stroke="#1A1A1A" stroke-width="3"/>
+          <!-- Red awning -->
+          <rect x="60" y="200" width="200" height="20" fill="#DD0031" stroke="#1A1A1A" stroke-width="2"/>
+          <!-- Glowing windows -->
+          <rect x="80" y="225" width="40" height="40" fill="#FFE066" stroke="#1A1A1A" stroke-width="2"/>
+          <rect x="140" y="225" width="40" height="40" fill="#FFE066" stroke="#1A1A1A" stroke-width="2"/>
+          <rect x="200" y="225" width="40" height="40" fill="#FFE066" stroke="#1A1A1A" stroke-width="2"/>
+          <!-- Logo curl -->
+          <path d="M150 158 q-12 -16 6 -22 q14 4 8 16" fill="#DD0031" stroke="#1A1A1A" stroke-width="2"/>
+        </g>
+        <!-- Tents -->
+        <g class="tent-g" transform="translate(310,210)">
+          <polygon points="0,80 50,0 100,80" fill="#DD0031" stroke="#1A1A1A" stroke-width="3"/>
+          <polygon points="0,80 50,0 50,80" fill="#B6002A"/>
+          <path d="M50 0 V-10 M40 -10 L60 -10" stroke="#1A1A1A" stroke-width="2"/>
+        </g>
+        <g class="tent-g" transform="translate(430,200)">
+          <polygon points="0,90 55,0 110,90" fill="#3D7AE0" stroke="#1A1A1A" stroke-width="3"/>
+          <polygon points="0,90 55,0 55,90" fill="#2A5BB5"/>
+          <path d="M55 0 V-10 M45 -10 L65 -10" stroke="#1A1A1A" stroke-width="2"/>
+        </g>
+        <g class="tent-g" transform="translate(560,215)">
+          <polygon points="0,75 48,0 96,75" fill="#FFC700" stroke="#1A1A1A" stroke-width="3"/>
+          <polygon points="0,75 48,0 48,75" fill="#E0AA00"/>
+          <path d="M48 0 V-10 M40 -10 L56 -10" stroke="#1A1A1A" stroke-width="2"/>
+        </g>
+        <g class="tent-g" transform="translate(670,225)">
+          <polygon points="0,65 42,0 84,65" fill="#3DAA5C" stroke="#1A1A1A" stroke-width="3"/>
+          <polygon points="0,65 42,0 42,65" fill="#2D6A3E"/>
+          <path d="M42 0 V-10 M34 -10 L50 -10" stroke="#1A1A1A" stroke-width="2"/>
+        </g>
+        <!-- Campfire -->
+        <g transform="translate(390,290)">
+          <ellipse cx="0" cy="8" rx="22" ry="4" fill="#1A1A1A" opacity=".4"/>
+          <path d="M-10 5 L0 -20 L10 5 Z" fill="#FF6E00"/>
+          <path d="M-5 5 L0 -10 L5 5 Z" fill="#FFC700"/>
+          <rect x="-14" y="3" width="28" height="5" rx="2" fill="#5A3A2E" stroke="#1A1A1A" stroke-width="1.5"/>
+        </g>
+        <!-- Banner -->
+        <g transform="translate(150,150)">
+          <line x1="0" y1="40" x2="0" y2="80" stroke="#1A1A1A" stroke-width="2"/>
+          <rect x="0" y="40" width="120" height="32" fill="#FFFEF5" stroke="#1A1A1A" stroke-width="2" transform="rotate(-4)"/>
+          <text x="60" y="62" font-family="'Permanent Marker', cursive" font-size="14" fill="#DD0031" text-anchor="middle" transform="rotate(-4)">FREE CHIKIN!</text>
+        </g>
+        <!-- Banner 2 -->
+        <g transform="translate(540,140)">
+          <line x1="0" y1="40" x2="0" y2="90" stroke="#1A1A1A" stroke-width="2"/>
+          <rect x="-10" y="40" width="120" height="32" fill="#FFFEF5" stroke="#1A1A1A" stroke-width="2" transform="rotate(5)"/>
+          <text x="50" y="62" font-family="'Permanent Marker', cursive" font-size="13" fill="#DD0031" text-anchor="middle" transform="rotate(5)">FIRST 100!</text>
+        </g>
+      </svg>
+      <div class="campsite__caption">Real people. Real tents. Real 24-hour wait. For chicken.</div>
+    </div>
+    <p class="ch__punch">Would YOU sleep in a tent for free chicken for a year? 🤔</p>
+  </section>
+
+  <!-- ========= CH 1.7: FRESH EVERY DAY ========= -->
+  <section class="ch ch-fresh" data-reveal>
+    <div class="ch__tag">Chapter 3</div>
+    <h2>Made <span class="rotate-2">FRESH</span> every day!</h2>
+    <p class="ch__lead">Tap each ingredient to learn how Chick-fil-A makes it ✨</p>
+
+    <div class="fresh-grid">
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🐓</div>
+          <div class="fresh-card__name">Chicken</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>100% real chicken breast</strong> — no antibiotics, ever. Hand-breaded fresh in the kitchen, cooked when you order!
+        </div>
+      </button>
+
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🍞</div>
+          <div class="fresh-card__name">Bun</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>Toasted with REAL butter</strong> on a hot griddle right before it goes on your sandwich. Soft, fluffy, golden!
+        </div>
+      </button>
+
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🥒</div>
+          <div class="fresh-card__name">Pickles</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>Always TWO pickle chips!</strong> Hand-placed by a real human. The recipe hasn't changed since 1964!
+        </div>
+      </button>
+
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🍋</div>
+          <div class="fresh-card__name">Lemonade</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>Real lemons, squeezed BY HAND every morning!</strong> Just lemons + sugar + water. No funny stuff!
+        </div>
+      </button>
+
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🥚</div>
+          <div class="fresh-card__name">Eggs</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>Cage-free eggs</strong> from happy hens. Cracked fresh every morning for breakfast biscuits!
+        </div>
+      </button>
+
+      <button class="fresh-card" data-fresh>
+        <div class="fresh-card__face fresh-card__face--front">
+          <div class="fresh-card__icon">🥔</div>
+          <div class="fresh-card__name">Waffle Fries</div>
+          <div class="fresh-card__hint">tap to flip!</div>
+        </div>
+        <div class="fresh-card__face fresh-card__face--back">
+          <strong>Real potatoes</strong> cut into the famous waffle pattern. Crispy outside, fluffy inside!
+        </div>
+      </button>
+    </div>
+
+    <p class="ch__punch">No frozen mystery food. No fake stuff. Just <strong>real ingredients, made fresh every single day!</strong> 🌟</p>
+  </section>
+
+  <!-- ========= CH 2: THE LOTTERY ========= -->
+  <section class="ch ch-2" data-reveal>
+    <div class="ch__tag">Chapter 4</div>
+    <h2>Want to run one? Get in line!</h2>
+    <p class="ch__lead">Each tiny dot = one person who applied this year. 60,000 of them!</p>
+    <div class="dots-wrap">
+      <div class="dots-grid" id="dots-grid"></div>
+      <div class="dots-controls">
+        <button class="biz-btn biz-btn--big" id="pick-lucky">🎯 PICK THE LUCKY 80</button>
+        <p class="dots-result" id="dots-result"></p>
+      </div>
+    </div>
+    <div class="ch-versus">
+      <div class="vs-item"><strong>0.13%</strong><span>Chick-fil-A operator</span></div>
+      <div class="vs-x">vs.</div>
+      <div class="vs-item"><strong>3.4%</strong><span>Harvard acceptance</span></div>
+    </div>
+    <div class="ch-fact-big">Harder than Harvard. Harder than Stanford. Harder than MIT.</div>
+  </section>
+
+  <!-- ========= CH 3: SUNDAY ========= -->
+  <section class="ch ch-3" data-reveal>
+    <div class="ch__tag">Chapter 5</div>
+    <h2>The Sunday Surprise!</h2>
+    <p class="ch__lead">Tap the days to see what's open. Then click Sunday 👇</p>
+    <div class="week" id="week">
+      <button class="day" data-day="M"><span class="day__letter">M</span><span class="day__state">OPEN</span></button>
+      <button class="day" data-day="T"><span class="day__letter">T</span><span class="day__state">OPEN</span></button>
+      <button class="day" data-day="W"><span class="day__letter">W</span><span class="day__state">OPEN</span></button>
+      <button class="day" data-day="T"><span class="day__letter">T</span><span class="day__state">OPEN</span></button>
+      <button class="day" data-day="F"><span class="day__letter">F</span><span class="day__state">OPEN</span></button>
+      <button class="day" data-day="S"><span class="day__letter">S</span><span class="day__state">OPEN</span></button>
+      <button class="day day--sun" id="day-sun" data-day="Sun">
+        <span class="day__letter">Sun</span>
+        <span class="day__state">CLOSED</span>
+        <span class="day__zzz">zZz</span>
+      </button>
+    </div>
+    <div class="ch-aside" id="sunday-cost" hidden>
+      That one closed day costs Chick-fil-A about<br>
+      <strong class="ch-aside__big">$1,000,000,000</strong> per year.
+      <br>(That's a <em>billion</em> dollars!)
+    </div>
+    <p class="ch__punch" id="sunday-why" hidden>So why do they do it? Because some things are <strong>more important than money</strong> — like family time and a day off. ❤️</p>
+  </section>
+
+  <!-- ========= CH 4: LIMITED MENU ========= -->
+  <section class="ch ch-4" data-reveal>
+    <div class="ch__tag">Chapter 6</div>
+    <h2>Less stuff = better stuff</h2>
+    <p class="ch__lead">Compare a Chick-fil-A menu vs other fast food places:</p>
+
+    <div class="menu-real-grid">
+      <figure class="menu-real-card">
+        <img src="assets/real/sandwich.jpg" alt="Real Chick-fil-A chicken sandwich" />
+        <figcaption>The Original Chicken Sandwich</figcaption>
+      </figure>
+      <figure class="menu-real-card">
+        <img src="assets/real/fries.jpg" alt="Real Chick-fil-A waffle fries" />
+        <figcaption>Waffle Potato Fries™</figcaption>
+      </figure>
+      <figure class="menu-real-card">
+        <img src="assets/real/nuggets.jpg" alt="Real Chick-fil-A chicken nuggets" />
+        <figcaption>Hand-Breaded Nuggets</figcaption>
+      </figure>
+      <figure class="menu-real-card">
+        <img src="assets/real/chicken-strips-fries.jpg" alt="Real Chick-fil-A meal" />
+        <figcaption>Classic Combo Meal</figcaption>
+      </figure>
+    </div>
+    <div class="menu-versus">
+      <div class="menu-side menu-side--cfa">
+        <div class="menu-side__head">
+          <img src="assets/logo.png" alt="" />
+          <strong>~30 items</strong>
+        </div>
+        <div class="menu-dots" data-count="30"></div>
+        <div class="menu-side__caption">tight, focused, made <strong>perfectly</strong></div>
+      </div>
+      <div class="menu-side menu-side--other">
+        <div class="menu-side__head">
+          <span class="menu-side__title">other places</span>
+          <strong>100+ items</strong>
+        </div>
+        <div class="menu-dots menu-dots--many" data-count="120"></div>
+        <div class="menu-side__caption">a giant menu = slower & messier</div>
+      </div>
+    </div>
+    <p class="ch__punch">When you do FEWER things really WELL, customers love you more!</p>
+  </section>
+
+  <!-- ========= CH 5: MY PLEASURE ========= -->
+  <section class="ch ch-5" data-reveal>
+    <div class="ch__tag">Chapter 7</div>
+    <h2>The Magic Words</h2>
+
+    <div class="real-team">
+      <img src="assets/real/drive-thru.jpg" alt="Real Chick-fil-A drive-thru" />
+      <div class="real-team__bubble">"My pleasure!"</div>
+    </div>
+    <div class="real-team__credit">Real Chick-fil-A drive-thru · Wikimedia Commons</div>
+
+    <p class="ch__lead">Tap the team members below to hear it again!</p>
+    <div class="pleasure-stage" id="pleasure-stage">
+      <button class="pleasure-person" data-pleasure>
+        <div class="pp__head"><div class="pp__face">😊</div></div>
+        <div class="pp__body"></div>
+      </button>
+      <button class="pleasure-person" data-pleasure>
+        <div class="pp__head"><div class="pp__face">😄</div></div>
+        <div class="pp__body"></div>
+      </button>
+      <button class="pleasure-person" data-pleasure>
+        <div class="pp__head"><div class="pp__face">😁</div></div>
+        <div class="pp__body"></div>
+      </button>
+      <button class="pleasure-person" data-pleasure>
+        <div class="pp__head"><div class="pp__face">🥰</div></div>
+        <div class="pp__body"></div>
+      </button>
+    </div>
+    <div class="pleasure-counter">
+      "My pleasure!" said: <strong id="pleasure-count">0</strong> times
+    </div>
+    <p class="ch__punch">Every "my pleasure" makes a customer smile. Smiles make people come back. Coming back = more chicken sold! 🎉</p>
+  </section>
+
+  <!-- ========= CH 6: APP POINTS GAME ========= -->
+  <section class="ch ch-6" data-reveal>
+    <div class="ch__tag">Chapter 8</div>
+    <h2>The Magic Points Game!</h2>
+    <p class="ch__lead">Tap to "order" food and earn points. Reach 100 to unlock a prize!</p>
+    <div class="app-game">
+      <div class="app-screen">
+        <div class="app-progress">
+          <div class="app-progress__bar" id="app-bar"></div>
+          <div class="app-progress__num"><span id="app-points">0</span> / 100 points</div>
+        </div>
+        <div class="app-prize" id="app-prize" hidden>
+          🎁 FREE NUGGETS UNLOCKED! 🎉
+        </div>
+        <div class="app-buttons">
+          <button class="app-btn" data-points="10">🍔 Order Sandwich +10</button>
+          <button class="app-btn" data-points="5">🍟 Order Fries +5</button>
+          <button class="app-btn" data-points="8">🥤 Order Lemonade +8</button>
+        </div>
+      </div>
+    </div>
+    <p class="ch__punch"><strong>40 MILLION people</strong> play this game on the Chick-fil-A app every day!</p>
+  </section>
+
+  <!-- ========= CH 7: THE FAMILY ========= -->
+  <section class="ch ch-7" data-reveal>
+    <div class="ch__tag">Chapter 9</div>
+    <h2>One Family. One Recipe. One Vision.</h2>
+    <p class="ch__lead">Most big companies are owned by thousands of strangers. Not Chick-fil-A!</p>
+
+    <div class="founder-card">
+      <img src="assets/truett-cathy.jpg" alt="S. Truett Cathy, founder of Chick-fil-A" class="founder-card__photo" />
+      <div class="founder-card__info">
+        <div class="founder-card__name">S. Truett Cathy</div>
+        <div class="founder-card__role">FOUNDER · 1921–2014</div>
+        <p class="founder-card__quote">"We didn't invent the chicken sandwich… just the chicken sandwich restaurant."</p>
+        <div class="founder-card__legacy">
+          <strong>Today</strong> his sons, grandkids, and great-grandkids still run the company together.<br>
+          Three generations. One family. One recipe.
+        </div>
+      </div>
+    </div>
+    <div class="founder-card__credit">Photo: Wikimedia Commons (CC BY-SA 4.0)</div>
+    <div class="family-tree">
+      <div class="family-node family-node--root">
+        <div class="family-node__avatar">👴</div>
+        <div class="family-node__name">S. Truett Cathy</div>
+        <div class="family-node__role">FOUNDER · 1946</div>
+      </div>
+      <div class="family-line"></div>
+      <div class="family-row">
+        <div class="family-node">
+          <div class="family-node__avatar">👨</div>
+          <div class="family-node__name">Dan Cathy</div>
+          <div class="family-node__role">Son · Chairman</div>
+        </div>
+        <div class="family-node">
+          <div class="family-node__avatar">👨</div>
+          <div class="family-node__name">Bubba Cathy</div>
+          <div class="family-node__role">Son · Exec VP</div>
+        </div>
+        <div class="family-node">
+          <div class="family-node__avatar">👵</div>
+          <div class="family-node__name">Trudy Cathy</div>
+          <div class="family-node__role">Daughter</div>
+        </div>
+      </div>
+      <div class="family-line"></div>
+      <div class="family-row family-row--small">
+        <div class="family-node family-node--small">
+          <div class="family-node__avatar">🧒</div>
+          <div class="family-node__name">Grandkids</div>
+        </div>
+        <div class="family-node family-node--small">
+          <div class="family-node__avatar">👧</div>
+          <div class="family-node__name">running it now</div>
+        </div>
+        <div class="family-node family-node--small">
+          <div class="family-node__avatar">👦</div>
+          <div class="family-node__name">3 generations!</div>
+        </div>
+      </div>
+    </div>
+    <p class="ch__punch">Because it's family-owned, they can stick to their values — even when it costs them billions! 💪</p>
+  </section>
+
+  <!-- ========= CH 10: SPECIAL STUFF ========= -->
+  <section class="ch ch-special" data-reveal>
+    <div class="ch__tag">Chapter 10</div>
+    <h2>The <span class="rotate-1">EXTRA</span> fun stuff!</h2>
+    <p class="ch__lead">Stuff that no other fast food place does. Tap each one!</p>
+
+    <div class="special-grid">
+      <button class="special-card" data-special data-fact="Every July, if you wear a cow costume to Chick-fil-A, you get a FREE entrée! 🐄">
+        <div class="special-card__icon">🐄</div>
+        <div class="special-card__title">Cow Appreciation Day</div>
+        <div class="special-card__sub">Dress like a cow = free food!</div>
+      </button>
+
+      <button class="special-card" data-special data-fact="Got a name on your cup? It happens! Workers walk to your table to bring napkins, refill drinks, and check on you.">
+        <div class="special-card__icon">🥤</div>
+        <div class="special-card__title">Free Refills</div>
+        <div class="special-card__sub">As much lemonade as you want!</div>
+      </button>
+
+      <button class="special-card" data-special data-fact="Many Chick-fil-As have indoor playgrounds with slides! Eat nuggets, then climb. Best lunch ever! 🎢">
+        <div class="special-card__icon">🎢</div>
+        <div class="special-card__title">Indoor Playgrounds</div>
+        <div class="special-card__sub">Slides + nuggets = perfect day</div>
+      </button>
+
+      <button class="special-card" data-special data-fact="Schools team up with Chick-fil-A on Spirit Nights — a chunk of every sandwich sold goes to your school! Free fundraising! 🏫">
+        <div class="special-card__icon">🎓</div>
+        <div class="special-card__title">Spirit Nights</div>
+        <div class="special-card__sub">Free money for schools!</div>
+      </button>
+
+      <button class="special-card" data-special data-fact="The Chick-fil-A Cow Calendar (now an app) had silly cow photos for every month — collected by 1 million+ fans!">
+        <div class="special-card__icon">📅</div>
+        <div class="special-card__title">The Cow Calendar</div>
+        <div class="special-card__sub">12 months of cow jokes!</div>
+      </button>
+
+      <button class="special-card" data-special data-fact="The Peach Bowl in Atlanta? Now called the Chick-fil-A Peach Bowl! College football's biggest game = lots of chicken! 🏈">
+        <div class="special-card__icon">🏈</div>
+        <div class="special-card__title">Peach Bowl</div>
+        <div class="special-card__sub">Sponsors a HUGE football game!</div>
+      </button>
+    </div>
+
+    <div class="special-popup" id="special-popup" hidden>
+      <div class="special-popup__inner">
+        <button class="special-popup__close" id="special-popup-close">×</button>
+        <p id="special-popup-text"></p>
+      </div>
+    </div>
+
+    <p class="ch__punch">All this fun = customers come back EVERY week! That's the secret to staying America's favorite. 🏆</p>
+  </section>
+
+  <!-- ========= MAGIC FORMULA ========= -->
+  <section class="ch ch-formula" data-reveal>
+    <div class="ch__tag">★ The Big Secret ★</div>
+    <h2>The Chick-fil-A Magic Formula</h2>
+    <div class="formula">
+      <div class="formula__pill formula__pill-1">Be nice<br><small>my pleasure!</small></div>
+      <div class="formula__op">+</div>
+      <div class="formula__pill formula__pill-2">Great food<br><small>fresh & tasty</small></div>
+      <div class="formula__op">+</div>
+      <div class="formula__pill formula__pill-3">Stick to values<br><small>closed Sundays</small></div>
+      <div class="formula__op">=</div>
+      <div class="formula__result">
+        A really<br><span>BIG &amp; LOVED</span><br>chicken empire 🏰
+      </div>
+    </div>
+    <p class="ch__sig">It's not just chicken. It's how they <em>do</em> chicken. ✨</p>
+  </section>
+
+  <!-- ========= QUIZ ========= -->
+  <section class="ch ch-quiz" data-reveal>
+    <div class="ch__tag">★ Quiz Time ★</div>
+    <h2>Did you remember everything?</h2>
+    <p class="ch__lead">Answer 5 questions to get your Chicken Genius badge!</p>
+    <div class="quiz" id="quiz">
+      <div class="quiz-progress"><div class="quiz-progress__bar" id="quiz-bar"></div></div>
+      <div class="quiz-q" id="quiz-q">
+        <h3 id="quiz-question">Loading...</h3>
+        <div class="quiz-opts" id="quiz-opts"></div>
+        <div class="quiz-feedback" id="quiz-feedback"></div>
+      </div>
+      <div class="quiz-final" id="quiz-final" hidden>
+        <div class="quiz-badge">
+          <div class="quiz-badge__star">⭐</div>
+          <div class="quiz-badge__title" id="quiz-title">Chicken Genius!</div>
+          <div class="quiz-badge__score">You scored <strong id="quiz-score">0</strong> / 5</div>
+        </div>
+        <button class="biz-btn" id="quiz-restart">Try again 🔁</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= END ========= -->
+  <section class="ch ch-end">
+    <h2>The end... for now! 🐔</h2>
+    <p>You learned how a tiny chicken sandwich became a giant business empire.</p>
+    <button class="biz-btn biz-btn--big" data-biz-close>← Back to the fun page</button>
+  </section>
+</div>
+
+<!-- ============= MODAL ============= -->
+<div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="modal__backdrop" data-close></div>
+  <div class="modal__panel" role="document">
+    <button class="modal__close" data-close aria-label="Close">×</button>
+    <div class="modal__content" id="modal-content"></div>
+  </div>
+</div>
+
+<script src="stickman.js?v=20260511-first100-33"></script>
+<script src="biz.js?v=20260511-first100-33"></script>
+<script src="app.js?v=20260511-first100-33"></script>
+</body>
+</html>

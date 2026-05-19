@@ -1,0 +1,229 @@
+/**
+ * Kids-mode global styles.
+ * Loaded once at app entry. Scoped under `.kids-mode` so we can roll out
+ * gradually without affecting legacy pages.
+ *
+ * Toggle: add `kids-mode` class to <html> (see useKidsMode hook later).
+ * For now, every page that wants the styling adds the class itself.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+.kids-mode,
+.kids-mode body {
+  font-family: 'Fredoka', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.kids-mode .num,
+.kids-mode .mono {
+  font-family: 'Space Mono', 'SF Mono', Menlo, monospace;
+}
+
+.kids-mode *,
+.kids-mode *::before,
+.kids-mode *::after {
+  box-sizing: border-box;
+}
+
+.kids-mode button {
+  cursor: pointer;
+  font-family: 'Fredoka', sans-serif;
+  outline: none;
+  border: none;
+  background: none;
+}
+
+.kids-mode ::-webkit-scrollbar { width: 8px; height: 8px; }
+.kids-mode ::-webkit-scrollbar-thumb { background: #166534; border-radius: 999px; }
+.kids-mode ::-webkit-scrollbar-track { background: transparent; }
+
+/* Twemoji-rendered emojis inline with text */
+.kids-mode img.emoji {
+  height: 1.3em;
+  width: 1.3em;
+  margin: 0 0.05em;
+  vertical-align: -0.25em;
+  display: inline-block;
+}
+
+/* Emoji-only wrapper (Emo component) — twemoji should fill it exactly */
+.kids-mode .emo img.emoji {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  vertical-align: top;
+}
+
+/* Subtle pulse + barberpole animations available for use */
+@keyframes kids-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes kids-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes kids-wiggle {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+/* ── Momo mascot animations ────────────────────────────────────────── */
+@keyframes momo-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(-1.5deg); }
+}
+@keyframes momo-excited {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-8px) rotate(-4deg); }
+  50%      { transform: translateY(0) rotate(0deg); }
+  75%      { transform: translateY(-8px) rotate(4deg); }
+}
+@keyframes momo-think {
+  0%, 100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(3deg); }
+}
+@keyframes momo-sad {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(3px) rotate(-3deg); }
+}
+@keyframes momo-love {
+  0%, 100% { transform: scale(1); }
+  25%      { transform: scale(1.08); }
+  50%      { transform: scale(1); }
+  75%      { transform: scale(1.08); }
+}
+@keyframes momo-celebrate {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  20%      { transform: translateY(-6px) rotate(-8deg); }
+  40%      { transform: translateY(-2px) rotate(8deg); }
+  60%      { transform: translateY(-8px) rotate(-6deg); }
+  80%      { transform: translateY(-2px) rotate(6deg); }
+}
+@keyframes momo-cool {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2px); }
+}
+@keyframes momo-tap {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.86) translateY(2px); }
+  60%  { transform: scale(1.08) translateY(-4px); }
+  100% { transform: scale(1); }
+}
+@keyframes momo-badge-pop {
+  0%   { transform: scale(0.6) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes momo-badge-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes momo-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+@keyframes momo-bubble-in {
+  0%   { transform: translateY(4px) scale(0.92); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes momo-caret {
+  0%, 100% { opacity: 0; }
+  50%      { opacity: 1; }
+}
+
+/* Entrance wave — runs once when Momo first mounts. */
+@keyframes momo-wave {
+  0%   { transform: scale(0.4) rotate(-25deg); opacity: 0; }
+  40%  { transform: scale(1.15) rotate(12deg); opacity: 1; }
+  70%  { transform: scale(0.95) rotate(-6deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* Random fidgets — fired periodically by JS for life. */
+@keyframes momo-fidget-peek {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  35%      { transform: translateX(-3px) rotate(-6deg); }
+  70%      { transform: translateX(3px) rotate(6deg); }
+}
+@keyframes momo-fidget-stretch {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  50%      { transform: scaleY(1.18) translateY(-3px); }
+}
+@keyframes momo-fidget-look {
+  0%, 100% { transform: rotate(0deg); }
+  35%      { transform: rotate(-14deg); }
+  70%      { transform: rotate(12deg); }
+}
+
+/* WILD mode — kicks in on a 5-tap streak. */
+@keyframes momo-wild {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  10%      { transform: translateY(-10px) rotate(-12deg) scale(1.1); }
+  20%      { transform: translateY(-2px) rotate(15deg) scale(0.95); }
+  30%      { transform: translateY(-14px) rotate(-18deg) scale(1.12); }
+  40%      { transform: translateY(-4px) rotate(20deg) scale(0.92); }
+  50%      { transform: translateY(-12px) rotate(-15deg) scale(1.1); }
+  60%      { transform: translateY(-2px) rotate(12deg) scale(1.05); }
+  70%      { transform: translateY(-10px) rotate(-10deg) scale(1.08); }
+  85%      { transform: translateY(-4px) rotate(8deg) scale(1); }
+}
+@keyframes momo-wild-banner {
+  0%   { transform: translateX(-50%) translateY(-8px) scale(0.6) rotate(-12deg); opacity: 0; }
+  15%  { transform: translateX(-50%) translateY(-32px) scale(1.2) rotate(8deg); opacity: 1; }
+  30%  { transform: translateX(-50%) translateY(-28px) scale(1) rotate(-4deg); }
+  85%  { transform: translateX(-50%) translateY(-28px) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-12px) scale(0.7) rotate(0deg); opacity: 0; }
+}
+
+/* Particles — ambient (looping) and burst (one-shot). */
+@keyframes momo-particle-float {
+  0%   { transform: translate(0, 0) scale(0.4) rotate(0deg); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(var(--dx, 0px), var(--dy, -60px)) scale(1) rotate(var(--rot, 20deg)); opacity: 0; }
+}
+@keyframes momo-particle-burst {
+  0%   { transform: translate(0, 0) scale(0.2); opacity: 0; }
+  15%  { transform: translate(calc(var(--dx, 24px) * 0.4), calc(var(--dy, -30px) * 0.4)) scale(1.2); opacity: 1; }
+  100% { transform: translate(var(--dx, 24px), var(--dy, -30px)) scale(0.6); opacity: 0; }
+}
+
+@keyframes momo-zzz {
+  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  30%  { transform: translate(8px, -10px) scale(1); opacity: 1; }
+  100% { transform: translate(14px, -28px) scale(0.7); opacity: 0; }
+}
+@keyframes momo-halo {
+  0%   { transform: scale(0.85); opacity: 0.0; }
+  35%  { transform: scale(1.18); opacity: 0.45; }
+  100% { transform: scale(1.6);  opacity: 0; }
+}
+
+/* Respect users who don't want motion */
+@media (prefers-reduced-motion: reduce) {
+  .momo-avatar, .momo-badge, .momo-bubble { animation: none !important; }
+}
+
+/* Slider thumbs (used in mini-games) */
+.kids-mode input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 8px;
+  height: 10px;
+  background: #ddd;
+  outline: none;
+}
+.kids-mode input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #166534;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
