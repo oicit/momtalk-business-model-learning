@@ -83,7 +83,8 @@ export const portalStops: MapStop[] = [
     color: '#EDE9FE',
     themeKey: 'pet-shop',
     path: '/pet-shop',
-    status: 'coming-soon',
+    status: 'available',
+    progressKey: 'pet-shop',
   },
   {
     id: 'youtube-creator',
@@ -92,7 +93,8 @@ export const portalStops: MapStop[] = [
     color: '#E0F2FE',
     themeKey: 'youtube-creator',
     path: '/youtube-creator',
-    status: 'coming-soon',
+    status: 'available',
+    progressKey: 'youtube-creator',
   },
   {
     id: 'cookie-bakery',
@@ -101,7 +103,8 @@ export const portalStops: MapStop[] = [
     color: '#FFF8F0',
     themeKey: 'cookie-bakery',
     path: '/cookie-bakery',
-    status: 'coming-soon',
+    status: 'available',
+    progressKey: 'cookie-bakery',
   },
   {
     id: 'cards',

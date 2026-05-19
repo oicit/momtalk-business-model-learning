@@ -23,8 +23,13 @@ import Pill from '../components/kids/Pill';
 import Momo from '../components/kids/Momo';
 import lemonadeStand from '../data/lessons/lemonade-stand';
 import chickFilA from '../data/lessons/chick-fil-a';
+import petShop from '../data/lessons/pet-shop';
+import youtubeCreator from '../data/lessons/youtube-creator';
+import cookieBakery from '../data/lessons/cookie-bakery';
 
-const ALL_LESSONS: LessonDef[] = [lemonadeStand, chickFilA];
+const ALL_LESSONS: LessonDef[] = [
+  lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery,
+];
 
 interface LessonMissionRef {
   lesson: LessonDef;

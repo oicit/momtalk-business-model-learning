@@ -3,6 +3,9 @@ import Portal from './pages/Portal';
 import GarageSalePage from './pages/GarageSalePage';
 import ChickFilAPage from './pages/ChickFilAPage';
 import LemonadeStandPage from './pages/LemonadeStandPage';
+import PetShopPage from './pages/PetShopPage';
+import YouTubeCreatorPage from './pages/YouTubeCreatorPage';
+import CookieBakeryPage from './pages/CookieBakeryPage';
 import CardsPage from './pages/CardsPage';
 import CertificatePage from './pages/CertificatePage';
 import PracticePage from './pages/PracticePage';
@@ -20,6 +23,9 @@ export default function App() {
       <Route path="/garage-sale" element={<AuthGuard><GarageSalePage /></AuthGuard>} />
       <Route path="/chick-fil-a" element={<AuthGuard><ChickFilAPage /></AuthGuard>} />
       <Route path="/lemonade-stand" element={<AuthGuard><LemonadeStandPage /></AuthGuard>} />
+      <Route path="/pet-shop" element={<AuthGuard><PetShopPage /></AuthGuard>} />
+      <Route path="/youtube-creator" element={<AuthGuard><YouTubeCreatorPage /></AuthGuard>} />
+      <Route path="/cookie-bakery" element={<AuthGuard><CookieBakeryPage /></AuthGuard>} />
       <Route path="/cards" element={<CardsPage />} />
       <Route path="/certificate" element={<CertificatePage />} />
       <Route path="/practice" element={<PracticePage />} />
