@@ -10,7 +10,8 @@
  * Lessons become ~50 LOC of data instead of ~500 LOC of bespoke page.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../Header';
 import Footer from '../Footer';
 import MomoMentorBubble from '../MomoMentorBubble';
@@ -34,7 +35,6 @@ import {
 import { themes, T } from '../../styles/kidsTokens';
 
 import Momo from './Momo';
-import ConceptCard from './ConceptCard';
 import FadeIn from './FadeIn';
 import MCard from './MCard';
 import Pill from './Pill';
@@ -47,6 +47,7 @@ interface LessonScaffoldProps {
 
 export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const theme = themes[lesson.themeKey];
+  const navigate = useNavigate();
   const { isCompleted, getScore, completeLesson } = useProgress();
   const { scheduleReview } = useSpacedReview();
   const { child, isGuest } = useChildContext();
@@ -57,10 +58,36 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const { earnCard, hasCard } = useEarnedCards();
   const [toastCardId, setToastCardId] = useState<string | null>(null);
 
+  // Beats become wizard steps. Outro is hidden until completion, so it's
+  // pruned from the visible step list.
+  const visibleBeats = useMemo(
+    () => lesson.beats.filter((b) => !(b.kind === 'outro' && !alreadyDone)),
+    [lesson.beats, alreadyDone],
+  );
+  const [stepIdx, setStepIdx] = useState(0);
+  // Clamp step in case beats change (e.g., outro reveals after completion)
+  useEffect(() => {
+    if (stepIdx >= visibleBeats.length) setStepIdx(visibleBeats.length - 1);
+  }, [visibleBeats.length, stepIdx]);
+
+  const totalSteps = visibleBeats.length;
+  const currentBeat = visibleBeats[Math.min(stepIdx, totalSteps - 1)];
+  const isFirstStep = stepIdx === 0;
+  const isLastStep = stepIdx === totalSteps - 1;
+  const goNext = () => setStepIdx((s) => Math.min(totalSteps - 1, s + 1));
+  const goBack = () => setStepIdx((s) => Math.max(0, s - 1));
+
+  // Scroll viewport to top whenever the step changes — no inheriting scroll
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [stepIdx]);
+
   useEffect(() => {
     document.documentElement.classList.add('kids-mode');
     return () => document.documentElement.classList.remove('kids-mode');
   }, []);
+
+  const stepLabel = stepLabelFor(currentBeat);
 
   return (
     <div
@@ -73,124 +100,213 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
     >
       <Header />
 
-      {/* ─── Hero ─── */}
-      <section
+      {/* ─── Compact sticky lesson header ─── */}
+      <div
         style={{
-          padding: '40px 24px 48px',
-          textAlign: 'center',
-          borderBottom: `6px solid ${T.green}`,
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+          background: theme.bg,
+          borderBottom: `2px solid ${T.green}`,
+          padding: '10px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
         }}
       >
-        <div style={{ fontSize: 64, marginBottom: 12 }}>
-          <Emo size={64}>{lesson.emoji}</Emo>
-        </div>
-        <h1
+        <button
+          type="button"
+          onClick={() => navigate('/')}
+          aria-label="Back to map"
           style={{
-            fontSize: 'clamp(28px, 5vw, 42px)',
-            fontWeight: 700,
+            background: T.white,
+            border: `2px solid ${T.green}`,
+            borderRadius: 10,
+            padding: '6px 10px',
+            cursor: 'pointer',
             color: T.green,
-            marginBottom: 8,
-            letterSpacing: '-0.01em',
+            fontWeight: 800,
+            fontFamily: 'inherit',
+            fontSize: 14,
+            lineHeight: 1,
           }}
         >
-          {lesson.title}
-        </h1>
-        {lesson.subtitle && (
-          <p
+          ←
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+          <Emo size={26}>{lesson.emoji}</Emo>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontWeight: 800,
+                color: T.green,
+                fontSize: 15,
+                lineHeight: 1.1,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {lesson.title}
+            </div>
+            <div style={{ fontSize: 11, color: T.sub, marginTop: 2, fontWeight: 600 }}>
+              {stepLabel} · Step {stepIdx + 1} of {totalSteps}
+            </div>
+          </div>
+        </div>
+
+        <ProgressDots count={totalSteps} active={stepIdx} onSeek={setStepIdx} />
+
+        {alreadyDone && previousScore !== null && (
+          <div
+            title={`Best ${previousScore}%`}
             style={{
-              fontSize: 16,
-              color: T.text,
-              fontWeight: 500,
-              maxWidth: 540,
+              background: T.green,
+              color: T.white,
+              padding: '4px 10px',
+              borderRadius: 999,
+              fontSize: 12,
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            ✓ {previousScore}%
+          </div>
+        )}
+      </div>
+
+      {/* ─── Single beat ─── */}
+      <main style={{ flex: 1, paddingBottom: 100 /* space for sticky nav */ }}>
+        {/* On the first step, show a compact intro hero too (one-time welcome).
+            Other steps keep the chrome minimal. */}
+        {isFirstStep && lesson.subtitle && (
+          <div
+            style={{
+              padding: '18px 20px 0',
+              textAlign: 'center',
+              maxWidth: 720,
               margin: '0 auto',
             }}
           >
-            {child
-              ? `Hey ${themeContext.childName}! ${resolveText(lesson.subtitle, difficultyLevel)}`
-              : resolveText(lesson.subtitle, difficultyLevel)}
-          </p>
-        )}
-        {alreadyDone && previousScore !== null && (
-          <div
-            style={{
-              marginTop: 14,
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: T.green,
-              color: T.white,
-              padding: '8px 20px',
-              borderRadius: 999,
-              fontSize: 14,
-              fontWeight: 800,
-            }}
-          >
-            ✓ Completed — Best Score: {previousScore}%
+            <p
+              style={{
+                fontSize: 15,
+                color: T.text,
+                fontWeight: 500,
+                margin: 0,
+                lineHeight: 1.45,
+              }}
+            >
+              {child
+                ? `Hey ${themeContext.childName}! ${resolveText(lesson.subtitle, difficultyLevel)}`
+                : resolveText(lesson.subtitle, difficultyLevel)}
+            </p>
           </div>
         )}
-      </section>
 
-      {/* ─── Beats ─── */}
-      <main style={{ flex: 1 }}>
-        {lesson.beats.map((beat, i) => {
-          // Outro celebrates completion — hide until the lesson is done
-          if (beat.kind === 'outro' && !alreadyDone) return null;
-          return (
-          <BeatRenderer
-            key={i}
-            beat={beat}
-            lessonId={lesson.id}
-            difficultyLevel={difficultyLevel}
-            childName={child ? themeContext.childName : undefined}
-            isGuest={isGuest}
-            onQuizSubmit={(score, percent, quizBeat) => {
-              const skillScores: Record<string, number> = quizBeat.skillScores
-                ? Object.fromEntries(
-                    Object.entries(quizBeat.skillScores).map(([k, base]) => [
-                      k,
-                      Math.round(base * (percent / 100)),
-                    ]),
-                  )
-                : {};
+        <BeatRenderer
+          key={stepIdx}
+          beat={currentBeat}
+          lessonId={lesson.id}
+          difficultyLevel={difficultyLevel}
+          childName={child ? themeContext.childName : undefined}
+          isGuest={isGuest}
+          onQuizSubmit={(score, percent, quizBeat) => {
+            const skillScores: Record<string, number> = quizBeat.skillScores
+              ? Object.fromEntries(
+                  Object.entries(quizBeat.skillScores).map(([k, base]) => [
+                    k,
+                    Math.round(base * (percent / 100)),
+                  ]),
+                )
+              : {};
+            completeLesson({
+              lessonId: lesson.id,
+              score: percent,
+              xpEarned: quizBeat.xpReward ?? 100,
+              completedAt: new Date().toISOString(),
+              skillScores,
+            });
+            scheduleReview(lesson.id);
+            const reward = earnedCardFor(lesson.id);
+            if (reward && !hasCard(reward.id)) {
+              earnCard(reward.id);
+              setToastCardId(reward.id);
+            }
+            void score;
+            // Don't auto-advance — let the kid read their score and tap Continue.
+          }}
+          onGameFinish={(miniBeat) => {
+            if (miniBeat.completesLesson && !alreadyDone) {
               completeLesson({
                 lessonId: lesson.id,
-                score: percent,
-                xpEarned: quizBeat.xpReward ?? 100,
+                score: 100,
+                xpEarned: 100,
                 completedAt: new Date().toISOString(),
-                skillScores,
+                skillScores: {},
               });
               scheduleReview(lesson.id);
-
-              // Award the lesson's card (no-op if already earned)
-              const reward = earnedCardFor(lesson.id);
-              if (reward && !hasCard(reward.id)) {
-                earnCard(reward.id);
-                setToastCardId(reward.id);
-              }
-              void score;
-            }}
-            onGameFinish={(miniBeat) => {
-              if (!miniBeat.completesLesson) return;
-              if (!alreadyDone) {
-                completeLesson({
-                  lessonId: lesson.id,
-                  score: 100,
-                  xpEarned: 100,
-                  completedAt: new Date().toISOString(),
-                  skillScores: {},
-                });
-                scheduleReview(lesson.id);
-              }
-              const reward = earnedCardFor(lesson.id);
-              if (reward && !hasCard(reward.id)) {
-                earnCard(reward.id);
-                setToastCardId(reward.id);
-              }
-            }}
-          />
-          );
-        })}
+            }
+            const reward = earnedCardFor(lesson.id);
+            if (reward && !hasCard(reward.id)) {
+              earnCard(reward.id);
+              setToastCardId(reward.id);
+            }
+            window.setTimeout(() => goNext(), 600);
+          }}
+        />
       </main>
+
+      {/* ─── Sticky bottom nav ─── */}
+      <nav
+        style={{
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: T.white,
+          borderTop: `2px solid ${T.green}`,
+          padding: '10px 16px calc(10px + env(safe-area-inset-bottom))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          zIndex: 40,
+          boxShadow: '0 -4px 14px rgba(22,101,52,0.06)',
+        }}
+      >
+        <button
+          type="button"
+          onClick={goBack}
+          disabled={isFirstStep}
+          style={navBtn(isFirstStep ? 'ghost' : 'secondary')}
+        >
+          ← Back
+        </button>
+
+        <div style={{ fontSize: 12, color: T.sub, fontWeight: 600 }}>
+          {stepIdx + 1} / {totalSteps}
+        </div>
+
+        {isLastStep ? (
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            style={navBtn('primary')}
+          >
+            🗺️ Back to map
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={goNext}
+            style={navBtn('primary')}
+          >
+            Continue →
+          </button>
+        )}
+      </nav>
 
       <Footer />
 
@@ -200,6 +316,97 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
 }
 
 /* ────────────────────────────────────────────────────────────────────── */
+
+function stepLabelFor(beat: LessonBeat | undefined): string {
+  if (!beat) return '';
+  switch (beat.kind) {
+    case 'intro': return 'Welcome';
+    case 'video': return 'Watch';
+    case 'concept-cards': return 'Learn';
+    case 'mini-game': return 'Play';
+    case 'quiz': return 'Quiz';
+    case 'outro': return 'Wrap up';
+    case 'real-world-mission': return 'Try it';
+  }
+}
+
+function navBtn(variant: 'primary' | 'secondary' | 'ghost'): React.CSSProperties {
+  const base: React.CSSProperties = {
+    padding: '10px 18px',
+    borderRadius: 14,
+    border: `2px solid ${T.green}`,
+    fontFamily: 'inherit',
+    fontWeight: 800,
+    fontSize: 15,
+    cursor: 'pointer',
+    minWidth: 120,
+    textAlign: 'center',
+  };
+  if (variant === 'primary') {
+    return {
+      ...base,
+      background: T.green,
+      color: T.white,
+      boxShadow: `0 3px 0 #0c4523`,
+    };
+  }
+  if (variant === 'secondary') {
+    return { ...base, background: T.white, color: T.green };
+  }
+  // ghost (disabled)
+  return {
+    ...base,
+    background: 'transparent',
+    color: '#aaa',
+    borderColor: '#ddd',
+    cursor: 'not-allowed',
+    boxShadow: 'none',
+  };
+}
+
+function ProgressDots({
+  count,
+  active,
+  onSeek,
+}: {
+  count: number;
+  active: number;
+  onSeek?: (i: number) => void;
+}) {
+  // Cap visible dots so a long lesson doesn't blow out the header
+  const MAX_VISIBLE = 8;
+  const dots = Math.min(count, MAX_VISIBLE);
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+      {Array.from({ length: dots }).map((_, i) => {
+        const isActive = i === active;
+        const isPast = i < active;
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSeek?.(i)}
+            aria-label={`Go to step ${i + 1}`}
+            style={{
+              width: isActive ? 22 : 10,
+              height: 10,
+              borderRadius: 999,
+              border: 'none',
+              background: isActive ? T.green : isPast ? T.green : '#D8E5DA',
+              opacity: isActive ? 1 : isPast ? 0.85 : 1,
+              cursor: onSeek ? 'pointer' : 'default',
+              padding: 0,
+              transition: 'width 200ms ease, background 200ms ease',
+            }}
+          />
+        );
+      })}
+      {count > MAX_VISIBLE && (
+        <span style={{ fontSize: 11, color: T.sub, marginLeft: 4 }}>+{count - MAX_VISIBLE}</span>
+      )}
+    </div>
+  );
+}
 
 interface BeatRendererProps {
   beat: LessonBeat;
@@ -323,59 +530,7 @@ function BeatRenderer({
 
     case 'concept-cards':
       return (
-        <section
-          style={{
-            padding: '20px 24px 32px',
-            maxWidth: 800,
-            margin: '0 auto',
-            width: '100%',
-          }}
-        >
-          {beat.heading && (
-            <h2
-              style={{
-                fontSize: 26,
-                fontWeight: 700,
-                color: T.green,
-                textAlign: 'center',
-                margin: '0 0 6px',
-              }}
-            >
-              {beat.heading}
-            </h2>
-          )}
-          {beat.subheading && (
-            <p
-              style={{
-                textAlign: 'center',
-                color: T.sub,
-                fontWeight: 500,
-                marginBottom: 24,
-              }}
-            >
-              {beat.subheading}
-            </p>
-          )}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns:
-                'repeat(auto-fill, minmax(260px, 1fr))',
-              gap: 14,
-              marginTop: 16,
-            }}
-          >
-            {beat.cards.map((card, i) => (
-              <ConceptCard
-                key={i}
-                emoji={card.emoji}
-                title={card.title}
-                desc={resolveText(card.desc, difficultyLevel)}
-                color={card.color}
-              />
-            ))}
-          </div>
-        </section>
+        <ConceptCardsBeat beat={beat} difficultyLevel={difficultyLevel} />
       );
 
     case 'mini-game':
@@ -511,4 +666,186 @@ function BeatRenderer({
       );
     }
   }
+}
+
+/* ── Concept-cards beat: horizontal deck instead of vertical stack ── */
+function ConceptCardsBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'concept-cards' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const [idx, setIdx] = useState(0);
+  const total = beat.cards.length;
+  const card = beat.cards[Math.min(idx, total - 1)];
+  const goPrev = () => setIdx((i) => Math.max(0, i - 1));
+  const goNext = () => setIdx((i) => Math.min(total - 1, i + 1));
+
+  return (
+    <section
+      style={{
+        padding: '20px 20px 28px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && (
+        <h2
+          style={{
+            fontSize: 22,
+            fontWeight: 800,
+            color: T.green,
+            textAlign: 'center',
+            margin: '0 0 4px',
+            letterSpacing: '-0.01em',
+          }}
+        >
+          {beat.heading}
+        </h2>
+      )}
+      {beat.subheading && (
+        <p
+          style={{
+            textAlign: 'center',
+            color: T.sub,
+            fontWeight: 500,
+            fontSize: 13,
+            margin: '0 0 16px',
+          }}
+        >
+          {beat.subheading}
+        </p>
+      )}
+
+      {/* Card carousel — 1 visible at a time */}
+      <div style={{ position: 'relative' }}>
+        <FadeIn key={idx} show>
+          <div
+            style={{
+              background: card.color ?? T.white,
+              border: `3px solid ${T.green}`,
+              borderRadius: 22,
+              padding: '22px 22px 26px',
+              boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(22,101,52,0.10)`,
+            }}
+          >
+            <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 10, textAlign: 'center' }}>
+              <Emo size={56}>{card.emoji}</Emo>
+            </div>
+            <h3
+              style={{
+                margin: '0 0 8px',
+                fontSize: 20,
+                color: T.green,
+                fontWeight: 800,
+                textAlign: 'center',
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {card.title}
+            </h3>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 15,
+                color: T.text,
+                lineHeight: 1.55,
+                textAlign: 'center',
+              }}
+            >
+              {resolveText(card.desc, difficultyLevel)}
+            </p>
+          </div>
+        </FadeIn>
+
+        {/* Inline prev/next + dots */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            marginTop: 14,
+          }}
+        >
+          <button
+            type="button"
+            onClick={goPrev}
+            disabled={idx === 0}
+            aria-label="Previous concept"
+            style={{
+              padding: '8px 12px',
+              borderRadius: 12,
+              border: `2px solid ${idx === 0 ? '#ddd' : T.green}`,
+              background: T.white,
+              color: idx === 0 ? '#bbb' : T.green,
+              fontWeight: 800,
+              fontFamily: 'inherit',
+              cursor: idx === 0 ? 'not-allowed' : 'pointer',
+              minWidth: 60,
+            }}
+          >
+            ←
+          </button>
+
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            {beat.cards.map((_, i) => {
+              const active = i === idx;
+              const past = i < idx;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setIdx(i)}
+                  aria-label={`Concept ${i + 1}`}
+                  style={{
+                    width: active ? 20 : 10,
+                    height: 10,
+                    borderRadius: 999,
+                    border: 'none',
+                    background: active || past ? T.green : '#D8E5DA',
+                    padding: 0,
+                    cursor: 'pointer',
+                    transition: 'width 180ms ease',
+                  }}
+                />
+              );
+            })}
+            <span
+              style={{
+                marginLeft: 8,
+                fontSize: 12,
+                color: T.sub,
+                fontWeight: 700,
+              }}
+            >
+              {idx + 1} / {total}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={goNext}
+            disabled={idx === total - 1}
+            aria-label="Next concept"
+            style={{
+              padding: '8px 12px',
+              borderRadius: 12,
+              border: `2px solid ${idx === total - 1 ? '#ddd' : T.green}`,
+              background: idx === total - 1 ? T.white : T.green,
+              color: idx === total - 1 ? '#bbb' : T.white,
+              fontWeight: 800,
+              fontFamily: 'inherit',
+              cursor: idx === total - 1 ? 'not-allowed' : 'pointer',
+              minWidth: 60,
+            }}
+          >
+            →
+          </button>
+        </div>
+      </div>
+    </section>
+  );
 }
