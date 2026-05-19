@@ -14,7 +14,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../Header';
 import Footer from '../Footer';
-import MomoMentorBubble from '../MomoMentorBubble';
 import SaveProgressPrompt from '../SaveProgressPrompt';
 
 import { useProgress } from '../../hooks/useProgress';
@@ -178,37 +177,9 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
 
       {/* ─── Single beat ─── */}
       <main style={{ flex: 1, paddingBottom: 100 /* space for sticky nav */ }}>
-        {/* On the first step, show a compact intro hero too (one-time welcome).
-            Other steps keep the chrome minimal. */}
-        {isFirstStep && lesson.subtitle && (
-          <div
-            style={{
-              padding: '18px 20px 0',
-              textAlign: 'center',
-              maxWidth: 720,
-              margin: '0 auto',
-            }}
-          >
-            <p
-              style={{
-                fontSize: 15,
-                color: T.text,
-                fontWeight: 500,
-                margin: 0,
-                lineHeight: 1.45,
-              }}
-            >
-              {child
-                ? `Hey ${themeContext.childName}! ${resolveText(lesson.subtitle, difficultyLevel)}`
-                : resolveText(lesson.subtitle, difficultyLevel)}
-            </p>
-          </div>
-        )}
-
         <BeatRenderer
           key={stepIdx}
           beat={currentBeat}
-          lessonId={lesson.id}
           difficultyLevel={difficultyLevel}
           childName={child ? themeContext.childName : undefined}
           isGuest={isGuest}
@@ -410,7 +381,6 @@ function ProgressDots({
 
 interface BeatRendererProps {
   beat: LessonBeat;
-  lessonId: string;
   difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
   childName?: string;
   isGuest: boolean;
@@ -426,7 +396,6 @@ interface BeatRendererProps {
 
 function BeatRenderer({
   beat,
-  lessonId,
   difficultyLevel,
   childName,
   isGuest,
@@ -438,32 +407,40 @@ function BeatRenderer({
       return (
         <section
           style={{
-            padding: '20px 24px 0',
-            maxWidth: 800,
+            padding: '40px 24px 32px',
+            maxWidth: 640,
             margin: '0 auto',
             width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 'calc(100vh - 280px)',
+            textAlign: 'center',
           }}
         >
           <FadeIn show>
-            {/* Keep MomoMentorBubble for backward compat — it now visually
-                renders via our Momo component. */}
-            <MomoMentorBubble
-              lessonId={lessonId}
-              step={0}
-              difficulty={difficultyLevel}
-              childName={childName}
+            <Momo
+              mood={beat.mood ?? 'excited'}
+              msg={resolveText(beat.text, difficultyLevel)}
+              size={88}
+              name={childName ? `Hey ${childName}!` : 'Momo'}
             />
-            {beat.text && (
-              <Momo
-                mood={beat.mood}
-                msg={resolveText(beat.text, difficultyLevel)}
-                size={56}
-                style={{ display: 'none' }}
-                // Hidden — MomoMentorBubble already shows the matching text
-                // from MOMO_TIPS. Kept here for when we deprecate MomoMentorBubble.
-              />
-            )}
           </FadeIn>
+          <div
+            style={{
+              marginTop: 24,
+              padding: '10px 18px',
+              border: `2px dashed ${T.green}`,
+              borderRadius: 999,
+              color: T.green,
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '.05em',
+            }}
+          >
+            Tap CONTINUE when you're ready 👇
+          </div>
         </section>
       );
 
