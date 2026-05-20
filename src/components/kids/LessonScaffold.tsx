@@ -12,8 +12,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../Header';
-import Footer from '../Footer';
 import SaveProgressPrompt from '../SaveProgressPrompt';
 
 import { useProgress } from '../../hooks/useProgress';
@@ -97,8 +95,6 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
         background: theme.bg,
       }}
     >
-      <Header />
-
       {/* ─── Compact sticky lesson header ─── */}
       <div
         style={{
@@ -180,6 +176,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
         <BeatRenderer
           key={stepIdx}
           beat={currentBeat}
+          lesson={lesson}
           difficultyLevel={difficultyLevel}
           childName={child ? themeContext.childName : undefined}
           isGuest={isGuest}
@@ -279,8 +276,6 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
         )}
       </nav>
 
-      <Footer />
-
       <CardEarnedToast cardId={toastCardId} onClose={() => setToastCardId(null)} />
     </div>
   );
@@ -298,6 +293,18 @@ function stepLabelFor(beat: LessonBeat | undefined): string {
     case 'quiz': return 'Quiz';
     case 'outro': return 'Wrap up';
     case 'real-world-mission': return 'Try it';
+  }
+}
+
+function roadmapEmojiFor(beat: LessonBeat): string {
+  switch (beat.kind) {
+    case 'intro': return '👋';
+    case 'video': return '🎬';
+    case 'concept-cards': return '💡';
+    case 'mini-game': return '🎮';
+    case 'quiz': return '🏆';
+    case 'outro': return '🎉';
+    case 'real-world-mission': return '🚀';
   }
 }
 
@@ -381,6 +388,7 @@ function ProgressDots({
 
 interface BeatRendererProps {
   beat: LessonBeat;
+  lesson: LessonDef;
   difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
   childName?: string;
   isGuest: boolean;
@@ -396,6 +404,7 @@ interface BeatRendererProps {
 
 function BeatRenderer({
   beat,
+  lesson,
   difficultyLevel,
   childName,
   isGuest,
@@ -403,46 +412,163 @@ function BeatRenderer({
   onGameFinish,
 }: BeatRendererProps) {
   switch (beat.kind) {
-    case 'intro':
+    case 'intro': {
+      // Build the roadmap from non-intro / non-outro beats
+      const roadmap = lesson.beats
+        .filter((b) => b.kind !== 'intro' && b.kind !== 'outro')
+        .map((b) => ({
+          label: stepLabelFor(b),
+          emoji: roadmapEmojiFor(b),
+        }));
+
       return (
         <section
           style={{
-            padding: '40px 24px 32px',
-            maxWidth: 640,
+            padding: '24px 20px 40px',
+            maxWidth: 720,
             margin: '0 auto',
             width: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 'calc(100vh - 280px)',
-            textAlign: 'center',
           }}
         >
           <FadeIn show>
-            <Momo
-              mood={beat.mood ?? 'excited'}
-              msg={resolveText(beat.text, difficultyLevel)}
-              size={88}
-              name={childName ? `Hey ${childName}!` : 'Momo'}
-            />
+            <div
+              style={{
+                textAlign: 'center',
+                marginBottom: 18,
+              }}
+            >
+              <div style={{ fontSize: 96, lineHeight: 1, marginBottom: 4 }}>
+                <Emo size={96}>{lesson.emoji}</Emo>
+              </div>
+              <h1
+                style={{
+                  fontSize: 'clamp(26px, 5vw, 36px)',
+                  fontWeight: 800,
+                  color: T.green,
+                  margin: 0,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                {lesson.title}
+              </h1>
+            </div>
           </FadeIn>
-          <div
-            style={{
-              marginTop: 24,
-              padding: '10px 18px',
-              border: `2px dashed ${T.green}`,
-              borderRadius: 999,
-              color: T.green,
-              fontSize: 13,
-              fontWeight: 700,
-              letterSpacing: '.05em',
-            }}
-          >
-            Tap CONTINUE when you're ready 👇
-          </div>
+
+          <FadeIn show delay={100}>
+            <div
+              style={{
+                background: T.white,
+                border: `3px solid ${T.green}`,
+                borderRadius: 22,
+                padding: '20px 22px',
+                boxShadow: `0 4px 0 ${T.green}, 0 8px 18px rgba(22,101,52,0.08)`,
+                marginBottom: 22,
+              }}
+            >
+              <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ flexShrink: 0 }}>
+                  <Momo
+                    mood={beat.mood ?? 'excited'}
+                    size={64}
+                    avatarOnly
+                  />
+                </div>
+                <div style={{ flex: 1, paddingTop: 4 }}>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: T.pink,
+                      fontWeight: 800,
+                      marginBottom: 4,
+                      letterSpacing: '.04em',
+                    }}
+                  >
+                    MOMO {childName ? `· HI ${childName.toUpperCase()}!` : ''}
+                  </div>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: 16,
+                      lineHeight: 1.55,
+                      color: T.text,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {resolveText(beat.text, difficultyLevel)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {roadmap.length > 0 && (
+            <FadeIn show delay={200}>
+              <div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: T.sub,
+                    letterSpacing: '.1em',
+                    marginBottom: 8,
+                    textAlign: 'center',
+                  }}
+                >
+                  WHAT YOU'LL DO
+                </div>
+                <ol
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: 0,
+                    display: 'grid',
+                    gap: 8,
+                  }}
+                >
+                  {roadmap.map((item, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 14px',
+                        background: T.white,
+                        border: `2px solid ${T.green}`,
+                        borderRadius: 14,
+                        boxShadow: `2px 2px 0 rgba(22,101,52,.08)`,
+                      }}
+                    >
+                      <span
+                        style={{
+                          background: T.green,
+                          color: T.white,
+                          width: 26,
+                          height: 26,
+                          borderRadius: '50%',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: 13,
+                          fontWeight: 800,
+                          flexShrink: 0,
+                        }}
+                      >
+                        {i + 1}
+                      </span>
+                      <Emo size={22}>{item.emoji}</Emo>
+                      <span style={{ fontWeight: 700, color: T.text, fontSize: 15 }}>
+                        {item.label}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </FadeIn>
+          )}
         </section>
       );
+    }
 
     case 'video':
       return (
@@ -666,6 +792,10 @@ function ConceptCardsBeat({
         maxWidth: 720,
         margin: '0 auto',
         width: '100%',
+        minHeight: 'calc(100vh - 200px)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
       }}
     >
       {beat.heading && (
@@ -703,21 +833,26 @@ function ConceptCardsBeat({
             style={{
               background: card.color ?? T.white,
               border: `3px solid ${T.green}`,
-              borderRadius: 22,
-              padding: '22px 22px 26px',
+              borderRadius: 24,
+              padding: '40px 32px 44px',
               boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(22,101,52,0.10)`,
+              minHeight: 320,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: 56, lineHeight: 1, marginBottom: 10, textAlign: 'center' }}>
-              <Emo size={56}>{card.emoji}</Emo>
+            <div style={{ fontSize: 80, lineHeight: 1, marginBottom: 16 }}>
+              <Emo size={80}>{card.emoji}</Emo>
             </div>
             <h3
               style={{
-                margin: '0 0 8px',
-                fontSize: 20,
+                margin: '0 0 14px',
+                fontSize: 28,
                 color: T.green,
                 fontWeight: 800,
-                textAlign: 'center',
                 letterSpacing: '-0.01em',
               }}
             >
@@ -726,10 +861,10 @@ function ConceptCardsBeat({
             <p
               style={{
                 margin: 0,
-                fontSize: 15,
+                fontSize: 17,
                 color: T.text,
                 lineHeight: 1.55,
-                textAlign: 'center',
+                maxWidth: 480,
               }}
             >
               {resolveText(card.desc, difficultyLevel)}
