@@ -203,6 +203,102 @@
   100% { transform: scale(1.6);  opacity: 0; }
 }
 
+/* ── Lesson-beat animations ─────────────────────────────────────────── */
+
+/* Each item in a list pops in with bounce. Pair with inline animation-delay. */
+@keyframes pop-in {
+  0%   { transform: scale(0.7) translateY(8px); opacity: 0; }
+  60%  { transform: scale(1.05) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); }
+}
+
+/* Slide in from below — gentler than pop-in. */
+@keyframes slide-up-fade {
+  0%   { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Lightbulb / answer reveal. */
+@keyframes lightbulb-pop {
+  0%   { transform: scale(0.5) rotate(-12deg); opacity: 0; filter: brightness(1.4); }
+  50%  { transform: scale(1.1) rotate(4deg); opacity: 1; filter: brightness(1.2); }
+  100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+}
+
+/* Shake — for wrong answers. */
+@keyframes shake-x {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-8px) rotate(-1deg); }
+  30%      { transform: translateX(8px)  rotate(1deg); }
+  45%      { transform: translateX(-6px) rotate(-1deg); }
+  60%      { transform: translateX(6px)  rotate(1deg); }
+  75%      { transform: translateX(-3px); }
+}
+
+/* Big celebratory pulse — for correct answers. */
+@keyframes correct-pulse {
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(22,101,52,0.45); }
+  40%  { transform: scale(1.05); box-shadow: 0 0 0 18px rgba(22,101,52,0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22,101,52,0); }
+}
+
+/* Hero bounce — for big lesson emoji on intro. */
+@keyframes hero-bounce-in {
+  0%   { transform: scale(0.4) translateY(-30px) rotate(-10deg); opacity: 0; }
+  50%  { transform: scale(1.15) translateY(0) rotate(4deg); opacity: 1; }
+  70%  { transform: scale(0.95) translateY(2px) rotate(-2deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(2deg); }
+}
+
+/* Sparkle ring around an element — small twinkle ring. */
+@keyframes sparkle-spin {
+  0%   { transform: rotate(0deg) scale(0.6); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: rotate(360deg) scale(1.4); opacity: 0; }
+}
+
+/* Confetti particle — rises, drifts, fades. */
+@keyframes confetti-fly {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  100% {
+    transform:
+      translate(var(--cx, 0px), var(--cy, -240px))
+      rotate(var(--cr, 360deg));
+    opacity: 0;
+  }
+}
+
+/* Tick-in for checkboxes / completion marks. */
+@keyframes tick-pop {
+  0%   { transform: scale(0); opacity: 0; }
+  50%  { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* Concept card slide-in from the right (going forward) */
+@keyframes card-slide-in-right {
+  0%   { transform: translateX(40px) scale(0.96); opacity: 0; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes card-slide-in-left {
+  0%   { transform: translateX(-40px) scale(0.96); opacity: 0; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+/* Reduced motion — disable everything we just defined */
+@media (prefers-reduced-motion: reduce) {
+  .pop-in, .slide-up-fade, .lightbulb-pop, .shake-x,
+  .correct-pulse, .hero-bounce-in, .hero-float, .confetti-particle,
+  .tick-pop, .sparkle-spin {
+    animation: none !important;
+  }
+}
+
 /* Respect users who don't want motion */
 @media (prefers-reduced-motion: reduce) {
   .momo-avatar, .momo-badge, .momo-bubble { animation: none !important; }

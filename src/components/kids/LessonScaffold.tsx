@@ -33,6 +33,7 @@ import { themes, T } from '../../styles/kidsTokens';
 
 import Momo from './Momo';
 import FadeIn from './FadeIn';
+import ConfettiBurst from './ConfettiBurst';
 import MCard from './MCard';
 import Pill from './Pill';
 import Emo from './Emo';
@@ -440,29 +441,37 @@ function BeatRenderer({
             width: '100%',
           }}
         >
-          <FadeIn show>
+          <div
+            style={{
+              textAlign: 'center',
+              marginBottom: 18,
+            }}
+          >
             <div
               style={{
-                textAlign: 'center',
-                marginBottom: 18,
+                fontSize: 96,
+                lineHeight: 1,
+                marginBottom: 4,
+                display: 'inline-block',
+                animation: 'hero-bounce-in 700ms cubic-bezier(.34,1.56,.64,1) both, hero-float 4s ease-in-out 800ms infinite',
+                transformOrigin: 'center bottom',
               }}
             >
-              <div style={{ fontSize: 96, lineHeight: 1, marginBottom: 4 }}>
-                <Emo size={96}>{lesson.emoji}</Emo>
-              </div>
-              <h1
-                style={{
-                  fontSize: 'clamp(26px, 5vw, 36px)',
-                  fontWeight: 800,
-                  color: T.green,
-                  margin: 0,
-                  letterSpacing: '-0.02em',
-                }}
-              >
-                {lesson.title}
-              </h1>
+              <Emo size={96}>{lesson.emoji}</Emo>
             </div>
-          </FadeIn>
+            <h1
+              style={{
+                fontSize: 'clamp(26px, 5vw, 36px)',
+                fontWeight: 800,
+                color: T.green,
+                margin: 0,
+                letterSpacing: '-0.02em',
+                animation: 'slide-up-fade 500ms ease-out 300ms both',
+              }}
+            >
+              {lesson.title}
+            </h1>
+          </div>
 
           <FadeIn show delay={100}>
             <div
@@ -547,6 +556,8 @@ function BeatRenderer({
                         border: `2px solid ${T.green}`,
                         borderRadius: 14,
                         boxShadow: `2px 2px 0 rgba(22,101,52,.08)`,
+                        animation: `pop-in 450ms cubic-bezier(.34,1.56,.64,1) both`,
+                        animationDelay: `${500 + i * 90}ms`,
                       }}
                     >
                       <span
@@ -800,10 +811,17 @@ function ConceptCardsBeat({
   difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
 }) {
   const [idx, setIdx] = useState(0);
+  const [dir, setDir] = useState<'right' | 'left'>('right');
   const total = beat.cards.length;
   const card = beat.cards[Math.min(idx, total - 1)];
-  const goPrev = () => setIdx((i) => Math.max(0, i - 1));
-  const goNext = () => setIdx((i) => Math.min(total - 1, i + 1));
+  const goPrev = () => {
+    setDir('left');
+    setIdx((i) => Math.max(0, i - 1));
+  };
+  const goNext = () => {
+    setDir('right');
+    setIdx((i) => Math.min(total - 1, i + 1));
+  };
 
   return (
     <section
@@ -848,23 +866,33 @@ function ConceptCardsBeat({
 
       {/* Card carousel — 1 visible at a time */}
       <div style={{ position: 'relative' }}>
-        <FadeIn key={idx} show>
-          <div
-            style={{
-              background: card.color ?? T.white,
-              border: `3px solid ${T.green}`,
-              borderRadius: 24,
-              padding: '40px 32px 44px',
-              boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(22,101,52,0.10)`,
-              minHeight: 320,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: 80, lineHeight: 1, marginBottom: 16 }}>
+        <div
+          key={idx}
+          style={{
+            background: card.color ?? T.white,
+            border: `3px solid ${T.green}`,
+            borderRadius: 24,
+            padding: '40px 32px 44px',
+            boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(22,101,52,0.10)`,
+            minHeight: 320,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            animation: `${
+              dir === 'right' ? 'card-slide-in-right' : 'card-slide-in-left'
+            } 380ms cubic-bezier(.34,1.5,.64,1) both`,
+          }}
+        >
+            <div
+              style={{
+                fontSize: 80,
+                lineHeight: 1,
+                marginBottom: 16,
+                animation: 'pop-in 500ms cubic-bezier(.34,1.56,.64,1) 100ms both',
+              }}
+            >
               <Emo size={80}>{card.emoji}</Emo>
             </div>
             <h3
@@ -890,7 +918,6 @@ function ConceptCardsBeat({
               {resolveText(card.desc, difficultyLevel)}
             </p>
           </div>
-        </FadeIn>
 
         {/* Inline prev/next + dots */}
         <div
@@ -1047,8 +1074,11 @@ function DecisionBeat({
                 fontWeight: 600,
                 lineHeight: 1.4,
                 boxShadow: isPicked ? `4px 4px 0 ${T.green}` : `2px 2px 0 rgba(22,101,52,.08)`,
-                transition: 'all 180ms ease',
+                transition: 'all 220ms ease',
                 position: 'relative',
+                transform: isPicked ? 'translateY(-2px)' : 'translateY(0)',
+                animation: `pop-in 400ms cubic-bezier(.34,1.56,.64,1) both`,
+                animationDelay: `${200 + i * 110}ms`,
               }}
             >
               <span
@@ -1112,7 +1142,8 @@ function DecisionBeat({
 
       {showReveal && (
         <FadeIn show>
-          <div style={{ ...revealCard, marginTop: 14 }}>
+          <div style={{ ...revealCard, marginTop: 14, position: 'relative' }}>
+            <ConfettiBurst show palette={['🎉', '🌍', '💡', '✨', '⭐']} count={16} />
             <div style={kicker('coral')}>🌍 IN THE REAL WORLD</div>
             <p style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.6 }}>
               {resolveText(beat.realWorldReveal, difficultyLevel)}
@@ -1165,6 +1196,10 @@ function ThinkDeeperBeat({
                 padding: '16px 18px',
                 opacity: isAvailable ? 1 : 0.5,
                 boxShadow: isOpen ? `4px 4px 0 rgba(22,101,52,.10)` : '2px 2px 0 rgba(22,101,52,.06)',
+                transition: 'all 280ms ease',
+                animation: 'pop-in 420ms cubic-bezier(.34,1.56,.64,1) both',
+                animationDelay: `${i * 100}ms`,
+                position: 'relative',
               }}
             >
               <div style={kicker(isOpen ? 'green' : 'sub')}>
@@ -1174,22 +1209,35 @@ function ThinkDeeperBeat({
                 {resolveText(layer.question, difficultyLevel)}
               </div>
               {isOpen ? (
-                <FadeIn show>
-                  <div
+                <div
+                  style={{
+                    marginTop: 10,
+                    padding: '10px 14px',
+                    background: '#F4FFF6',
+                    border: `2px dashed ${T.green}`,
+                    borderRadius: 12,
+                    fontSize: 14,
+                    color: T.text,
+                    lineHeight: 1.55,
+                    animation: 'lightbulb-pop 520ms cubic-bezier(.34,1.56,.64,1) both',
+                    transformOrigin: 'top left',
+                    position: 'relative',
+                  }}
+                >
+                  <span
+                    aria-hidden
                     style={{
-                      marginTop: 10,
-                      padding: '10px 14px',
-                      background: '#F4FFF6',
-                      border: `2px dashed ${T.green}`,
-                      borderRadius: 12,
-                      fontSize: 14,
-                      color: T.text,
-                      lineHeight: 1.55,
+                      position: 'absolute',
+                      top: -12,
+                      left: 14,
+                      fontSize: 22,
+                      animation: 'lightbulb-pop 520ms cubic-bezier(.34,1.56,.64,1) both',
                     }}
                   >
-                    {resolveText(layer.reveal, difficultyLevel)}
-                  </div>
-                </FadeIn>
+                    💡
+                  </span>
+                  {resolveText(layer.reveal, difficultyLevel)}
+                </div>
               ) : (
                 <button
                   type="button"
@@ -1314,7 +1362,16 @@ function BrainstormBeat({
               }}
             />
             {v.trim() && (
-              <span style={{ color: T.green, fontSize: 16 }} aria-hidden>
+              <span
+                key={`tick-${i}-${v.length > 0}`}
+                aria-hidden
+                style={{
+                  color: T.green,
+                  fontSize: 16,
+                  animation: 'tick-pop 380ms cubic-bezier(.34,1.56,.64,1) both',
+                  display: 'inline-block',
+                }}
+              >
                 ✓
               </span>
             )}
@@ -1378,7 +1435,8 @@ function BrainstormBeat({
         </div>
       ) : (
         <FadeIn show>
-          <div style={{ marginTop: 16 }}>
+          <div style={{ marginTop: 16, position: 'relative' }}>
+            <ConfettiBurst show palette={['💡', '✨', '⭐', '🌟']} count={14} />
             <div
               style={{
                 background: '#F4FFF6',
@@ -1390,7 +1448,16 @@ function BrainstormBeat({
               <div style={kicker('green')}>🐻 MOMO'S IDEAS — DID YOU THINK OF…</div>
               <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>
                 {beat.hints.map((h, i) => (
-                  <li key={i} style={{ fontSize: 14, color: T.text, lineHeight: 1.45 }}>
+                  <li
+                    key={i}
+                    style={{
+                      fontSize: 14,
+                      color: T.text,
+                      lineHeight: 1.45,
+                      animation: 'slide-up-fade 360ms ease-out both',
+                      animationDelay: `${300 + i * 110}ms`,
+                    }}
+                  >
                     {resolveText(h, difficultyLevel)}
                   </li>
                 ))}
@@ -1555,32 +1622,38 @@ function CalcChallengeBeat({
       </div>
 
       {submitted && (
-        <FadeIn show>
+        <div
+          key={`result-${isCorrect}`}
+          style={{
+            marginTop: 14,
+            padding: '14px 18px',
+            background: isCorrect ? '#F0FFF4' : '#FFF5F5',
+            border: `3px solid ${isCorrect ? T.green : T.coral}`,
+            borderRadius: 16,
+            position: 'relative',
+            animation: isCorrect
+              ? 'correct-pulse 700ms ease-out 1, slide-up-fade 300ms ease-out both'
+              : 'shake-x 540ms cubic-bezier(.36,.07,.19,.97) 1, slide-up-fade 300ms ease-out both',
+          }}
+        >
+          {isCorrect && (
+            <ConfettiBurst show palette={['🎉', '💯', '⭐', '✨', '🥳']} count={22} />
+          )}
           <div
             style={{
-              marginTop: 14,
-              padding: '14px 18px',
-              background: isCorrect ? '#F0FFF4' : '#FFF5F5',
-              border: `3px solid ${isCorrect ? T.green : T.coral}`,
-              borderRadius: 16,
+              fontSize: 14,
+              fontWeight: 800,
+              color: isCorrect ? T.green : T.coral,
+              marginBottom: 6,
+              letterSpacing: '.04em',
             }}
           >
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 800,
-                color: isCorrect ? T.green : T.coral,
-                marginBottom: 6,
-                letterSpacing: '.04em',
-              }}
-            >
-              {isCorrect ? '🎉 NAILED IT!' : `💡 NOT QUITE — IT'S ${beat.problem.answer}${beat.problem.suffix ?? ''}`}
-            </div>
-            <p style={{ margin: 0, fontSize: 14, color: T.text, lineHeight: 1.55 }}>
-              {resolveText(beat.walkthrough, difficultyLevel)}
-            </p>
+            {isCorrect ? '🎉 NAILED IT!' : `💡 NOT QUITE — IT'S ${beat.problem.answer}${beat.problem.suffix ?? ''}`}
           </div>
-        </FadeIn>
+          <p style={{ margin: 0, fontSize: 14, color: T.text, lineHeight: 1.55 }}>
+            {resolveText(beat.walkthrough, difficultyLevel)}
+          </p>
+        </div>
       )}
     </section>
   );
@@ -1623,18 +1696,20 @@ function ConnectBeat({
 
       <div style={{ display: 'grid', gap: 12 }}>
         {beat.examples.map((ex, i) => (
-          <FadeIn key={i} show delay={i * 100}>
-            <div
-              style={{
-                display: 'flex',
-                gap: 14,
-                background: T.white,
-                border: `2px solid ${T.green}`,
-                borderRadius: 16,
-                padding: '12px 16px',
-                boxShadow: '2px 2px 0 rgba(22,101,52,.08)',
-              }}
-            >
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              gap: 14,
+              background: T.white,
+              border: `2px solid ${T.green}`,
+              borderRadius: 16,
+              padding: '12px 16px',
+              boxShadow: '2px 2px 0 rgba(22,101,52,.08)',
+              animation: 'pop-in 480ms cubic-bezier(.34,1.56,.64,1) both',
+              animationDelay: `${200 + i * 140}ms`,
+            }}
+          >
               <div
                 style={{
                   width: 50,
@@ -1657,8 +1732,7 @@ function ConnectBeat({
                   {resolveText(ex.story, difficultyLevel)}
                 </p>
               </div>
-            </div>
-          </FadeIn>
+          </div>
         ))}
       </div>
 
