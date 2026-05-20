@@ -240,7 +240,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
           justifyContent: 'space-between',
           gap: 12,
           zIndex: 40,
-          boxShadow: '0 -4px 14px rgba(22,101,52,0.06)',
+          boxShadow: '0 -4px 14px rgba(45,155,110,0.06)',
         }}
       >
         <button
@@ -476,7 +476,7 @@ function BeatRenderer({
                 border: `3px solid ${T.green}`,
                 borderRadius: 22,
                 padding: '20px 22px',
-                boxShadow: `0 4px 0 ${T.green}, 0 8px 18px rgba(22,101,52,0.08)`,
+                boxShadow: `0 4px 0 ${T.green}, 0 8px 18px rgba(45,155,110,0.08)`,
                 marginBottom: 22,
               }}
             >
@@ -551,7 +551,7 @@ function BeatRenderer({
                         background: T.white,
                         border: `2px solid ${T.green}`,
                         borderRadius: 14,
-                        boxShadow: `2px 2px 0 rgba(22,101,52,.08)`,
+                        boxShadow: `2px 2px 0 rgba(45,155,110,.08)`,
                         animation: `pop-in 450ms cubic-bezier(.34,1.56,.64,1) both`,
                         animationDelay: `${500 + i * 90}ms`,
                       }}
@@ -866,7 +866,7 @@ function ConceptCardsBeat({
             border: `3px solid ${T.green}`,
             borderRadius: 24,
             padding: '40px 32px 44px',
-            boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(22,101,52,0.10)`,
+            boxShadow: `0 5px 0 ${T.green}, 0 10px 20px rgba(45,155,110,0.10)`,
             minHeight: 320,
             display: 'flex',
             flexDirection: 'column',
@@ -1066,7 +1066,7 @@ function DecisionBeat({
                 fontFamily: 'inherit',
                 fontWeight: 600,
                 lineHeight: 1.4,
-                boxShadow: isPicked ? `4px 4px 0 ${T.green}` : `2px 2px 0 rgba(22,101,52,.08)`,
+                boxShadow: isPicked ? `4px 4px 0 ${T.green}` : `2px 2px 0 rgba(45,155,110,.08)`,
                 transition: 'all 220ms ease',
                 position: 'relative',
                 transform: isPicked ? 'translateY(-2px)' : 'translateY(0)',
@@ -1188,7 +1188,7 @@ function ThinkDeeperBeat({
                 borderRadius: 16,
                 padding: '16px 18px',
                 opacity: isAvailable ? 1 : 0.5,
-                boxShadow: isOpen ? `4px 4px 0 rgba(22,101,52,.10)` : '2px 2px 0 rgba(22,101,52,.06)',
+                boxShadow: isOpen ? `4px 4px 0 rgba(45,155,110,.10)` : '2px 2px 0 rgba(45,155,110,.06)',
                 transition: 'all 280ms ease',
                 animation: 'pop-in 420ms cubic-bezier(.34,1.56,.64,1) both',
                 animationDelay: `${i * 100}ms`,
@@ -1303,7 +1303,7 @@ function BrainstormBeat({
           borderRadius: 18,
           padding: '16px 18px',
           marginBottom: 16,
-          boxShadow: `3px 3px 0 rgba(22,101,52,.08)`,
+          boxShadow: `3px 3px 0 rgba(45,155,110,.08)`,
         }}
       >
         <div style={kicker('coral')}>💡 YOUR TURN</div>
@@ -1508,7 +1508,7 @@ function CalcChallengeBeat({
           borderRadius: 18,
           padding: '18px 20px',
           marginBottom: 14,
-          boxShadow: '3px 3px 0 rgba(22,101,52,.08)',
+          boxShadow: '3px 3px 0 rgba(45,155,110,.08)',
         }}
       >
         <div style={kicker('green')}>🧮 MATH CHALLENGE</div>
@@ -1678,7 +1678,7 @@ function ConnectBeat({
           borderRadius: 18,
           padding: '14px 18px',
           marginBottom: 16,
-          boxShadow: '3px 3px 0 rgba(22,101,52,.08)',
+          boxShadow: '3px 3px 0 rgba(45,155,110,.08)',
         }}
       >
         <div style={kicker('lavender')}>🌐 SAME IDEA, BIGGER BUSINESS</div>
@@ -1698,7 +1698,7 @@ function ConnectBeat({
               border: `2px solid ${T.green}`,
               borderRadius: 16,
               padding: '12px 16px',
-              boxShadow: '2px 2px 0 rgba(22,101,52,.08)',
+              boxShadow: '2px 2px 0 rgba(45,155,110,.08)',
               animation: 'pop-in 480ms cubic-bezier(.34,1.56,.64,1) both',
               animationDelay: `${200 + i * 140}ms`,
             }}
@@ -1769,7 +1769,7 @@ const scenarioCard: React.CSSProperties = {
   border: `3px solid ${T.coral}`,
   borderRadius: 18,
   padding: '14px 18px',
-  boxShadow: '3px 3px 0 rgba(22,101,52,.06)',
+  boxShadow: '3px 3px 0 rgba(45,155,110,.06)',
 };
 const feedbackCard: React.CSSProperties = {
   background: '#F4FFF6',

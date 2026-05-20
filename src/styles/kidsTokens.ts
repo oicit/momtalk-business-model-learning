@@ -5,19 +5,43 @@
  * Use these everywhere instead of raw hex values so the palette stays unified.
  */
 
+/**
+ * Color tokens — aligned with the MomTalk "Lush Memphis" design system
+ * (momtalk_UI_system/MomTalk Design System/colors_and_type.css).
+ *
+ * Brand structural green is `#2D9B6E` (Lush Green) per MomTalk. We keep
+ * the same Memphis accents (pink/yellow/sky/mint) and the warm cream
+ * canvas `#FFF5EC`.
+ */
 export const T = {
-  green: '#166534', // primary brand / outlines
-  pink: '#FF65C5',
-  yellow: '#FFCB65',
-  blue: '#65C9FF',
+  green: '#2D9B6E', // MomTalk Lush Green
+  pink: '#FF65C5', // Bubbly Pink
+  yellow: '#FFCB65', // Soft Yellow
+  blue: '#65C9FF', // Sky Blue
   lavender: '#7C5CFC',
   coral: '#FF6B6B',
   mint: '#CCFBF1',
-  canvas: '#FFF3EC', // page background
+  canvas: '#FFF5EC', // MomTalk warm off-white
   text: '#1E293B',
   sub: '#64748B',
   white: '#FFFFFF',
 } as const;
+
+/**
+ * MomTalk "Bauhaus" shadow — large hard offset green at 10% alpha.
+ * Used on big cards and hero containers.
+ */
+export const shadowBauhaus = '12px 12px 0px rgba(45,155,110,0.1)';
+/**
+ * MomTalk "Memphis" shadow — smaller, fully opaque green.
+ * Used on chips, badges, small interactive elements.
+ */
+export const shadowMemphis = `5px 5px 0px ${'#2D9B6E'}`;
+
+/** MomTalk-faithful borders. */
+export const frame = '10px solid #2D9B6E';
+export const frameThin = '3px solid #2D9B6E';
+export const frameHair = '2px solid #2D9B6E';
 
 /** Solid offset shadow used everywhere — never blurred. */
 export const shadow = (size: number = 5, color: string = T.green): string =>
@@ -31,12 +55,16 @@ export const shadowSoft = (size: number = 7): string =>
 export const border = (size: number = 3, color: string = T.green): string =>
   `${size}px solid ${color}`;
 
-/** Card radius scales. */
+/** Card radius scales — aligned with MomTalk's huge corner radii. */
 export const radius = {
   pill: 999,
-  card: 22,
-  cardLg: 24,
   chip: 14,
+  small: 20,
+  card: 24,     // medium cards
+  cardLg: 36,   // module / gamification cards
+  hero: 48,     // hero / large feature cards
+  /** Asymmetric speech-bubble radius (top-right-bottom-bottom). */
+  speech: '4px 32px 32px 32px',
 } as const;
 
 export type LessonTheme = {

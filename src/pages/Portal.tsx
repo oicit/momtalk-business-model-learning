@@ -259,7 +259,7 @@ function PracticeBanner({
         border: `3px solid ${T.coral}`,
         borderRadius: 18,
         padding: '14px 18px',
-        boxShadow: `4px 4px 0 rgba(22,101,52,.10)`,
+        boxShadow: `4px 4px 0 rgba(45,155,110,.10)`,
         cursor: 'pointer',
         fontFamily: 'inherit',
         display: 'flex',

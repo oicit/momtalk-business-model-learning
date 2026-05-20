@@ -197,7 +197,7 @@ export default function CertificatePage() {
                 borderRadius: 28,
                 padding: '34px 36px 26px',
                 position: 'relative',
-                boxShadow: `8px 8px 0 rgba(22,101,52,.15)`,
+                boxShadow: `8px 8px 0 rgba(45,155,110,.15)`,
               }}
             >
               {/* Decorative inner border */}
@@ -394,7 +394,7 @@ export default function CertificatePage() {
           header, footer, .no-print { display: none !important; }
           #certificate-print-area {
             box-shadow: none !important;
-            border-color: #166534 !important;
+            border-color: #2D9B6E !important;
             margin: 0 auto;
           }
         }

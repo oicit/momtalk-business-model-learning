@@ -36,7 +36,7 @@
 }
 
 .kids-mode ::-webkit-scrollbar { width: 8px; height: 8px; }
-.kids-mode ::-webkit-scrollbar-thumb { background: #166534; border-radius: 999px; }
+.kids-mode ::-webkit-scrollbar-thumb { background: #2D9B6E; border-radius: 999px; }
 .kids-mode ::-webkit-scrollbar-track { background: transparent; }
 
 /* Twemoji-rendered emojis inline with text */
@@ -237,9 +237,9 @@
 
 /* Big celebratory pulse — for correct answers. */
 @keyframes correct-pulse {
-  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(22,101,52,0.45); }
-  40%  { transform: scale(1.05); box-shadow: 0 0 0 18px rgba(22,101,52,0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(22,101,52,0); }
+  0%   { transform: scale(1); box-shadow: 0 0 0 0 rgba(45,155,110,0.45); }
+  40%  { transform: scale(1.05); box-shadow: 0 0 0 18px rgba(45,155,110,0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(45,155,110,0); }
 }
 
 /* Hero bounce — for big lesson emoji on intro. */
@@ -318,7 +318,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #166534;
+  background: #2D9B6E;
   cursor: pointer;
   border: 3px solid white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);

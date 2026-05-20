@@ -38,7 +38,7 @@ export default function MapStop({ stop, visited, onTap, size = 160 }: MapStopPro
       badge={badge}
       style={{
         boxShadow: visited
-          ? `5px 5px 0 ${T.green}, 0 0 0 4px rgba(22,101,52,0.12)`
+          ? `5px 5px 0 ${T.green}, 0 0 0 4px rgba(45,155,110,0.12)`
           : undefined,
       }}
     />

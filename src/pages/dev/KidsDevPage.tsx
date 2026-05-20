@@ -286,7 +286,7 @@ function Swatch({ name, color }: { name: string; color: string }) {
           background: color,
           border: `2px solid ${T.green}`,
           borderRadius: 12,
-          boxShadow: `3px 3px 0 rgba(22,101,52,.15)`,
+          boxShadow: `3px 3px 0 rgba(45,155,110,.15)`,
         }}
       />
       <div style={{ fontSize: 11, fontWeight: 600 }}>{name}</div>

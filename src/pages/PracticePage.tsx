@@ -24,12 +24,13 @@ import Momo from '../components/kids/Momo';
 import lemonadeStand from '../data/lessons/lemonade-stand';
 import chickFilA from '../data/lessons/chick-fil-a';
 import business101 from '../data/lessons/business-101';
+import garageSale from '../data/lessons/garage-sale';
 import petShop from '../data/lessons/pet-shop';
 import youtubeCreator from '../data/lessons/youtube-creator';
 import cookieBakery from '../data/lessons/cookie-bakery';
 
 const ALL_LESSONS: LessonDef[] = [
-  business101, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery,
+  business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery,
 ];
 
 interface LessonMissionRef {
@@ -200,7 +201,7 @@ function MissionTile({
         border: `3px solid ${accent}`,
         borderRadius: 18,
         padding: '14px 16px',
-        boxShadow: `4px 4px 0 rgba(22,101,52,.10)`,
+        boxShadow: `4px 4px 0 rgba(45,155,110,.10)`,
         cursor: 'pointer',
         fontFamily: 'inherit',
         display: 'flex',

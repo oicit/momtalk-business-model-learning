@@ -170,7 +170,7 @@ export default function RealWorldMission({ mission }: Props) {
                 maxWidth: 360,
                 borderRadius: 14,
                 border: `3px solid ${T.green}`,
-                boxShadow: `4px 4px 0 rgba(22,101,52,.15)`,
+                boxShadow: `4px 4px 0 rgba(45,155,110,.15)`,
                 display: 'block',
               }}
             />
@@ -430,7 +430,7 @@ function card(accent: string): React.CSSProperties {
     border: `3px solid ${accent}`,
     borderRadius: 20,
     padding: '18px 20px',
-    boxShadow: `5px 5px 0 rgba(22,101,52,.12)`,
+    boxShadow: `5px 5px 0 rgba(45,155,110,.12)`,
     maxWidth: 640,
     margin: '0 auto',
   };

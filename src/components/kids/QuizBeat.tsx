@@ -147,7 +147,7 @@ export default function QuizBeat({
                     submitted && selected && q.correct !== oi;
 
                   let bg: string = T.white;
-                  let bd: string = 'rgba(22,101,52,.2)';
+                  let bd: string = 'rgba(45,155,110,.2)';
                   if (isCorrect) {
                     bg = '#D1FAE5';
                     bd = T.green;
