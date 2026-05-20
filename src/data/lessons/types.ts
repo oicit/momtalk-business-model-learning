@@ -76,7 +76,87 @@ export type LessonBeat =
   | {
       kind: 'real-world-mission';
       mission: RealWorldMissionDef;
+    }
+  | {
+      /** Case-study decision — kid picks a path, gets per-choice feedback, then the real-world reveal. */
+      kind: 'decision';
+      heading?: string;
+      scenario: AdaptiveText;
+      question: AdaptiveText;
+      choices: DecisionChoice[];
+      /** Shown after the kid has explored at least one choice. */
+      realWorldReveal: AdaptiveText;
+    }
+  | {
+      /** Socratic question chain — each layer reveals when the kid presses "Show me". */
+      kind: 'think-deeper';
+      heading?: string;
+      intro?: AdaptiveText;
+      layers: ThinkLayer[];
+    }
+  | {
+      /** Open-ended creativity prompt — kid types their own ideas, Momo offers hints after. */
+      kind: 'brainstorm';
+      heading?: string;
+      prompt: AdaptiveText;
+      /** Minimum entries the kid should type before "Done" is enabled. Default 3. */
+      minItems?: number;
+      /** Placeholder text inside the empty inputs. */
+      placeholder?: string;
+      /** Bulleted hints revealed after the kid submits. */
+      hints: AdaptiveText[];
+      /** Optional closing thought after hints. */
+      closer?: AdaptiveText;
+    }
+  | {
+      /** Math challenge — kid solves a real numeric problem with adaptive difficulty. */
+      kind: 'calc-challenge';
+      heading?: string;
+      setup: AdaptiveText;
+      /** Numeric variables + formulas to compute the answer. */
+      problem: CalcProblem;
+      /** Steps shown after the kid submits or asks for the explanation. */
+      walkthrough: AdaptiveText;
+    }
+  | {
+      /** Connect-the-dots: same concept showing up in bigger businesses. */
+      kind: 'connect';
+      heading?: string;
+      concept: AdaptiveText;
+      examples: ConnectExample[];
+      kicker?: AdaptiveText;
     };
+
+export interface DecisionChoice {
+  label: AdaptiveText;
+  feedback: AdaptiveText;
+  /** Whether this choice represents the most thoughtful answer (visual cue only). */
+  isPreferred?: boolean;
+}
+
+export interface ThinkLayer {
+  question: AdaptiveText;
+  reveal: AdaptiveText;
+}
+
+export interface CalcProblem {
+  /** Numeric inputs the kid sees in the scenario. */
+  givens: Array<{ label: string; value: number; suffix?: string }>;
+  /** A label for the answer field (e.g. "Profit"). */
+  answerLabel: string;
+  /** The correct numeric answer. */
+  answer: number;
+  /** Acceptable tolerance (default 0 for integers, 0.01 for currency). */
+  tolerance?: number;
+  /** Optional unit suffix on the answer (e.g. "$", "%"). */
+  suffix?: string;
+}
+
+export interface ConnectExample {
+  emoji: string;
+  who: string;
+  story: AdaptiveText;
+}
 
 /** A single check-yes step the kid can do in the real world. */
 export interface MissionStep {

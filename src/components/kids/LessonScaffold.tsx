@@ -293,6 +293,11 @@ function stepLabelFor(beat: LessonBeat | undefined): string {
     case 'quiz': return 'Quiz';
     case 'outro': return 'Wrap up';
     case 'real-world-mission': return 'Try it';
+    case 'decision': return 'Decide';
+    case 'think-deeper': return 'Think';
+    case 'brainstorm': return 'Brainstorm';
+    case 'calc-challenge': return 'Solve';
+    case 'connect': return 'Connect';
   }
 }
 
@@ -305,6 +310,11 @@ function roadmapEmojiFor(beat: LessonBeat): string {
     case 'quiz': return '🏆';
     case 'outro': return '🎉';
     case 'real-world-mission': return '🚀';
+    case 'decision': return '🧭';
+    case 'think-deeper': return '🤔';
+    case 'brainstorm': return '✨';
+    case 'calc-challenge': return '🧮';
+    case 'connect': return '🌐';
   }
 }
 
@@ -768,6 +778,16 @@ function BeatRenderer({
         </section>
       );
     }
+    case 'decision':
+      return <DecisionBeat beat={beat} difficultyLevel={difficultyLevel} />;
+    case 'think-deeper':
+      return <ThinkDeeperBeat beat={beat} difficultyLevel={difficultyLevel} />;
+    case 'brainstorm':
+      return <BrainstormBeat beat={beat} difficultyLevel={difficultyLevel} />;
+    case 'calc-challenge':
+      return <CalcChallengeBeat beat={beat} difficultyLevel={difficultyLevel} />;
+    case 'connect':
+      return <ConnectBeat beat={beat} difficultyLevel={difficultyLevel} />;
   }
 }
 
@@ -960,4 +980,754 @@ function ConceptCardsBeat({
       </div>
     </section>
   );
+}
+
+/* ── Decision beat: kid picks, gets per-choice feedback, then reveal ── */
+function DecisionBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'decision' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const [picked, setPicked] = useState<number | null>(null);
+  const [explored, setExplored] = useState<Set<number>>(new Set());
+  const [showReveal, setShowReveal] = useState(false);
+
+  const choose = (i: number) => {
+    setPicked(i);
+    setExplored((prev) => new Set(prev).add(i));
+  };
+
+  return (
+    <section
+      style={{
+        padding: '24px 20px 32px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && (
+        <h2 style={beatH2}>{beat.heading}</h2>
+      )}
+
+      <FadeIn show>
+        <div style={scenarioCard}>
+          <div style={kicker('coral')}>🧭 SCENARIO</div>
+          <p style={{ margin: 0, fontSize: 16, color: T.text, lineHeight: 1.55 }}>
+            {resolveText(beat.scenario, difficultyLevel)}
+          </p>
+        </div>
+      </FadeIn>
+
+      <h3 style={{ ...beatH3, marginTop: 22 }}>
+        {resolveText(beat.question, difficultyLevel)}
+      </h3>
+
+      <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+        {beat.choices.map((c, i) => {
+          const isPicked = picked === i;
+          const wasExplored = explored.has(i);
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => choose(i)}
+              style={{
+                textAlign: 'left',
+                background: isPicked ? '#F0FFF4' : T.white,
+                border: `3px solid ${isPicked ? T.green : wasExplored ? '#B5D4BC' : T.green}`,
+                borderRadius: 16,
+                padding: '14px 18px',
+                fontSize: 15,
+                color: T.text,
+                cursor: 'pointer',
+                fontFamily: 'inherit',
+                fontWeight: 600,
+                lineHeight: 1.4,
+                boxShadow: isPicked ? `4px 4px 0 ${T.green}` : `2px 2px 0 rgba(22,101,52,.08)`,
+                transition: 'all 180ms ease',
+                position: 'relative',
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 26,
+                  height: 26,
+                  borderRadius: '50%',
+                  background: isPicked ? T.green : '#E0E0E0',
+                  color: isPicked ? T.white : T.sub,
+                  fontWeight: 800,
+                  fontSize: 13,
+                  marginRight: 10,
+                }}
+              >
+                {String.fromCharCode(65 + i)}
+              </span>
+              {resolveText(c.label, difficultyLevel)}
+              {wasExplored && !isPicked && (
+                <span style={{ color: T.sub, fontSize: 11, marginLeft: 8, fontWeight: 600 }}>
+                  · viewed
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {picked !== null && (
+        <FadeIn key={`fb-${picked}`} show>
+          <div style={{ ...feedbackCard, marginTop: 16 }}>
+            <div style={kicker('green')}>💭 MOMO SAYS</div>
+            <p style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.55 }}>
+              {resolveText(beat.choices[picked].feedback, difficultyLevel)}
+            </p>
+            {explored.size >= 1 && !showReveal && (
+              <button
+                type="button"
+                onClick={() => setShowReveal(true)}
+                style={{
+                  marginTop: 14,
+                  padding: '8px 16px',
+                  background: T.yellow,
+                  color: T.green,
+                  border: `2px solid ${T.green}`,
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}
+              >
+                🔍 What really happens in real businesses?
+              </button>
+            )}
+          </div>
+        </FadeIn>
+      )}
+
+      {showReveal && (
+        <FadeIn show>
+          <div style={{ ...revealCard, marginTop: 14 }}>
+            <div style={kicker('coral')}>🌍 IN THE REAL WORLD</div>
+            <p style={{ margin: 0, fontSize: 15, color: T.text, lineHeight: 1.6 }}>
+              {resolveText(beat.realWorldReveal, difficultyLevel)}
+            </p>
+          </div>
+        </FadeIn>
+      )}
+    </section>
+  );
+}
+
+/* ── Think-deeper beat: Socratic question chain, reveal one at a time ── */
+function ThinkDeeperBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'think-deeper' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const [revealed, setRevealed] = useState<Set<number>>(new Set());
+  const reveal = (i: number) => setRevealed((p) => new Set(p).add(i));
+
+  return (
+    <section
+      style={{
+        padding: '24px 20px 32px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && <h2 style={beatH2}>{beat.heading}</h2>}
+      {beat.intro && (
+        <p style={{ textAlign: 'center', color: T.sub, fontSize: 14, margin: '0 0 18px' }}>
+          {resolveText(beat.intro, difficultyLevel)}
+        </p>
+      )}
+
+      <div style={{ display: 'grid', gap: 14 }}>
+        {beat.layers.map((layer, i) => {
+          const isOpen = revealed.has(i);
+          const isAvailable = i === 0 || revealed.has(i - 1);
+          return (
+            <div
+              key={i}
+              style={{
+                background: T.white,
+                border: `3px solid ${isAvailable ? T.green : '#DDE5DE'}`,
+                borderRadius: 16,
+                padding: '16px 18px',
+                opacity: isAvailable ? 1 : 0.5,
+                boxShadow: isOpen ? `4px 4px 0 rgba(22,101,52,.10)` : '2px 2px 0 rgba(22,101,52,.06)',
+              }}
+            >
+              <div style={kicker(isOpen ? 'green' : 'sub')}>
+                {isOpen ? `✓ STEP ${i + 1}` : `STEP ${i + 1}`}
+              </div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: T.text, marginBottom: 4 }}>
+                {resolveText(layer.question, difficultyLevel)}
+              </div>
+              {isOpen ? (
+                <FadeIn show>
+                  <div
+                    style={{
+                      marginTop: 10,
+                      padding: '10px 14px',
+                      background: '#F4FFF6',
+                      border: `2px dashed ${T.green}`,
+                      borderRadius: 12,
+                      fontSize: 14,
+                      color: T.text,
+                      lineHeight: 1.55,
+                    }}
+                  >
+                    {resolveText(layer.reveal, difficultyLevel)}
+                  </div>
+                </FadeIn>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!isAvailable}
+                  onClick={() => reveal(i)}
+                  style={{
+                    marginTop: 8,
+                    padding: '8px 16px',
+                    background: isAvailable ? T.green : '#ccc',
+                    color: T.white,
+                    border: 'none',
+                    borderRadius: 999,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    cursor: isAvailable ? 'pointer' : 'not-allowed',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  🤔 Hmm... show me
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+/* ── Brainstorm beat: kid types ideas, then Momo coaches with hints ── */
+function BrainstormBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'brainstorm' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const minItems = beat.minItems ?? 3;
+  const [ideas, setIdeas] = useState<string[]>(Array(minItems).fill(''));
+  const [submitted, setSubmitted] = useState(false);
+  const filled = ideas.filter((s) => s.trim().length > 0).length;
+  const canSubmit = filled >= minItems;
+
+  const updateIdea = (i: number, v: string) => {
+    setIdeas((prev) => {
+      const next = [...prev];
+      next[i] = v;
+      return next;
+    });
+  };
+
+  const addLine = () =>
+    setIdeas((prev) => (prev.length < 6 ? [...prev, ''] : prev));
+
+  return (
+    <section
+      style={{
+        padding: '24px 20px 32px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && <h2 style={beatH2}>{beat.heading}</h2>}
+
+      <div
+        style={{
+          background: T.white,
+          border: `3px solid ${T.coral}`,
+          borderRadius: 18,
+          padding: '16px 18px',
+          marginBottom: 16,
+          boxShadow: `3px 3px 0 rgba(22,101,52,.08)`,
+        }}
+      >
+        <div style={kicker('coral')}>💡 YOUR TURN</div>
+        <p style={{ margin: 0, fontSize: 16, color: T.text, lineHeight: 1.5 }}>
+          {resolveText(beat.prompt, difficultyLevel)}
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gap: 8 }}>
+        {ideas.map((v, i) => (
+          <div
+            key={i}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              background: T.white,
+              border: `2px solid ${T.green}`,
+              borderRadius: 12,
+              padding: '6px 10px 6px 14px',
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 800,
+                color: T.green,
+                flexShrink: 0,
+                width: 22,
+              }}
+            >
+              {i + 1}.
+            </span>
+            <input
+              type="text"
+              value={v}
+              onChange={(e) => updateIdea(i, e.target.value)}
+              placeholder={beat.placeholder ?? 'Write an idea here...'}
+              disabled={submitted}
+              style={{
+                flex: 1,
+                border: 'none',
+                outline: 'none',
+                fontSize: 15,
+                fontFamily: 'inherit',
+                color: T.text,
+                padding: '6px 0',
+                background: 'transparent',
+              }}
+            />
+            {v.trim() && (
+              <span style={{ color: T.green, fontSize: 16 }} aria-hidden>
+                ✓
+              </span>
+            )}
+          </div>
+        ))}
+        {!submitted && ideas.length < 6 && (
+          <button
+            type="button"
+            onClick={addLine}
+            style={{
+              padding: '6px 12px',
+              background: 'transparent',
+              border: `2px dashed ${T.green}`,
+              borderRadius: 12,
+              color: T.green,
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              alignSelf: 'flex-start',
+            }}
+          >
+            + Add another idea
+          </button>
+        )}
+      </div>
+
+      {!submitted ? (
+        <div
+          style={{
+            marginTop: 14,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ fontSize: 13, color: T.sub }}>
+            {filled < minItems
+              ? `Write at least ${minItems - filled} more`
+              : `Nice — ${filled} idea${filled === 1 ? '' : 's'}!`}
+          </div>
+          <button
+            type="button"
+            disabled={!canSubmit}
+            onClick={() => setSubmitted(true)}
+            style={{
+              padding: '10px 20px',
+              background: canSubmit ? T.green : '#cbd6cd',
+              color: T.white,
+              border: 'none',
+              borderRadius: 999,
+              fontSize: 14,
+              fontWeight: 800,
+              cursor: canSubmit ? 'pointer' : 'not-allowed',
+              fontFamily: 'inherit',
+            }}
+          >
+            🚀 Done — Show me Momo's ideas
+          </button>
+        </div>
+      ) : (
+        <FadeIn show>
+          <div style={{ marginTop: 16 }}>
+            <div
+              style={{
+                background: '#F4FFF6',
+                border: `3px solid ${T.green}`,
+                borderRadius: 18,
+                padding: '14px 18px',
+              }}
+            >
+              <div style={kicker('green')}>🐻 MOMO'S IDEAS — DID YOU THINK OF…</div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: 'grid', gap: 6 }}>
+                {beat.hints.map((h, i) => (
+                  <li key={i} style={{ fontSize: 14, color: T.text, lineHeight: 1.45 }}>
+                    {resolveText(h, difficultyLevel)}
+                  </li>
+                ))}
+              </ul>
+              {beat.closer && (
+                <p
+                  style={{
+                    margin: '12px 0 0',
+                    fontSize: 13,
+                    color: T.sub,
+                    fontStyle: 'italic',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {resolveText(beat.closer, difficultyLevel)}
+                </p>
+              )}
+            </div>
+          </div>
+        </FadeIn>
+      )}
+    </section>
+  );
+}
+
+/* ── Calc-challenge beat: real-numbers math problem ── */
+function CalcChallengeBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'calc-challenge' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const [input, setInput] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+  const tol = beat.problem.tolerance ?? 0.01;
+  const numeric = parseFloat(input);
+  const isCorrect = !Number.isNaN(numeric) && Math.abs(numeric - beat.problem.answer) <= tol;
+
+  return (
+    <section
+      style={{
+        padding: '24px 20px 32px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && <h2 style={beatH2}>{beat.heading}</h2>}
+
+      <div
+        style={{
+          background: T.white,
+          border: `3px solid ${T.green}`,
+          borderRadius: 18,
+          padding: '18px 20px',
+          marginBottom: 14,
+          boxShadow: '3px 3px 0 rgba(22,101,52,.08)',
+        }}
+      >
+        <div style={kicker('green')}>🧮 MATH CHALLENGE</div>
+        <p style={{ margin: 0, fontSize: 16, color: T.text, lineHeight: 1.55 }}>
+          {resolveText(beat.setup, difficultyLevel)}
+        </p>
+
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 10,
+            marginTop: 14,
+            justifyContent: 'center',
+          }}
+        >
+          {beat.problem.givens.map((g, i) => (
+            <div
+              key={i}
+              style={{
+                background: '#FFFBEB',
+                border: `2px solid ${T.yellow}`,
+                borderRadius: 12,
+                padding: '8px 14px',
+                textAlign: 'center',
+              }}
+            >
+              <div style={{ fontSize: 11, color: T.sub, fontWeight: 700 }}>
+                {g.label.toUpperCase()}
+              </div>
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: T.green,
+                  fontFamily: 'Space Mono, monospace',
+                }}
+              >
+                {g.value}
+                {g.suffix && <span style={{ fontSize: 14, marginLeft: 2 }}>{g.suffix}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          background: T.white,
+          border: `3px solid ${T.green}`,
+          borderRadius: 16,
+          padding: '12px 16px',
+        }}
+      >
+        <span style={{ fontSize: 16, fontWeight: 800, color: T.green }}>
+          {beat.problem.answerLabel} =
+        </span>
+        <input
+          type="number"
+          inputMode="decimal"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          disabled={submitted}
+          placeholder="?"
+          style={{
+            flex: 1,
+            border: `2px dashed ${T.green}`,
+            borderRadius: 10,
+            padding: '8px 12px',
+            fontSize: 22,
+            fontFamily: 'Space Mono, monospace',
+            color: T.green,
+            outline: 'none',
+            minWidth: 100,
+            textAlign: 'center',
+          }}
+        />
+        {beat.problem.suffix && (
+          <span style={{ fontSize: 16, fontWeight: 800, color: T.sub }}>
+            {beat.problem.suffix}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => setSubmitted(true)}
+          disabled={input.trim() === '' || submitted}
+          style={{
+            padding: '8px 16px',
+            background: submitted ? '#ccc' : T.green,
+            color: T.white,
+            border: 'none',
+            borderRadius: 999,
+            fontSize: 13,
+            fontWeight: 800,
+            cursor: input.trim() === '' || submitted ? 'not-allowed' : 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          Check
+        </button>
+      </div>
+
+      {submitted && (
+        <FadeIn show>
+          <div
+            style={{
+              marginTop: 14,
+              padding: '14px 18px',
+              background: isCorrect ? '#F0FFF4' : '#FFF5F5',
+              border: `3px solid ${isCorrect ? T.green : T.coral}`,
+              borderRadius: 16,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 800,
+                color: isCorrect ? T.green : T.coral,
+                marginBottom: 6,
+                letterSpacing: '.04em',
+              }}
+            >
+              {isCorrect ? '🎉 NAILED IT!' : `💡 NOT QUITE — IT'S ${beat.problem.answer}${beat.problem.suffix ?? ''}`}
+            </div>
+            <p style={{ margin: 0, fontSize: 14, color: T.text, lineHeight: 1.55 }}>
+              {resolveText(beat.walkthrough, difficultyLevel)}
+            </p>
+          </div>
+        </FadeIn>
+      )}
+    </section>
+  );
+}
+
+/* ── Connect beat: same concept showing up in famous businesses ── */
+function ConnectBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'connect' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  return (
+    <section
+      style={{
+        padding: '24px 20px 32px',
+        maxWidth: 720,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && <h2 style={beatH2}>{beat.heading}</h2>}
+
+      <div
+        style={{
+          background: T.white,
+          border: `3px solid ${T.lavender}`,
+          borderRadius: 18,
+          padding: '14px 18px',
+          marginBottom: 16,
+          boxShadow: '3px 3px 0 rgba(22,101,52,.08)',
+        }}
+      >
+        <div style={kicker('lavender')}>🌐 SAME IDEA, BIGGER BUSINESS</div>
+        <p style={{ margin: 0, fontSize: 16, color: T.text, lineHeight: 1.55, fontWeight: 600 }}>
+          {resolveText(beat.concept, difficultyLevel)}
+        </p>
+      </div>
+
+      <div style={{ display: 'grid', gap: 12 }}>
+        {beat.examples.map((ex, i) => (
+          <FadeIn key={i} show delay={i * 100}>
+            <div
+              style={{
+                display: 'flex',
+                gap: 14,
+                background: T.white,
+                border: `2px solid ${T.green}`,
+                borderRadius: 16,
+                padding: '12px 16px',
+                boxShadow: '2px 2px 0 rgba(22,101,52,.08)',
+              }}
+            >
+              <div
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: '50%',
+                  background: '#FFF8E5',
+                  border: `2px solid ${T.green}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  fontSize: 28,
+                }}
+              >
+                <Emo size={28}>{ex.emoji}</Emo>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 15, fontWeight: 800, color: T.green }}>{ex.who}</div>
+                <p style={{ margin: '2px 0 0', fontSize: 14, color: T.text, lineHeight: 1.5 }}>
+                  {resolveText(ex.story, difficultyLevel)}
+                </p>
+              </div>
+            </div>
+          </FadeIn>
+        ))}
+      </div>
+
+      {beat.kicker && (
+        <p
+          style={{
+            marginTop: 16,
+            textAlign: 'center',
+            fontSize: 14,
+            color: T.sub,
+            fontStyle: 'italic',
+            lineHeight: 1.5,
+          }}
+        >
+          {resolveText(beat.kicker, difficultyLevel)}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/* ── shared styles for new beats ────────────────────────────────────── */
+
+const beatH2: React.CSSProperties = {
+  fontSize: 24,
+  fontWeight: 800,
+  color: T.green,
+  textAlign: 'center',
+  margin: '0 0 18px',
+  letterSpacing: '-0.01em',
+};
+const beatH3: React.CSSProperties = {
+  fontSize: 18,
+  fontWeight: 800,
+  color: T.text,
+  margin: '0 0 8px',
+  textAlign: 'center',
+};
+const scenarioCard: React.CSSProperties = {
+  background: '#FFFBEB',
+  border: `3px solid ${T.coral}`,
+  borderRadius: 18,
+  padding: '14px 18px',
+  boxShadow: '3px 3px 0 rgba(22,101,52,.06)',
+};
+const feedbackCard: React.CSSProperties = {
+  background: '#F4FFF6',
+  border: `3px solid ${T.green}`,
+  borderRadius: 16,
+  padding: '14px 18px',
+};
+const revealCard: React.CSSProperties = {
+  background: T.white,
+  border: `3px dashed ${T.coral}`,
+  borderRadius: 16,
+  padding: '14px 18px',
+};
+
+function kicker(color: 'green' | 'coral' | 'sub' | 'lavender'): React.CSSProperties {
+  const c =
+    color === 'green' ? T.green :
+    color === 'coral' ? T.coral :
+    color === 'lavender' ? T.lavender :
+    T.sub;
+  return {
+    fontSize: 11,
+    fontWeight: 800,
+    color: c,
+    letterSpacing: '.08em',
+    marginBottom: 6,
+  };
 }
