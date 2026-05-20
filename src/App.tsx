@@ -14,20 +14,19 @@ import MissionPrintPage from './pages/MissionPrintPage';
 import AuthPage from './pages/AuthPage';
 import KidsDevPage from './pages/dev/KidsDevPage';
 import LessonPreviewPage from './pages/dev/LessonPreviewPage';
-import AuthGuard from './components/AuthGuard';
 
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Portal />} />
       <Route path="/auth" element={<AuthPage />} />
-      <Route path="/garage-sale" element={<AuthGuard><GarageSalePage /></AuthGuard>} />
-      <Route path="/chick-fil-a" element={<AuthGuard><ChickFilAPage /></AuthGuard>} />
-      <Route path="/lemonade-stand" element={<AuthGuard><LemonadeStandPage /></AuthGuard>} />
-      <Route path="/business-101" element={<AuthGuard><Business101Page /></AuthGuard>} />
-      <Route path="/pet-shop" element={<AuthGuard><PetShopPage /></AuthGuard>} />
-      <Route path="/youtube-creator" element={<AuthGuard><YouTubeCreatorPage /></AuthGuard>} />
-      <Route path="/cookie-bakery" element={<AuthGuard><CookieBakeryPage /></AuthGuard>} />
+      <Route path="/garage-sale" element={<GarageSalePage />} />
+      <Route path="/chick-fil-a" element={<ChickFilAPage />} />
+      <Route path="/lemonade-stand" element={<LemonadeStandPage />} />
+      <Route path="/business-101" element={<Business101Page />} />
+      <Route path="/pet-shop" element={<PetShopPage />} />
+      <Route path="/youtube-creator" element={<YouTubeCreatorPage />} />
+      <Route path="/cookie-bakery" element={<CookieBakeryPage />} />
       <Route path="/cards" element={<CardsPage />} />
       <Route path="/certificate" element={<CertificatePage />} />
       <Route path="/practice" element={<PracticePage />} />

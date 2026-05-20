@@ -12,7 +12,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import SaveProgressPrompt from '../SaveProgressPrompt';
 
 import { useProgress } from '../../hooks/useProgress';
 import { useSpacedReview } from '../../hooks/useSpacedReview';
@@ -48,7 +47,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const navigate = useNavigate();
   const { isCompleted, getScore, completeLesson } = useProgress();
   const { scheduleReview } = useSpacedReview();
-  const { child, isGuest } = useChildContext();
+  const { child } = useChildContext();
   const { difficultyLevel, themeContext } = useAdaptive(child);
 
   const previousScore = getScore(lesson.id);
@@ -180,7 +179,6 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
           lesson={lesson}
           difficultyLevel={difficultyLevel}
           childName={child ? themeContext.childName : undefined}
-          isGuest={isGuest}
           onQuizSubmit={(score, percent, quizBeat) => {
             const skillScores: Record<string, number> = quizBeat.skillScores
               ? Object.fromEntries(
@@ -402,7 +400,6 @@ interface BeatRendererProps {
   lesson: LessonDef;
   difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
   childName?: string;
-  isGuest: boolean;
   onQuizSubmit: (
     score: number,
     percent: number,
@@ -418,7 +415,6 @@ function BeatRenderer({
   lesson,
   difficultyLevel,
   childName,
-  isGuest,
   onQuizSubmit,
   onGameFinish,
 }: BeatRendererProps) {
@@ -713,9 +709,6 @@ function BeatRenderer({
             difficulty={difficultyLevel}
             bonusTip={undefined /* outro beat provides this */}
             onSubmit={(s, p) => onQuizSubmit(s, p, beat)}
-            afterResult={
-              <SaveProgressPrompt isGuest={isGuest} show />
-            }
           />
         </section>
       );
