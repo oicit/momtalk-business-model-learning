@@ -47,6 +47,16 @@ export const portalStops: MapStop[] = [
     status: 'available',
   },
   {
+    id: 'business-101',
+    emoji: '🧠',
+    title: 'Business\n101',
+    color: '#FFFDE8',
+    themeKey: 'business',
+    path: '/business-101',
+    status: 'available',
+    progressKey: 'business-101',
+  },
+  {
     id: 'garage-sale',
     emoji: '🏷️',
     title: 'Garage\nSale',

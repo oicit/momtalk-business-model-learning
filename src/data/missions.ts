@@ -5,12 +5,13 @@
 import type { RealWorldMissionDef } from './lessons/types';
 import lemonadeStand from './lessons/lemonade-stand';
 import chickFilA from './lessons/chick-fil-a';
+import business101 from './lessons/business-101';
 import petShop from './lessons/pet-shop';
 import youtubeCreator from './lessons/youtube-creator';
 import cookieBakery from './lessons/cookie-bakery';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery];
+const LESSONS = [business101, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {

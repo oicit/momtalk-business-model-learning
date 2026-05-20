@@ -34,6 +34,15 @@ export const RARITY_COLORS: Record<Rarity, string> = {
 
 export const cardData: CardDef[] = [
   {
+    id: 'business-brain',
+    emoji: '🧠',
+    title: 'Business Brain',
+    fact: 'Every business has 5 building blocks. You can see them all!',
+    color: '#FFFDE8',
+    rarity: 'Legendary',
+    awardedBy: 'business-101',
+  },
+  {
     id: 'service-pro',
     emoji: '🐔',
     title: 'Service Pro',

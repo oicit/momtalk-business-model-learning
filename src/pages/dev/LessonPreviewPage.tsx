@@ -7,12 +7,14 @@ import { useParams } from 'react-router-dom';
 import LessonScaffold from '../../components/kids/LessonScaffold';
 import chickFilA from '../../data/lessons/chick-fil-a';
 import lemonadeStand from '../../data/lessons/lemonade-stand';
+import business101 from '../../data/lessons/business-101';
 import petShop from '../../data/lessons/pet-shop';
 import youtubeCreator from '../../data/lessons/youtube-creator';
 import cookieBakery from '../../data/lessons/cookie-bakery';
 import type { LessonDef } from '../../data/lessons/types';
 
 const LESSONS: Record<string, LessonDef> = {
+  'business-101': business101,
   'chick-fil-a': chickFilA,
   'lemonade-stand': lemonadeStand,
   'pet-shop': petShop,
