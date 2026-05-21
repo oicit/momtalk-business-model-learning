@@ -519,71 +519,22 @@ function BeatRenderer({
           </FadeIn>
 
           {roadmap.length > 0 && (
-            <FadeIn show delay={200}>
-              <div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 800,
-                    color: T.sub,
-                    letterSpacing: '.1em',
-                    marginBottom: 8,
-                    textAlign: 'center',
-                  }}
-                >
-                  WHAT YOU'LL DO
-                </div>
-                <ol
-                  style={{
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: 0,
-                    display: 'grid',
-                    gap: 8,
-                  }}
-                >
-                  {roadmap.map((item, i) => (
-                    <li
-                      key={i}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: '10px 14px',
-                        background: T.white,
-                        border: `2px solid ${T.green}`,
-                        borderRadius: 14,
-                        boxShadow: `2px 2px 0 rgba(45,155,110,.08)`,
-                        animation: `pop-in 450ms cubic-bezier(.34,1.56,.64,1) both`,
-                        animationDelay: `${500 + i * 90}ms`,
-                      }}
-                    >
-                      <span
-                        style={{
-                          background: T.green,
-                          color: T.white,
-                          width: 26,
-                          height: 26,
-                          borderRadius: '50%',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 13,
-                          fontWeight: 800,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {i + 1}
-                      </span>
-                      <Emo size={22}>{item.emoji}</Emo>
-                      <span style={{ fontWeight: 700, color: T.text, fontSize: 15 }}>
-                        {item.label}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
+            <div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  color: T.sub,
+                  letterSpacing: '.1em',
+                  marginBottom: 14,
+                  textAlign: 'center',
+                  animation: 'slide-up-fade 400ms ease-out 400ms both',
+                }}
+              >
+                WHAT YOU'LL DO
               </div>
-            </FadeIn>
+              <CircleRoadmap roadmap={roadmap} lessonEmoji={lesson.emoji} />
+            </div>
           )}
         </section>
       );
@@ -2027,6 +1978,172 @@ function TypingIndicator() {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ── Circular roadmap: cute round buttons popping out one by one ─────
+ *
+ * Replaces the old vertical list of pill buttons on the lesson intro.
+ * Items arrange around a circle with the lesson emoji at the center,
+ * each tile pops in (clockwise from the top) on a staggered delay.
+ *
+ * Sized for the typical lesson (4–10 steps). Falls back to a wrap-grid
+ * for unusually long roadmaps. Mobile-friendly via CSS clamp.
+ * ──────────────────────────────────────────────────────────────────── */
+interface RoadmapItem {
+  label: string;
+  emoji: string;
+}
+
+function CircleRoadmap({
+  roadmap,
+  lessonEmoji,
+}: {
+  roadmap: RoadmapItem[];
+  lessonEmoji: string;
+}) {
+  const N = roadmap.length;
+
+  // Step palette — cycles through Memphis accents per tile.
+  const palette = ['#FFFDE8', '#FFE5EC', '#E0F2FE', '#EDE9FE', '#FFF8F0', '#D7F0E4'];
+
+  // Radius scales with item count so adjacent tiles don't crowd.
+  // We pick the smallest radius that keeps 88px of arc between centers.
+  const tileSize = 76; // px
+  const minArc = tileSize + 18; // 18px gap between tiles
+  // arc between adjacent centers ≈ 2 * R * sin(π/N) → solve for R
+  const radius =
+    N <= 1 ? 110 : Math.max(110, Math.ceil(minArc / (2 * Math.sin(Math.PI / N))));
+  const containerSize = (radius + tileSize / 2 + 24) * 2; // a bit of margin
+
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: containerSize,
+        aspectRatio: '1 / 1',
+        margin: '0 auto',
+      }}
+    >
+      {/* Center "lesson" badge — the anchor point */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '34%',
+          minWidth: 88,
+          aspectRatio: '1 / 1',
+          background: T.white,
+          border: `4px dashed ${T.green}`,
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          textAlign: 'center',
+          padding: 12,
+          boxSizing: 'border-box',
+          animation: 'pop-in 600ms cubic-bezier(.34,1.56,.64,1) 200ms both',
+          boxShadow: '0 4px 0 rgba(45,155,110,.12)',
+        }}
+      >
+        <div style={{ fontSize: 'clamp(28px, 6vw, 42px)', lineHeight: 1 }}>
+          <Emo size={42}>{lessonEmoji}</Emo>
+        </div>
+        <div
+          style={{
+            marginTop: 4,
+            fontSize: 10,
+            fontWeight: 800,
+            color: T.green,
+            letterSpacing: '.12em',
+          }}
+        >
+          START
+        </div>
+      </div>
+
+      {/* Items around the circle, clockwise from top */}
+      {roadmap.map((item, i) => {
+        const angle = (i / N) * Math.PI * 2 - Math.PI / 2; // top = -π/2
+        // Position as % of container so it scales with container width
+        const xPct = 50 + (Math.cos(angle) * radius * 100) / containerSize;
+        const yPct = 50 + (Math.sin(angle) * radius * 100) / containerSize;
+        const bg = palette[i % palette.length];
+
+        return (
+          <button
+            key={i}
+            type="button"
+            disabled
+            aria-label={`Step ${i + 1}: ${item.label}`}
+            style={{
+              position: 'absolute',
+              left: `${xPct}%`,
+              top: `${yPct}%`,
+              transform: 'translate(-50%, -50%)',
+              width: tileSize,
+              height: tileSize,
+              background: bg,
+              border: `3px solid ${T.green}`,
+              borderRadius: '50%',
+              padding: 0,
+              fontFamily: 'inherit',
+              cursor: 'default',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: `0 4px 0 ${T.green}, 0 6px 12px rgba(45,155,110,.12)`,
+              animation: 'pop-in 540ms cubic-bezier(.34,1.7,.64,1) both',
+              animationDelay: `${400 + i * 130}ms`,
+            }}
+          >
+            {/* Step number ribbon */}
+            <span
+              style={{
+                position: 'absolute',
+                top: -8,
+                left: -8,
+                width: 26,
+                height: 26,
+                background: T.green,
+                color: T.white,
+                borderRadius: '50%',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 12,
+                fontWeight: 800,
+                border: `2px solid ${T.white}`,
+                boxShadow: '0 2px 0 rgba(45,155,110,.2)',
+              }}
+            >
+              {i + 1}
+            </span>
+            <Emo size={28}>{item.emoji}</Emo>
+            <span
+              style={{
+                marginTop: 2,
+                fontSize: 10,
+                fontWeight: 800,
+                color: T.green,
+                letterSpacing: '.04em',
+                lineHeight: 1.1,
+                textAlign: 'center',
+                padding: '0 4px',
+              }}
+            >
+              {item.label.toUpperCase()}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
