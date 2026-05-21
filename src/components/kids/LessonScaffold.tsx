@@ -10,7 +10,7 @@
  * Lessons become ~50 LOC of data instead of ~500 LOC of bespoke page.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useProgress } from '../../hooks/useProgress';
@@ -297,6 +297,7 @@ function stepLabelFor(beat: LessonBeat | undefined): string {
     case 'brainstorm': return 'Brainstorm';
     case 'calc-challenge': return 'Solve';
     case 'connect': return 'Connect';
+    case 'dialogue': return 'Chat';
   }
 }
 
@@ -314,6 +315,7 @@ function roadmapEmojiFor(beat: LessonBeat): string {
     case 'brainstorm': return '✨';
     case 'calc-challenge': return '🧮';
     case 'connect': return '🌐';
+    case 'dialogue': return '💬';
   }
 }
 
@@ -792,6 +794,8 @@ function BeatRenderer({
       return <CalcChallengeBeat beat={beat} difficultyLevel={difficultyLevel} />;
     case 'connect':
       return <ConnectBeat beat={beat} difficultyLevel={difficultyLevel} />;
+    case 'dialogue':
+      return <DialogueBeat beat={beat} difficultyLevel={difficultyLevel} />;
   }
 }
 
@@ -1797,4 +1801,232 @@ function kicker(color: 'green' | 'coral' | 'sub' | 'lavender'): React.CSSPropert
     letterSpacing: '.08em',
     marginBottom: 6,
   };
+}
+
+/* ── Dialogue beat: chat-style sequence of Momo bubbles ───────────────
+ * Each message reveals on tap after a "typing" indicator, the way an
+ * iMessage thread builds up. Feels like a continuing conversation
+ * with the mascot, not a slideshow.
+ * ─────────────────────────────────────────────────────────────────── */
+function DialogueBeat({
+  beat,
+  difficultyLevel,
+}: {
+  beat: Extract<LessonBeat, { kind: 'dialogue' }>;
+  difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
+}) {
+  const total = beat.messages.length;
+  const [revealed, setRevealed] = useState(1); // first bubble visible immediately
+  const [typing, setTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const isDone = revealed >= total;
+
+  const showNext = useCallback(() => {
+    if (isDone || typing) return;
+    setTyping(true);
+    window.setTimeout(() => {
+      setRevealed((r) => Math.min(total, r + 1));
+      setTyping(false);
+    }, 650);
+  }, [isDone, typing, total]);
+
+  // Auto-advance mode: fire showNext on a timer
+  useEffect(() => {
+    if (!beat.autoAdvance || isDone) return;
+    const id = window.setTimeout(showNext, typing ? 0 : 1200);
+    return () => window.clearTimeout(id);
+  }, [beat.autoAdvance, isDone, typing, showNext]);
+
+  // Scroll latest bubble into view smoothly
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [revealed, typing]);
+
+  const visible = beat.messages.slice(0, revealed);
+
+  return (
+    <section
+      style={{
+        padding: '20px 16px 28px',
+        maxWidth: 640,
+        margin: '0 auto',
+        width: '100%',
+      }}
+    >
+      {beat.heading && (
+        <h2 style={{ ...beatH2, fontSize: 20, marginBottom: 14 }}>{beat.heading}</h2>
+      )}
+
+      <div
+        role="log"
+        aria-live="polite"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
+        }}
+      >
+        {visible.map((m, i) => (
+          <ChatBubble
+            key={i}
+            text={resolveText(m.text, difficultyLevel)}
+            mood={m.mood ?? 'happy'}
+            // Show Momo avatar on first bubble, or whenever mood changes
+            showAvatar={i === 0 || (m.mood && m.mood !== visible[i - 1]?.mood)}
+          />
+        ))}
+
+        {typing && <TypingIndicator />}
+
+        {!isDone && !typing && !beat.autoAdvance && (
+          <button
+            type="button"
+            onClick={showNext}
+            style={{
+              alignSelf: 'flex-start',
+              marginLeft: 56,
+              marginTop: 4,
+              padding: '8px 16px',
+              background: T.white,
+              border: `2px dashed ${T.green}`,
+              borderRadius: 999,
+              color: T.green,
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontFamily: 'inherit',
+              letterSpacing: '.04em',
+            }}
+          >
+            ▼ Tap for more
+          </button>
+        )}
+
+        {isDone && !typing && (
+          <div
+            style={{
+              alignSelf: 'flex-start',
+              marginLeft: 56,
+              marginTop: 6,
+              fontSize: 12,
+              color: T.sub,
+              fontWeight: 600,
+              fontStyle: 'italic',
+            }}
+          >
+            👇 Tap Continue when ready
+          </div>
+        )}
+
+        <div ref={scrollRef} aria-hidden style={{ height: 1 }} />
+      </div>
+    </section>
+  );
+}
+
+function ChatBubble({
+  text,
+  mood,
+  showAvatar,
+}: {
+  text: string;
+  mood: import('./Momo').MomoMood;
+  showAvatar: boolean | undefined;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 10,
+        alignItems: 'flex-end',
+        animation: 'chat-bubble-in 320ms cubic-bezier(.34,1.5,.64,1) both',
+      }}
+    >
+      <div style={{ width: 46, flexShrink: 0 }}>
+        {showAvatar ? (
+          <Momo mood={mood} size={42} avatarOnly />
+        ) : null}
+      </div>
+      <div
+        style={{
+          background: T.white,
+          border: `3px solid ${T.green}`,
+          borderRadius: '18px 18px 18px 4px',
+          padding: '12px 16px',
+          fontSize: 15,
+          color: T.text,
+          lineHeight: 1.5,
+          maxWidth: 'calc(100% - 56px)',
+          boxShadow: '3px 3px 0 rgba(45,155,110,0.10)',
+          fontWeight: 500,
+        }}
+      >
+        {text.split('\n').map((line, i) => (
+          <p key={i} style={{ margin: i === 0 ? 0 : '6px 0 0' }}>
+            {/* simple **bold** parsing for casual emphasis */}
+            {parseBold(line)}
+          </p>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function parseBold(line: string): React.ReactNode[] {
+  // Split on **...** and render the inner parts as <b>
+  const parts = line.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) => {
+    const m = p.match(/^\*\*(.+)\*\*$/);
+    if (m) {
+      return (
+        <b key={i} style={{ color: T.green, fontWeight: 800 }}>
+          {m[1]}
+        </b>
+      );
+    }
+    return <span key={i}>{p}</span>;
+  });
+}
+
+function TypingIndicator() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        gap: 10,
+        alignItems: 'flex-end',
+        animation: 'chat-bubble-in 220ms ease-out both',
+      }}
+    >
+      <div style={{ width: 46 }} />
+      <div
+        style={{
+          background: T.white,
+          border: `3px solid ${T.green}`,
+          borderRadius: '18px 18px 18px 4px',
+          padding: '10px 14px',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          boxShadow: '2px 2px 0 rgba(45,155,110,0.08)',
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <span
+            key={i}
+            aria-hidden
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: T.green,
+              display: 'inline-block',
+              animation: `typing-dot 1.0s ease-in-out ${i * 0.15}s infinite`,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

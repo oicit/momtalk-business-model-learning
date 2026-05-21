@@ -280,6 +280,18 @@
   100% { transform: scale(1); }
 }
 
+/* Typing indicator — three bouncing dots like iMessage. */
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30%           { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Chat bubble entrance — slide from the side. */
+@keyframes chat-bubble-in {
+  0%   { transform: translateX(-14px) translateY(6px) scale(0.9); opacity: 0; }
+  100% { transform: translateX(0) translateY(0) scale(1); opacity: 1; }
+}
+
 /* Concept card slide-in from the right (going forward) */
 @keyframes card-slide-in-right {
   0%   { transform: translateX(40px) scale(0.96); opacity: 0; }

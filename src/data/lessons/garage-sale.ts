@@ -1,10 +1,11 @@
 /**
- * Garage Sale — pricing, marketing, and the joy of selling stuff you
- * don't use anymore.
+ * Garage Sale — pricing + marketing in a kid-runnable real business.
  *
- * The big lesson: an object's value is what someone will pay — not what
- * you paid for it. Garage sales are kid-runnable, cash-positive, and
- * teach pricing psychology better than any textbook.
+ * Teaching style: chat-conversational. Momo walks the kid through
+ * each idea as a sequence of speech bubbles (dialogue beats), then
+ * gates each block with one interactive beat (decision / concept /
+ * calc / brainstorm). Feels like texting with a smart friend, not
+ * navigating slides.
  */
 
 import type { LessonDef } from './types';
@@ -16,36 +17,73 @@ const lesson: LessonDef = {
   title: 'Garage Sale',
   subtitle: {
     easy: "Old toys + clever pricing = real money!",
-    medium: 'Turn stuff you don\'t use into cash — and learn pricing along the way.',
+    medium: "Turn stuff you don't use into cash — and learn pricing along the way.",
     hard: "Price discovery in a low-friction physical marketplace: garage sales as a microcosm of market clearing.",
   },
 
   beats: [
-    // ─── Intro ──────────────────────────────────────────────────────────
+    // ─── Welcome (chat) ───────────────────────────────────────────────
     {
       kind: 'intro',
       mood: 'excited',
       text: {
-        easy:
-          "Your room has TREASURE in it! Toys you don't play with, clothes that don't fit, books you've read. Other kids would LOVE them — and pay for them!",
-        medium:
-          "Stuff you've outgrown is gold to someone else. A garage sale turns clutter into cash AND teaches you the most important skill in business: pricing.",
-        hard:
-          "Garage sales are the cleanest example of price discovery: zero overhead, instant feedback loop, real customers. Better than any textbook.",
+        easy: "Hey friend! Today we're going to turn your old stuff into REAL money. Tap continue and let's chat!",
+        medium: "Today's adventure: turn the stuff you don't use into cash. Continue when you're ready — we'll talk through it.",
+        hard: "Welcome. We'll walk through running a kid-scale secondary market. Continue and we'll get into it.",
       },
     },
 
-    // ─── Decision: the neighbor's offer ────────────────────────────────
+    // ─── Chat: what is a garage sale, really? ────────────────────────
+    {
+      kind: 'dialogue',
+      heading: '💬 Let me tell you a secret',
+      messages: [
+        {
+          mood: 'excited',
+          text: {
+            easy: "Your room is FULL of treasure! 💎 Toys you don't play with. Books you've read. Clothes that don't fit.",
+            medium: "Your room is full of stuff you don't use anymore. To you it's clutter. To other people? **TREASURE**.",
+            hard: "Your unused inventory has positive value to someone in the local secondary market. The trade is value-accretive for both sides.",
+          },
+        },
+        {
+          mood: 'happy',
+          text: {
+            easy: "A **garage sale** is just a mini-store you set up in your driveway. Customers walk by, look at your stuff, and BUY it!",
+            medium: "A garage sale is your own little pop-up store. Real products. Real customers. Real money. All in one Saturday morning.",
+            hard: "Garage sale = a one-day physical retail outlet. Lowest possible CAC, zero permitting friction, instant feedback loop on price discovery.",
+          },
+        },
+        {
+          mood: 'thinking',
+          text: {
+            easy: "Did you know — over **165,000 garage sales** happen in the US **every week?** That's HUGE!",
+            medium: "Fun fact: ~165,000 garage sales happen in the US every week. It's the OG marketplace — and you can run one this Saturday.",
+            hard: "US secondary-market activity at the curb level: ~165k weekly events. The aggregate channel rivals mid-sized retail chains.",
+          },
+        },
+        {
+          mood: 'cool',
+          text: {
+            easy: "Best part? **YOU are the boss.** You pick what to sell, how much to charge, and how to make people stop. That's called being an **entrepreneur**!",
+            medium: "And the best part: YOU run it. You decide what, how much, and how. That's the definition of an entrepreneur.",
+            hard: "Full operator control: inventory selection, pricing, merchandising, customer service. Compressed entrepreneurship.",
+          },
+        },
+      ],
+    },
+
+    // ─── Decision: the lowball offer ─────────────────────────────────
     {
       kind: 'decision',
       heading: '🧭 A Real Garage-Sale Moment',
       scenario: {
         easy:
-          "It's Saturday morning. Your old bike (that you LOVED two years ago but hasn't been ridden in 6 months) is for sale. You wrote '$20' on a sticker. A neighbor walks up and offers $5.",
+          "It's Saturday morning. Your old bike (you LOVED it 2 years ago but haven't ridden it in 6 months) has a $20 sticker. A neighbor walks up and offers $5.",
         medium:
-          "Saturday morning, hour 1 of your sale. The old bike you priced at $20 (you LOVED it, but haven't ridden it in 6 months) is sitting there. A neighbor offers $5 cash — take it or leave it.",
+          "Saturday morning, hour 1 of your sale. The old bike you priced at $20 (loved it, haven't ridden in 6 months) is sitting there. A neighbor offers $5 cash — take it or leave it.",
         hard:
-          "First customer, premium item priced at $20 (your reservation price was vague — emotional anchor). Lowball offer at $5 (75% discount). The clock matters: 5 hours of sale window remaining.",
+          "First customer, premium item priced at $20 (reservation price vague). Lowball offer at $5 (75% discount). 5 hours of sale window remaining.",
       },
       question: {
         easy: "What do you do?",
@@ -60,12 +98,9 @@ const lesson: LessonDef = {
             hard: "Reject — anchor at $20, defer to next bidder",
           },
           feedback: {
-            easy:
-              "Hmm — but what if NOBODY else buys it? You'll end the day with $0 AND still have a bike to store!",
-            medium:
-              "Risky. What if no other buyer comes? You’ll be back inside with a bike taking up space. A garage sale isn’t Sotheby’s — there’s no waiting list.",
-            hard:
-              "Failure to clear inventory. Garage-sale demand is thin and Poisson-distributed. Reservation pricing as if there's a queue is a costly emotional anchor.",
+            easy: "Hmm — but what if NOBODY else buys it? You'll end the day with $0 AND still have a bike to store!",
+            medium: "Risky. What if no other buyer comes? You'll be back inside with a bike taking up space. A garage sale isn't Sotheby's.",
+            hard: "Failure to clear inventory. Garage-sale demand is thin and Poisson-distributed. Reservation pricing as if there's a queue is a costly emotional anchor.",
           },
         },
         {
@@ -75,12 +110,9 @@ const lesson: LessonDef = {
             hard: "Accept — clear the inventory at any positive bid",
           },
           feedback: {
-            easy:
-              "Money in hand! But… you might have left $10 or $15 on the table. The neighbor went STRAIGHT to $5 — maybe they'd have paid more if you'd said 'no'?",
-            medium:
-              "Some cash is better than none. BUT — they jumped to $5 immediately, which means they were probably willing to go higher. Counter-offers exist for a reason.",
-            hard:
-              "Avoids over-anchoring but underprices. Buyers who lead with a number have a max above their opener; not negotiating leaves the surplus on the table.",
+            easy: "Money in hand! But… you might have left $10 on the table. The neighbor jumped to $5 — maybe they'd pay more!",
+            medium: "Some cash is better than none. BUT — they jumped to $5 immediately, which means they were probably willing to go higher.",
+            hard: "Avoids over-anchoring but underprices. Buyers who lead with a number have a max above their opener.",
           },
         },
         {
@@ -90,150 +122,113 @@ const lesson: LessonDef = {
             hard: "Counter — split-the-difference at $12 with urgency framing",
           },
           feedback: {
-            easy:
-              "Smart! You're being flexible AND firm. Most people pay something close to the middle — and you keep MORE money!",
-            medium:
-              "This is how real negotiators work. You signal flexibility (not stubborn) without giving away too much. The 'take it today' adds urgency — they came over for a reason.",
-            hard:
-              "Optimal mid-game tactic. Anchors moderate, signals willingness to deal, and 'today' creates artificial urgency that reduces walk-away probability.",
+            easy: "Smart! Flexible AND firm. Most people pay close to the middle — and you keep MORE money!",
+            medium: "How real negotiators work. You signal flexibility without giving away too much. 'Take it today' adds urgency.",
+            hard: "Optimal mid-game tactic. Anchors moderate, signals willingness to deal, and 'today' creates artificial urgency.",
           },
           isPreferred: true,
         },
       ],
       realWorldReveal: {
-        easy:
-          "The MIDDLE move wins most garage-sale moments. Real sellers on eBay and Facebook Marketplace counter-offer all day long — meet in the middle = both people happy!",
-        medium:
-          "Counter-offering is the #1 negotiation tool used everywhere — eBay, real estate, car dealerships, even when YouTubers sign sponsorship deals. 'Meet in the middle' usually means BOTH sides walk away feeling they won.",
-        hard:
-          "Counter-offering with split-the-difference is the canonical bargaining solution (Nash, 1950). It maximizes joint surplus and is a robust default when each party's true reservation is unknown.",
+        easy: "The MIDDLE move wins most garage-sale moments. eBay, Facebook Marketplace, even car dealers — they all counter-offer!",
+        medium: "Counter-offering is the #1 negotiation tool used everywhere — eBay, real estate, car dealerships, YouTube sponsorships. 'Meet in the middle' usually means BOTH sides win.",
+        hard: "Counter-offering with split-the-difference is the canonical Nash bargaining solution. Maximizes joint surplus.",
       },
     },
 
-    // ─── Think-deeper: what is something WORTH? ────────────────────────
+    // ─── Chat: the pricing trick ─────────────────────────────────────
     {
-      kind: 'think-deeper',
-      heading: '🤔 What Makes Something WORTH Something?',
-      intro: {
-        easy: "Quick brain workout. Think before you tap.",
-        medium: "Strip pricing back to first principles.",
-        hard: "First-principles decomposition of value.",
-      },
-      layers: [
+      kind: 'dialogue',
+      heading: '💬 The pricing trick nobody tells you',
+      messages: [
         {
-          question: {
-            easy: "If I paid $50 for a toy, how much is it WORTH now?",
-            medium: "If you paid $50 for a toy a year ago, what's it worth now?",
-            hard: "Sunk cost: original purchase price = $50. Current value?",
-          },
-          reveal: {
-            easy:
-              "Worth = what someone will PAY today. Not what you paid! A $50 toy might sell for $5 now — and that's fine.",
-            medium:
-              "Whatever someone is willing to pay today. Your $50 was YESTERDAY. Today's value lives entirely in the buyer's head. Forget what you paid.",
-            hard:
-              "Sunk-cost fallacy. Historical cost has zero bearing on current fair value. Value = max(WTP) across the current buyer pool minus search and transaction friction.",
+          mood: 'thinking',
+          text: {
+            easy: "Here's the trick: an item is worth what someone will PAY today. Not what you PAID for it!",
+            medium: "Pricing rule #1: stuff is worth what someone will pay TODAY. Forget what you paid. That money is gone.",
+            hard: "Sunk cost is irrelevant. Current value = max willingness-to-pay across the local buyer pool.",
           },
         },
         {
-          question: {
-            easy: "Why would ANYONE pay for my used stuff?",
-            medium: "Why does anyone buy USED instead of new?",
-            hard: "What's the buyer's reason to enter the secondary market?",
-          },
-          reveal: {
-            easy:
-              "Because (a) it's cheaper, (b) sometimes you can find COOL old stuff, and (c) it's like treasure hunting — fun!",
-            medium:
-              "Three reasons: it's cheaper (save 80%), they find unique stuff (vintage, discontinued, weird), and the hunt itself is FUN (treasure-hunt vibe). Garage sales sell the THRILL, not just the items.",
-            hard:
-              "Three buyer motivations: (1) price arbitrage, (2) scarcity/uniqueness, (3) hedonic 'thrill of the hunt.' Used markets are partly utilitarian, partly experiential.",
+          mood: 'happy',
+          text: {
+            easy: "Try this formula: **price = about 1/4 of what it cost new.** A $20 toy? Try $5. Simple!",
+            medium: "Quick formula: start at **20-30% of what it cost new**. Adjust as the day goes. Watch what moves.",
+            hard: "Heuristic: open at 20-30% of replacement cost. Use mid-sale velocity to dynamically adjust.",
           },
         },
         {
-          question: {
-            easy: "So how do I pick a PRICE for my old toy?",
-            medium: "How should you actually price an item?",
-            hard: "What's the pricing heuristic for low-velocity secondary goods?",
+          mood: 'cool',
+          text: {
+            easy: "Round to NICE numbers — **$0.50, $1, $2, $5**. People love simple prices!",
+            medium: "Round to nice numbers ($0.50, $1, $2, $5). And bundle small stuff — '**3 books for $2!**' moves inventory FAST.",
+            hard: "Round-number price points reduce cognitive friction. Bundle pricing increases throughput on small-ticket items.",
           },
-          reveal: {
-            easy:
-              "Easy formula: price = (what it costs new) × (how new it looks) × (how popular it is). And honestly: it has to MOVE today, or it stays in your room!",
-            medium:
-              "Three factors: (1) replacement cost new, (2) condition (used 20-50%), (3) demand. And the constraint: it has to actually SELL — better $5 in pocket than $20 you never get.",
-            hard:
-              "Pricing model: P ≈ replacement_cost × condition_factor × demand_multiplier × (1 - urgency_discount). For 1-day-window clearance, set ~20-50% of replacement cost.",
+        },
+        {
+          mood: 'excited',
+          text: {
+            easy: "If something isn't selling by lunchtime — drop the price! Better to get **some money** than carry it back inside.",
+            medium: "Mid-sale, mark down anything that hasn't moved by 50%. End-of-day: '**fill a bag for $5**'. Clear it out!",
+            hard: "Dynamic markdown schedule. Mid-day 50% on stale inventory. End-of-sale clearance bundle to liquidate residual.",
           },
         },
       ],
     },
 
-    // ─── Concept cards: 4 pillars of a garage sale ─────────────────────
+    // ─── Concept cards: 4 pillars ─────────────────────────────────────
     {
       kind: 'concept-cards',
-      heading: 'The 4 Pillars of a Great Sale',
+      heading: 'The 4 Pillars',
       cards: [
         {
           emoji: '🔍',
-          title: '1. Find the Gold',
+          title: 'Find the Gold',
           desc: {
-            easy: 'Walk around your room! What haven\'t you used in 6 months? Toys, books, clothes that don\'t fit. ANY of those = potential gold.',
-            medium:
-              'Inventory hunt: anything you haven\'t used in 6+ months is a candidate. Grouped by category (toys / books / clothes / kitchen) sells faster than a random pile.',
-            hard:
-              "Inventory selection: target items with high WTP density and low storage value. Sort and bundle by category — bundle pricing increases throughput.",
+            easy: 'Walk around your room. Anything you haven\'t used in 6 months = potential gold. Group similar stuff together!',
+            medium: 'Inventory hunt: anything unused for 6+ months is a candidate. Grouped categories sell faster than a random pile.',
+            hard: "Inventory selection: target high-WTP-density items. Sort and bundle by category to lift throughput.",
           },
           color: '#FFFDE8',
         },
         {
           emoji: '💰',
-          title: '2. Price It Right',
+          title: 'Price It Right',
           desc: {
-            easy: 'Not too HIGH (no one buys) and not too LOW (you lose money). Try ~20% of what it cost new. Adjust as the day goes.',
-            medium:
-              'Start at ~20-30% of replacement cost. Watch what moves and what doesn\'t. After lunch, mark down everything left by 50%. Better cleared than carried.',
-            hard:
-              "Dynamic pricing: open at 20-30% of replacement cost (tests upper bound). Mid-sale markdown to clear stale inventory (50% off after 2 hours). End-of-sale: 'fill a bag for $5' to dump residual.",
+            easy: 'About 1/4 of what it cost new. Round to nice numbers. Drop prices after lunch.',
+            medium: 'Open at 20-30% of replacement cost. Mark down stale inventory mid-day. Better cleared than carried.',
+            hard: "Dynamic pricing: open high, mid-day markdown, end-of-day bundle clearance.",
           },
-          color: '#FFE5EC',
         },
         {
           emoji: '📣',
-          title: '3. Show It Off',
+          title: 'Show It Off',
           desc: {
-            easy: 'BIG SIGNS at the corner so people know! Put your best stuff up front. Group the toys together. Make it look like a real STORE.',
-            medium:
-              'Visibility wins: BIG signs at the corner of your street. Display tables, not bins. Best stuff at customer eye level. Group like-with-like. A messy pile screams "junk."',
-            hard:
-              "Merchandising: signage at all approach routes, eye-level placement of highest-margin items, categorical bundling, and aspirational vs. clearance staging. Marginal effort yields disproportionate conversion.",
+            easy: 'BIG signs at the corner! Best stuff up front, eye level. Make it look like a real store!',
+            medium: 'Signage at every approach route. Display tables, not bins. Best stuff at eye level. A messy pile screams "junk."',
+            hard: "Merchandising: aspirational vs. clearance staging, eye-level placement of premium SKUs.",
           },
-          color: '#E0F2FE',
         },
         {
           emoji: '🤝',
-          title: '4. Smile and Deal',
+          title: 'Smile and Deal',
           desc: {
-            easy: 'Be NICE! Smile at everyone. If someone offers less, don\'t get mad — make a deal. Friendly = more sales!',
-            medium:
-              "Customer service is a multiplier. Greet, make eye contact, be willing to negotiate, throw in a freebie. Friendly sellers move 30%+ more inventory.",
-            hard:
-              "Service quality is the cheapest demand-side intervention. Eye contact, name use, bundle suggestions, and willingness to counter-offer all materially raise average ticket size and conversion.",
+            easy: 'Be SUPER nice. Smile at everyone. If someone offers less, make a deal — don\'t get mad!',
+            medium: "Customer service is a multiplier. Greet, eye contact, willingness to counter. Friendly sellers move 30%+ more inventory.",
+            hard: "Service quality is the cheapest demand-side intervention. Materially raises ticket size and conversion.",
           },
-          color: '#D7F0E4',
         },
       ],
     },
 
-    // ─── Calc-challenge ────────────────────────────────────────────────
+    // ─── Calc-challenge ───────────────────────────────────────────────
     {
       kind: 'calc-challenge',
-      heading: 'Did Your Sale Actually Make Money?',
+      heading: 'Did Your Sale Make Money?',
       setup: {
-        easy: "You sold 12 things at your garage sale for a total of $54. You spent $3 making signs and $1 on lemons for free lemonade. What's your PROFIT?",
-        medium:
-          "Real numbers: 12 items sold, total revenue = $54. Costs: $3 on signs, $1 on lemons (you gave free lemonade to keep people around). What's profit?",
-        hard:
-          "12 units sold, $54 gross. Variable cost = $4 (signage $3 + complimentary refreshment $1). Compute profit.",
+        easy: "You sold 12 things for a total of $54. You spent $4 on signs and lemonade. What's your PROFIT?",
+        medium: "Real numbers: 12 items sold, $54 revenue. Costs: $4 ($3 signs + $1 lemons for free lemonade to keep buyers around). Profit?",
+        hard: "12 units, $54 gross, $4 variable cost (signage + complimentary refreshment). Compute profit.",
       },
       problem: {
         givens: [
@@ -247,154 +242,196 @@ const lesson: LessonDef = {
         tolerance: 0.01,
       },
       walkthrough: {
-        easy:
-          "Profit = Revenue ($54) − Cost ($4) = $50. From stuff you weren't even using! And the lemonade made people stay longer = more sales!",
-        medium:
-          "$54 − $4 = $50 profit. Almost 93% margin on items you weren't using. The $1 in lemonade is worth more than $1 in extra revenue — it's a customer-retention investment.",
-        hard:
-          "π = $50, GM% = 92.6%. The $1 lemonade cost is best understood as marketing OpEx — it extends average dwell time and raises basket size. ROI of customer retention spend at a garage sale is usually 5-10x.",
+        easy: "$54 − $4 = $50! Wild — that money came from stuff you weren't even using.",
+        medium: "$54 − $4 = $50 profit. ~93% margin on items that cost you $0 to acquire. The lemonade is the cheapest customer-retention spend you'll ever make.",
+        hard: "π = $50, GM% = 92.6%. Lemonade is best understood as marketing OpEx — extends dwell time, lifts basket size. Customer-retention ROI 5-10x.",
       },
     },
 
-    // ─── Brainstorm: low-cost ways to attract more buyers ──────────────
+    // ─── Chat: marketing tricks ─────────────────────────────────────
+    {
+      kind: 'dialogue',
+      heading: '💬 Make people SHOW UP',
+      messages: [
+        {
+          mood: 'excited',
+          text: {
+            easy: "Even the BEST sale fails if nobody knows about it. So how do you make people show up?",
+            medium: "Even great inventory fails without traffic. So how do we get people to show up?",
+            hard: "Distribution > product. Even excellent inventory fails without traffic. Let's solve traffic.",
+          },
+        },
+        {
+          mood: 'happy',
+          text: {
+            easy: "**Signs!** Put BIG ones at the corner of every street near you. Use arrows pointing to your house!",
+            medium: "Signs at every nearby intersection (with parent help). Big arrows. The words **GARAGE SALE**. Your house number.",
+            hard: "Geo-distributed signage at all approach vectors. Arrows + house number reduce navigation friction.",
+          },
+        },
+        {
+          mood: 'thinking',
+          text: {
+            easy: "**Balloons!** Tie a few to your mailbox. People driving by SEE them and stop. Cheap trick, big result!",
+            medium: "Balloons on your mailbox. Costs $2. People DRIVING by spot them and stop. Best ROI in garage sale marketing.",
+            hard: "Visual ambient signal. Disproportionate stop-rate lift for trivial cost. Classic local-marketing intervention.",
+          },
+        },
+        {
+          mood: 'cool',
+          text: {
+            easy: "**The combo move:** sell **lemonade** too! People stay longer, buy more, AND you make extra money. Pure genius!",
+            medium: "Pro move: pair with a lemonade stand. People linger longer, browse more, buy more. AND you sell drinks. Double business.",
+            hard: "Adjacent revenue stream + dwell-time extension. Lemonade lifts both basket size and conversion via reciprocity.",
+          },
+        },
+      ],
+    },
+
+    // ─── Brainstorm ──────────────────────────────────────────────────
     {
       kind: 'brainstorm',
-      heading: '✨ Get More Buyers (For Free)',
+      heading: '✨ Your Ideas to Get More Buyers',
       prompt: {
-        easy: "Write 3 things you can do to bring MORE people to your sale — without spending any money!",
-        medium:
-          'List 3+ ways to attract more buyers to your garage sale using $0. Be creative — what catches attention?',
-        hard:
-          "Enumerate 3-5 zero-cost levers for traffic + conversion at a garage sale.",
+        easy: "Write 3 things YOU could do to bring MORE people to your sale — without spending money!",
+        medium: 'List 3+ ways to attract more buyers using $0. Be creative.',
+        hard: "Enumerate 3-5 zero-cost levers for traffic + conversion.",
       },
       minItems: 3,
       placeholder: 'e.g. a huge bright sign at the corner...',
       hints: [
         {
           easy: 'BIG signs at the corner of your street pointing to your house.',
-          medium: 'Multiple signs at every intersection within 4 blocks. Big arrows + the words "GARAGE SALE" + your house number.',
-          hard: 'Geo-distributed signage along approach routes — every approach pathway needs an entry signal.',
+          medium: 'Multiple signs at every nearby intersection. Big arrows. Your address.',
+          hard: 'Geo-distributed signage along approach routes.',
         },
         {
           easy: "Post on the neighborhood group online (with a parent's help)!",
-          medium: "Post on Nextdoor / neighborhood Facebook group / local kid groups (with a parent).",
-          hard: "Free digital channels: Nextdoor, Facebook Marketplace 'free events,' local school newsletters, neighborhood WhatsApp threads.",
+          medium: "Post on Nextdoor / neighborhood Facebook group (with parent).",
+          hard: "Free digital channels: Nextdoor, FB Marketplace events, neighborhood threads.",
         },
         {
           easy: 'Set up early! People LOVE to be first and get the best stuff.',
-          medium: 'Open EARLY (7-8am). Serious garage-sale hunters drive routes at dawn. Early = best ticket sizes.',
-          hard: 'Front-load opening hour. The early-bird buyer segment has the highest WTP and lowest negotiation friction.',
+          medium: 'Open by 7-8am. Serious garage-sale shoppers route at dawn.',
+          hard: 'Early-bird buyer segment has highest WTP and lowest negotiation friction.',
         },
         {
-          easy: "Pick a SATURDAY when other people in your neighborhood are also having sales — buyers go to many on one day!",
-          medium: "Coordinate with neighbors or join a community garage sale day. Buyers literally drive routes — being on the route = free traffic.",
-          hard: "Cluster with neighborhood-wide sales days. Buyer traffic at multi-stop events compounds via route optimization.",
+          easy: "Pick a Saturday when other neighbors also have sales — buyers visit many in a day!",
+          medium: "Coordinate with neighbors or join a community garage sale day. Buyers drive routes.",
+          hard: "Cluster with neighborhood-wide sales days. Multi-stop traffic compounds.",
         },
         {
-          easy: 'Wear a fun outfit or play music — it makes people stop and look!',
-          medium: 'Add personality: costume, music, fun vibe. Makes people slow down. Slow-down = browse = buy.',
-          hard: 'Ambient differentiation: music + presence at the curb materially increases passing-vehicle stop probability.',
+          easy: 'Wear a fun costume or play music — people stop and look!',
+          medium: 'Music + costume = personality. Slows people down. Slow-down = browse = buy.',
+          hard: 'Ambient differentiation: music + curb presence raises stop probability.',
         },
         {
-          easy: "Give a FREE little surprise with every sale — a sticker or candy!",
-          medium: 'Lagniappe (a tiny free extra) with each purchase. People LOVE it and tell their friends — word of mouth in real time.',
-          hard: 'Surprise-and-delight unit: $0.10 cost creates social-proof effect amplifying remaining-day conversion among observers.',
+          easy: "Give a FREE little surprise with every sale — sticker or candy!",
+          medium: 'A tiny free extra with each purchase. Costs pennies, generates real-time WOM.',
+          hard: 'Lagniappe = surprise/delight unit. $0.10 cost amplifies remaining-day conversion.',
         },
       ],
       closer: {
-        easy: "You don't need to do ALL of these — pick 2 and do them really well!",
-        medium: "Pick your two best ideas and execute. Mediocre across many beats focused on two.",
-        hard: "Concentration > diffusion. Pick the two highest-leverage interventions and execute crisply.",
+        easy: "Pick 2 and do them really well!",
+        medium: "Pick your two strongest ideas and execute them crisply.",
+        hard: "Concentration > diffusion. Two well-executed levers beats five mediocre ones.",
       },
     },
 
-    // ─── Connect: same idea in bigger businesses ────────────────────────
+    // ─── Chat: the customer game ────────────────────────────────────
+    {
+      kind: 'dialogue',
+      heading: '💬 The customer game',
+      messages: [
+        {
+          mood: 'happy',
+          text: {
+            easy: "When someone walks up — **smile and say hi!** Friendly = more sales. ALWAYS.",
+            medium: "Customer arrives → smile, make eye contact, greet them. Sounds tiny. Multiplies sales by 30%+.",
+            hard: "Service quality is the highest-ROI demand-side intervention. Materially lifts both ticket size and conversion.",
+          },
+        },
+        {
+          mood: 'thinking',
+          text: {
+            easy: "Someone offers LESS than the price? **Don't get mad!** Try **'How about $4?'** That's called negotiating.",
+            medium: "When someone counters, **counter back.** '$4?' / 'How about $3 with that book?' / 'I'll do it if you grab two.' This is how EVERY business works.",
+            hard: "Counter-offering is the bargaining standard. Buyers who lead with a number expect negotiation; flat refusal often kills the deal.",
+          },
+        },
+        {
+          mood: 'cool',
+          text: {
+            easy: "Thank EVERY person, even ones who don't buy. They might come back later — or tell a friend!",
+            medium: "Thank every visitor regardless of purchase. Reputation compounds. Some come back. Most importantly: they tell friends.",
+            hard: "Conversion is multi-touch. Today's window-shopper is tomorrow's buyer or referral. Service quality compounds via WOM.",
+          },
+        },
+      ],
+    },
+
+    // ─── Connect ──────────────────────────────────────────────────────
     {
       kind: 'connect',
-      heading: 'Same Idea, Bigger Stage',
+      heading: '🌐 Same Idea, Bigger Stage',
       concept: {
-        easy: "Selling used stuff isn't just a garage sale! These are HUGE businesses doing the same thing:",
-        medium:
-          "Garage sales are the OG marketplace. The exact same dynamics scale all the way up:",
-        hard:
-          "Secondary-market dynamics are scale-invariant. Same pricing logic from your driveway to multi-billion-dollar platforms.",
+        easy: "Selling used stuff isn't just a garage sale — it's HUGE businesses!",
+        medium: "Garage sales are the OG marketplace. The same dynamics scale all the way up.",
+        hard: "Secondary-market dynamics are scale-invariant. Same pricing logic from your driveway to multi-billion-dollar platforms.",
       },
       examples: [
         {
           emoji: '📱',
           who: 'Facebook Marketplace',
           story: {
-            easy: 'Like a garage sale but on your phone, with the whole town! People list their old stuff and others come buy.',
-            medium:
-              'Facebook Marketplace = digital garage sale at neighborhood scale. ~1 billion users buying and selling used stuff. Same pricing instincts you just learned.',
-            hard:
-              "Marketplace network effect at neighborhood density. 1B+ MAU, gross transaction value comparable to mid-sized retailers.",
+            easy: 'Like a garage sale but on your phone — the whole town! ~1 billion users buy and sell used stuff.',
+            medium: 'Facebook Marketplace = digital garage sale at neighborhood scale. ~1B MAU. Same pricing instincts you just learned.',
+            hard: "Marketplace network effect at neighborhood density. GMV comparable to mid-sized retailers.",
           },
         },
         {
           emoji: '👜',
           who: 'eBay',
           story: {
-            easy: 'A global garage sale where people use AUCTIONS — the highest bidder wins! Started in 1995 with one used laser pointer.',
-            medium:
-              "eBay started in 1995 when Pierre Omidyar listed a broken laser pointer just to test if anyone would buy used stuff online. Now: $10B/year company built on secondary-market logic.",
-            hard:
-              "eBay's founding insight: the secondary market has scale at all price points if discovery + trust are solved. GMV ~$73B annually; market cap ~$20B.",
+            easy: 'A global garage sale where people BID — the highest bidder wins! Started in 1995 with a broken laser pointer.',
+            medium: "eBay (1995) began when Pierre Omidyar listed a broken laser pointer to test if anyone would buy used stuff online. Now: $10B/year.",
+            hard: "eBay's insight: the secondary market has scale at all price points if discovery + trust are solved.",
           },
         },
         {
           emoji: '🏛️',
-          who: "Sotheby's auction house",
+          who: "Sotheby's",
           story: {
-            easy: "It's a garage sale for VERY old, VERY fancy stuff. A painting sold there for $450 MILLION in 2017!",
-            medium:
-              "Sotheby's is a garage sale for art and antiques. Founded in 1744 (yes — 281 years ago). Same logic: used stuff + bidders + a price the buyer is willing to pay.",
-            hard:
-              "Sotheby's is a high-end secondary market with strict provenance verification + scarcity-pricing dynamics. The market mechanism is identical — quality of price discovery scales with capital at stake.",
-          },
-        },
-        {
-          emoji: '👕',
-          who: 'Thrift stores',
-          story: {
-            easy: "Stores that ONLY sell used stuff. People donate, the store sells it cheap, the money goes to help people!",
-            medium:
-              "Goodwill, Salvation Army, etc. run on donated goods. Together they generate $5B+ a year — and most of it funds job-training programs.",
-            hard:
-              "Thrift = vertically integrated secondary retail with donated inventory. ~$5B/yr in revenue across major US chains. Same pricing instincts you used at the curb.",
+            easy: "A garage sale for VERY old, VERY fancy stuff. A painting sold for $450 MILLION there in 2017!",
+            medium: "Sotheby's is the garage sale for art and antiques. Founded in 1744 (281 years ago). Same mechanics: used stuff + bidders.",
+            hard: "Sotheby's: high-end secondary market with strict provenance + scarcity pricing. Same mechanism, more capital at stake.",
           },
         },
       ],
       kicker: {
-        easy: "See? Your garage sale is just the SMALL version of huge businesses!",
-        medium:
-          "Same mechanics, different magnitudes. Once you grasp it on your driveway, it generalizes.",
-        hard:
-          "Scale-invariant market dynamics. Master the small game; the large game is the same with more zeros.",
+        easy: "Same idea, just way bigger. Your driveway = a real marketplace!",
+        medium: "Same mechanics, different magnitudes. Master the small game; the big game is just bigger.",
+        hard: "Scale-invariant market dynamics. Driveway clearance and a Christie's auction are operationally homologous.",
       },
     },
 
-    // ─── Outro ──────────────────────────────────────────────────────────
+    // ─── Outro ────────────────────────────────────────────────────────
     {
       kind: 'outro',
       mood: 'celebrating',
       text: {
-        easy: "You're a pricing pro now! You know how to find treasure, set prices, and make deals.",
-        medium:
-          "You’ve covered the four pillars (find / price / show / deal), the math, and the bigger picture. Time to run a real one.",
-        hard:
-          "You now have the mental model for secondary-market pricing, from your driveway to eBay. Apply it.",
+        easy: "You're a pricing pro now! Find treasure, set prices, make deals.",
+        medium: "You've covered the four pillars (find / price / show / deal), the math, and the bigger picture. Time to run a real one.",
+        hard: "You now have the mental model for secondary-market pricing, from your driveway to eBay. Apply it.",
       },
       bonusTip: {
-        easy: 'In 1995, a kid named Pierre Omidyar sold a BROKEN laser pointer online to see what would happen. That sale grew into eBay — now worth $20 BILLION!',
-        medium:
-          "Pierre Omidyar's first eBay listing was a broken laser pointer. He thought it was a joke. It sold for $14. He emailed the buyer to confirm: 'You know it’s broken, right?' Reply: 'I collect broken laser pointers.' That insight — niche buyers exist for ANYTHING — became eBay.",
-        hard:
-          "eBay's founding parable underlines two truths: (1) the secondary market has buyers at every price point if discovery is solved, and (2) personal taste forecasts are systematically wrong — let the market price discover the truth.",
+        easy: 'In 1995, a guy named Pierre Omidyar sold a BROKEN laser pointer online. Someone bought it. He emailed: "You know it\'s broken, right?" The buyer replied: "I collect broken laser pointers." → eBay was born!',
+        medium: "Pierre Omidyar's first eBay listing was a broken laser pointer. Sold for $14. He emailed to confirm: the buyer collected broken ones. Insight: niche buyers exist for ANYTHING. That became a $20B company.",
+        hard: "eBay's founding parable encodes two truths: (1) the secondary market has buyers at every price point if discovery is solved, (2) personal taste forecasts are systematically wrong — let the market discover the truth.",
       },
     },
 
-    // ─── Real-World Mission ────────────────────────────────────────────
+    // ─── Mission ──────────────────────────────────────────────────────
     {
       kind: 'real-world-mission',
       mission: {
@@ -406,52 +443,49 @@ const lesson: LessonDef = {
           hard: 'Operate a one-day secondary-market clearance',
         },
         pitch: {
-          easy:
-            "Pick 10 things you don't use anymore, set up a table outside, and turn them into REAL money!",
-          medium:
-            'Find 10+ items you don’t use, price them with the framework you learned, set up a sale, and track every transaction.',
-          hard:
-            "Run a one-day clearance: 10+ SKUs, dynamic pricing, captured P&L. Document buyer behavior.",
+          easy: "Pick 10 things you don't use, set up a table outside, turn them into REAL money!",
+          medium: 'Find 10+ items you don\'t use, price with the framework, set up the sale, track every transaction.',
+          hard: "Run a one-day clearance: 10+ SKUs, dynamic pricing, captured P&L.",
         },
         steps: [
           {
             emoji: '🔍',
             text: {
-              easy: "Find 10 things you don't use anymore (with a grown-up).",
-              medium: 'Inventory hunt: 10+ items you haven\'t used in 6 months. Sort by category.',
-              hard: 'Inventory selection: target 10+ items spanning 3+ categories. Document replacement cost where known.',
+              easy: "Find 10 things you don't use anymore.",
+              medium: 'Inventory hunt: 10+ items unused for 6 months. Sort by category.',
+              hard: 'Inventory selection: 10+ items across 3+ categories. Document replacement cost.',
             },
           },
           {
             emoji: '🏷️',
             text: {
-              easy: "Put a price sticker on each one — try about 1/4 of what it cost new!",
-              medium: 'Price each item at ~20-30% of replacement cost. Higher-emotion items can go a bit higher.',
-              hard: 'Initial pricing: 20-30% RC. Add a "best offer" tag on any high-uncertainty item.',
+              easy: "Put a price sticker on each — try about 1/4 of what it cost new!",
+              medium: 'Price at ~20-30% of replacement cost. Higher-emotion items can go a bit higher.',
+              hard: 'Initial pricing: 20-30% RC. Add a "best offer" tag on high-uncertainty items.',
             },
           },
           {
             emoji: '🪧',
             text: {
               easy: "Make a BIG colorful sign and put it at the corner of your street!",
-              medium: 'Signage: at least 2 big signs at nearby intersections + 1 at your house. Include your address.',
-              hard: 'Geo-distributed signage with directional arrows. Post on Nextdoor + neighborhood groups (with parent).',
+              medium: '2+ big signs at nearby intersections + 1 at your house. Include your address.',
+              hard: 'Geo-distributed signage with directional arrows. Post on Nextdoor.',
             },
           },
           {
             emoji: '🎉',
             text: {
-              easy: 'Open early Saturday morning! Smile at everyone who walks up.',
-              medium: 'Open by 8 AM. Greet every shopper. Be willing to negotiate.',
-              hard: 'Open at first light. Customer service: greet, eye contact, willingness to counter.',
+              easy: 'Open early Saturday morning! Smile at everyone.',
+              medium: 'Open by 8 AM. Greet every shopper. Willing to negotiate.',
+              hard: 'Open at first light. Greet, eye contact, willingness to counter.',
             },
           },
           {
             emoji: '📉',
             text: {
-              easy: "After lunch, mark down everything you haven't sold!",
-              medium: 'Mid-afternoon: discount 30-50% on remaining stock. End-of-day: "fill a bag for $5."',
-              hard: 'Mid-day markdown to 50%; end-of-sale residual: bundle-clearance pricing to dump remaining inventory.',
+              easy: "After lunch, mark down anything you haven't sold!",
+              medium: 'Mid-afternoon: 30-50% off remaining stock. End-of-day: "fill a bag for $5."',
+              hard: 'Mid-day markdown to 50%; end-of-sale bundle clearance.',
             },
           },
         ],
@@ -491,42 +525,20 @@ const lesson: LessonDef = {
           },
         ],
         parentNote: {
-          easy: 'Help with signs, supervise the cash box, and keep an eye on which neighbors stop by.',
-          medium:
-            'Supervise the curb and cash. Check city/HOA rules for garage sales — most are fine, some require a free permit.',
-          hard:
-            'Verify local ordinances + HOA rules. Some municipalities cap sales/year. Make sure your kid has change ready ($1s + $5s).',
+          easy: 'Help with signs, supervise the cash box.',
+          medium: 'Supervise the curb and cash. Check city/HOA rules — most are fine, some require a free permit.',
+          hard: 'Verify local ordinances + HOA rules. Some municipalities cap sales/year. Make sure kid has change ready.',
         },
         printables: {
           worksheets: [
             {
               title: 'Plan Your Sale',
               blocks: [
-                {
-                  label: '1. What 10 things will I sell?',
-                  hint: 'List each item + a 1-word condition note (good/ok/worn).',
-                  lines: 10,
-                },
-                {
-                  label: '2. What did each cost NEW?',
-                  hint: 'Rough estimate is fine.',
-                  lines: 5,
-                },
-                {
-                  label: '3. My starting prices (20-30% of new)',
-                  lines: 10,
-                  suffix: '$',
-                },
-                {
-                  label: '4. My mid-day markdown plan',
-                  hint: 'After 2 hours, drop everything by ___%',
-                  lines: 1,
-                },
-                {
-                  label: '5. End-of-day "everything left" deal',
-                  hint: 'e.g. "fill a bag for $5"',
-                  lines: 2,
-                },
+                { label: '1. What 10 things will I sell?', hint: 'List each item + a 1-word condition note.', lines: 10 },
+                { label: '2. What did each cost NEW?', hint: 'Rough estimate is fine.', lines: 5 },
+                { label: '3. My starting prices (20-30% of new)', lines: 10, suffix: '$' },
+                { label: '4. My mid-day markdown plan', hint: 'After 2 hours, drop everything by ___%', lines: 1 },
+                { label: '5. End-of-day "everything left" deal', hint: 'e.g. "fill a bag for $5"', lines: 2 },
               ],
             },
             {
@@ -536,14 +548,14 @@ const lesson: LessonDef = {
                 { label: '2. What I spent (signs, lemonade, etc.)', lines: 1, suffix: '$' },
                 { label: '3. Profit', equation: '$ _______  −  $ _______  =  $ _______' },
                 { label: '4. Best price-getting tactic I used', lines: 3 },
-                { label: '5. One thing I\'d do differently next time', lines: 4 },
+                { label: "5. One thing I'd do differently next time", lines: 4 },
               ],
             },
           ],
           trackers: [
             {
               title: 'Sales Log',
-              note: 'One row per sale. Track tactics, prices, and who bought.',
+              note: 'One row per sale.',
               columns: ['Time', 'Item', 'Listed price', 'Sold for', 'Customer'],
               rows: 18,
             },
@@ -573,7 +585,7 @@ const lesson: LessonDef = {
                 'Sunscreen + hat',
                 'Phone for posting on neighborhood groups',
               ],
-              note: 'Make a "FREE" bin near the curb with a few odds and ends — it draws people in.',
+              note: 'Make a "FREE" bin near the curb — it draws people in.',
             },
           ],
         },

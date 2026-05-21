@@ -125,7 +125,27 @@ export type LessonBeat =
       concept: AdaptiveText;
       examples: ConnectExample[];
       kicker?: AdaptiveText;
+    }
+  | {
+      /**
+       * Chat-style sequence of Momo speech bubbles. Each message arrives
+       * with a "typing" indicator and reveals on tap (or auto-reveal).
+       * Use this for explaining a concept conversationally — feels like
+       * texting with the mascot, not navigating slides.
+       */
+      kind: 'dialogue';
+      heading?: string;
+      /** Each message renders as its own speech bubble. */
+      messages: DialogueMessage[];
+      /** If true, messages auto-reveal with a delay between each (default false — tap to advance). */
+      autoAdvance?: boolean;
     };
+
+export interface DialogueMessage {
+  text: AdaptiveText;
+  /** Optional mood for THIS message (changes Momo's badge). */
+  mood?: MomoMood;
+}
 
 export interface DecisionChoice {
   label: AdaptiveText;
