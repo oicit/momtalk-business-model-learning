@@ -179,6 +179,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
           lesson={lesson}
           difficultyLevel={difficultyLevel}
           childName={child ? themeContext.childName : undefined}
+          onAdvance={goNext}
           onQuizSubmit={(score, percent, quizBeat) => {
             const skillScores: Record<string, number> = quizBeat.skillScores
               ? Object.fromEntries(
@@ -402,6 +403,8 @@ interface BeatRendererProps {
   lesson: LessonDef;
   difficultyLevel: ReturnType<typeof useAdaptive>['difficultyLevel'];
   childName?: string;
+  /** Called when the kid taps the central "Start" / "Begin" affordance on the intro beat. */
+  onAdvance?: () => void;
   onQuizSubmit: (
     score: number,
     percent: number,
@@ -417,6 +420,7 @@ function BeatRenderer({
   lesson,
   difficultyLevel,
   childName,
+  onAdvance,
   onQuizSubmit,
   onGameFinish,
 }: BeatRendererProps) {
@@ -533,7 +537,11 @@ function BeatRenderer({
               >
                 WHAT YOU'LL DO
               </div>
-              <CircleRoadmap roadmap={roadmap} lessonEmoji={lesson.emoji} />
+              <CircleRoadmap
+                roadmap={roadmap}
+                lessonEmoji={lesson.emoji}
+                onStart={onAdvance}
+              />
             </div>
           )}
         </section>
@@ -1999,9 +2007,11 @@ interface RoadmapItem {
 function CircleRoadmap({
   roadmap,
   lessonEmoji,
+  onStart,
 }: {
   roadmap: RoadmapItem[];
   lessonEmoji: string;
+  onStart?: () => void;
 }) {
   const N = roadmap.length;
 
@@ -2027,29 +2037,52 @@ function CircleRoadmap({
         margin: '0 auto',
       }}
     >
-      {/* Center "lesson" badge — the anchor point */}
-      <div
-        aria-hidden
+      {/* Center START button — the primary CTA. Tapping it advances to step 2. */}
+      <button
+        type="button"
+        onClick={onStart}
+        disabled={!onStart}
+        aria-label="Start the lesson"
         style={{
           position: 'absolute',
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
           width: '34%',
-          minWidth: 88,
+          minWidth: 100,
           aspectRatio: '1 / 1',
-          background: T.white,
-          border: `4px dashed ${T.green}`,
+          background: T.green,
+          border: `4px solid ${T.white}`,
+          outline: `4px dashed ${T.green}`,
+          outlineOffset: -2,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'column',
           textAlign: 'center',
-          padding: 12,
+          padding: 10,
           boxSizing: 'border-box',
-          animation: 'pop-in 600ms cubic-bezier(.34,1.56,.64,1) 200ms both',
-          boxShadow: '0 4px 0 rgba(45,155,110,.12)',
+          cursor: onStart ? 'pointer' : 'default',
+          fontFamily: 'inherit',
+          color: T.white,
+          animation:
+            'pop-in 600ms cubic-bezier(.34,1.56,.64,1) 200ms both, momo-love 2.6s ease-in-out 1200ms infinite',
+          boxShadow: '0 6px 0 #1a6b48, 0 12px 24px rgba(45,155,110,.25)',
+          transformOrigin: 'center',
+          transition: 'transform 200ms cubic-bezier(.34,1.56,.64,1), box-shadow 200ms ease',
+        }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.transform = 'translate(-50%, -50%) scale(0.92)';
+          e.currentTarget.style.boxShadow = '0 2px 0 #1a6b48, 0 4px 12px rgba(45,155,110,.25)';
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
+          e.currentTarget.style.boxShadow = '0 6px 0 #1a6b48, 0 12px 24px rgba(45,155,110,.25)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translate(-50%, -50%) scale(1)';
+          e.currentTarget.style.boxShadow = '0 6px 0 #1a6b48, 0 12px 24px rgba(45,155,110,.25)';
         }}
       >
         <div style={{ fontSize: 'clamp(28px, 6vw, 42px)', lineHeight: 1 }}>
@@ -2058,15 +2091,15 @@ function CircleRoadmap({
         <div
           style={{
             marginTop: 4,
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 800,
-            color: T.green,
-            letterSpacing: '.12em',
+            color: T.white,
+            letterSpacing: '.14em',
           }}
         >
-          START
+          START →
         </div>
-      </div>
+      </button>
 
       {/* Items around the circle, clockwise from top */}
       {roadmap.map((item, i) => {
