@@ -5254,22 +5254,17 @@ function startNextWord() {
     // standing-pin decoy at this slot is removed (the active goblin takes
     // its place visually).
     if (game.session && game.session.mode === "bowling" && game.session.bowlingState) {
-      const bs = game.session.bowlingState;
-      const slotIdx = bs.pinIdx;
-      const slot = PIN_SLOTS[slotIdx];
-      if (slot) {
-        removeBowlingDecoyAtSlot(slotIdx);
-        goblin.position.set(slot.x, 0.4, slot.z);
-        goblin.userData.sizeMul = PIN_SIZE_MUL;
-        goblin.userData.bowlingSlotIdx = slotIdx;
-        // pinned: true → updateFleer keeps this pin at its wander target
-        // and never picks a new flee target (see updateFleer guard).
-        goblin.userData.wander = {
-          targetX: slot.x, targetZ: slot.z,
-          nextPickAt: Number.POSITIVE_INFINITY,
-          pinned: true,
-        };
-      }
+      // HIDDEN goblin pinned at the center of the pin cluster, so the ball
+      // rolls into the whole lineup and knocks down ALL mini-goblins at once.
+      goblin.position.set(BOWL_CENTER.x, 0.4, BOWL_CENTER.z);
+      goblin.userData.sizeMul = 0.02;
+      goblin.userData.bowlingStrike = true;
+      goblin.userData.wander = {
+        targetX: BOWL_CENTER.x, targetZ: BOWL_CENTER.z,
+        nextPickAt: Number.POSITIVE_INFINITY, pinned: true,
+      };
+      goblin.visible = false;
+      goblin.traverse(o => { o.visible = false; });
     }
 
     // EXPANSION PASS F: GARDEN mode — HIDDEN goblin at next garden spot,
@@ -5299,6 +5294,32 @@ function startNextWord() {
         targetX: SNOWMAN_BASE.x, targetZ: SNOWMAN_BASE.z + 0.6,
         nextPickAt: Number.POSITIVE_INFINITY,
         pinned: true,
+      };
+      goblin.visible = false;
+      goblin.traverse(o => { o.visible = false; });
+    }
+
+    // SAVE BUN-BUN — NO goblin. Hidden goblin pinned at the caged bunny so the
+    // ball flies at the cage; each hit dissolves a bar (see advanceMission).
+    if (game.session && game.session.mode === "mission_cage") {
+      goblin.position.set(bunny.position.x, 0.4, bunny.position.z);
+      goblin.userData.sizeMul = 0.02;
+      goblin.userData.wander = {
+        targetX: bunny.position.x, targetZ: bunny.position.z,
+        nextPickAt: Number.POSITIVE_INFINITY, pinned: true,
+      };
+      goblin.visible = false;
+      goblin.traverse(o => { o.visible = false; });
+    }
+
+    // STOLEN CARROTS — NO goblin. Hidden goblin pinned at the barn so the ball
+    // flies at the barn; each hit cracks it and a carrot bursts out.
+    if (game.session && game.session.mode === "mission_carrots") {
+      goblin.position.set(CARROT_BARN.x, 0.4, CARROT_BARN.z);
+      goblin.userData.sizeMul = 0.02;
+      goblin.userData.wander = {
+        targetX: CARROT_BARN.x, targetZ: CARROT_BARN.z,
+        nextPickAt: Number.POSITIVE_INFINITY, pinned: true,
       };
       goblin.visible = false;
       goblin.traverse(o => { o.visible = false; });
@@ -5494,14 +5515,10 @@ function startAttack() {
 
 function defeatGoblin() {
   // EXPANSION: capture mode-specific info BEFORE we null out the goblin reference
-  let bowlingSlotIdx = null;
   let gardenSpotIdx = null;
   let snowmanPieceIdx = null;
   let castlePieceIdx = null;
   if (goblin && game.session) {
-    if (game.session.mode === "bowling" && goblin.userData.bowlingSlotIdx !== undefined) {
-      bowlingSlotIdx = goblin.userData.bowlingSlotIdx;
-    }
     if (game.session.mode === "garden_grow" && goblin.userData.gardenSpotIdx !== undefined) {
       gardenSpotIdx = goblin.userData.gardenSpotIdx;
     }
@@ -5545,21 +5562,8 @@ function defeatGoblin() {
     bossHpHide();
   }
 
-  // EXPANSION: bowling — mark the pin fallen, drop a debris decoration,
-  // and check whether this hit completes the frame.
-  if (bowlingSlotIdx !== null) {
-    const bs = game.session.bowlingState;
-    bs.fallen[bowlingSlotIdx] = true;
-    bs.pinIdx = bowlingSlotIdx + 1;
-    buildFallenPin(PIN_SLOTS[bowlingSlotIdx]);
-    bowlRenderPins();
-    if (bowlFrameComplete()) {
-      bs.strikes += 1;
-      bowlSpawnStrikeOverlay();
-      // Reset BEFORE the next startNextWord (which runs at ~380ms via advance)
-      setTimeout(() => bowlResetFrame(bs.frame + 1), 200);
-    }
-  }
+  // Bowling strikes are handled at impact in onProjectileHit (bowlStrikeAll),
+  // since one ball now topples the entire lineup at once.
 
   // EXPANSION PASS F: garden_grow — bloom the next flower at the spot we just "hit"
   if (gardenSpotIdx !== null) {
@@ -5651,6 +5655,11 @@ function onProjectileHit() {
 
   // ---- Mission advance (rescue / carrots) — purely additive visual ----
   advanceMission();
+
+  // ---- Bowling: one ball topples the WHOLE lineup of mini-goblins (a strike) ----
+  if (game.session && game.session.mode === "bowling") {
+    bowlStrikeAll();
+  }
 
   // ---- Pick the goofy reaction style — extended pool ----
   // Silly-pants session mode: every word uses pants-drop defeat.
@@ -5959,6 +5968,7 @@ function playAgain(opts = {}) {
   clearGardenFlowers();   // EXPANSION PASS F: clear last session's garden
   clearSnowmanParts();    // EXPANSION PASS F: clear last session's snowman
   clearCastleParts();     // EXPANSION PASS G: clear last session's castle
+  bunny.position.x = -0.9; bunny.position.z = 1.95;   // home spot (cage mission moves it center)
   bossHpHide();
   missionBannerHide();
   bowlBoardHide();
@@ -5983,6 +5993,8 @@ function playAgain(opts = {}) {
   } else if (game.session.mode === "mission_cage") {
     // Strip boss spawns — a rescue mission shouldn't be interrupted by boss intros
     game.wordKinds = game.wordKinds.map(k => k.kind === "boss" ? { kind: "normal" } : k);
+    // Bun-Bun got captured — bring the bunny center-stage and cage it there.
+    bunny.position.x = 1.55; bunny.position.z = -0.7;
     buildCageAroundBunny();
     missionBannerShow("🐰", "Save Bun-Bun!");
     setTimeout(() => showMissionIntro("SPECIAL MISSION", "SAVE BUN-BUN!", "Read 10 words to break the cage"), 100);
@@ -7536,11 +7548,12 @@ function buildCageAroundBunny() {
   game.session.missionMeta = { kind: "cage", bars, ringTop, ringBot };
 }
 
+const CARROT_BARN = { x: 1.7, z: -1.5 };   // barn sits center-stage (no goblin)
 function buildCarrotPile() {
   // A little red barn STUFFED with carrots. Each word cracks the barn and
   // a carrot bursts out toward the bunny; the last word pops the roof off.
   const barnGroup = new THREE.Group();
-  barnGroup.position.set(2.4, 0.4, -1.5);
+  barnGroup.position.set(CARROT_BARN.x, 0.4, CARROT_BARN.z);
   const red     = new THREE.MeshStandardMaterial({ color: 0xC0392B, roughness: 0.7 });
   const darkred = new THREE.MeshStandardMaterial({ color: 0x7B241C, roughness: 0.7 });
   const white   = new THREE.MeshStandardMaterial({ color: 0xF5F0E6, roughness: 0.85 });
@@ -7668,10 +7681,10 @@ function tickMissionAnimations(dt) {
       meta.shakeT = Math.max(0, meta.shakeT - dt);
       const s = meta.shakeT;
       if (meta.barn) meta.barn.rotation.z = Math.sin(s * 60) * 0.06;
-      if (meta.pile) meta.pile.position.x = 2.4 + Math.sin(s * 75) * 0.05;
+      if (meta.pile) meta.pile.position.x = CARROT_BARN.x + Math.sin(s * 75) * 0.05;
     } else {
       if (meta.barn) meta.barn.rotation.z = 0;
-      if (meta.pile) meta.pile.position.x = 2.4;
+      if (meta.pile) meta.pile.position.x = CARROT_BARN.x;
     }
     if (meta.roofPop && meta.roof) {
       meta.roofT = Math.min(1, (meta.roofT || 0) + dt * 0.7);
@@ -7742,6 +7755,9 @@ const PIN_SLOTS = [
   { x: 2.3, z: -2.0 },   // back-back
 ];
 const PIN_SIZE_MUL = 0.55;
+// Center of the pin cluster — the hidden goblin sits here so the ball rolls
+// into the whole lineup and topples every mini-goblin at once.
+const BOWL_CENTER = { x: 1.82, z: -1.0 };
 
 const bowlBoardEl   = document.getElementById("bowl-board");
 const bowlFrameEl   = document.getElementById("bowl-frame");
@@ -7752,6 +7768,47 @@ const bowlStrikeOverlay = document.getElementById("bowl-strike");
 // Fallen pin decorations live in this list — purely cosmetic remains
 // of toppled pins. Cleared on frame reset / session change.
 const fallenPins = [];
+const bowlToppling = [];   // mini-goblins mid-topple after a strike
+
+// One ball topples the ENTIRE lineup of mini-goblins at once (a strike!),
+// then a fresh lineup pops back up for the next word.
+function bowlStrikeAll() {
+  const bs = game.session && game.session.bowlingState;
+  if (!bs) return;
+  for (const d of (bs.decoys || [])) {
+    if (!d) continue;
+    d.userData.toppleT = 0;
+    d.userData.toppleDir = Math.random() < 0.5 ? 1 : -1;
+    bowlToppling.push(d);
+  }
+  bs.decoys = [];
+  bs.strikes += 1;
+  bs.fallen = PIN_SLOTS.map(() => true);
+  bowlRenderPins();
+  bowlSpawnStrikeOverlay();
+  // Fresh lineup for the next word
+  setTimeout(() => {
+    for (const d of bowlToppling) {
+      if (d && d.parent) d.parent.remove(d);
+      if (d && d.traverse) d.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material.forEach(m=>m.dispose()) : o.material.dispose()); });
+    }
+    bowlToppling.length = 0;
+    if (game.session && game.session.bowlingState) {
+      game.session.bowlingState.fallen = PIN_SLOTS.map(() => false);
+      buildBowlingDecoys();
+      bowlRenderPins();
+    }
+  }, 800);
+}
+function tickBowlingTopple(dt) {
+  for (const d of bowlToppling) {
+    if (d.userData.toppleT === undefined || d.userData.toppleT >= 1) continue;
+    d.userData.toppleT = Math.min(1, d.userData.toppleT + dt * 3.2);
+    const k = d.userData.toppleT;
+    d.rotation.z = d.userData.toppleDir * k * Math.PI * 0.5;   // fall flat
+    d.position.y = 0.4 - k * 0.22;                              // sink to the ground
+  }
+}
 
 function bowlBoardShow() {
   bowlBoardEl.classList.remove("hidden");
@@ -10274,6 +10331,7 @@ function tick() {
 
   // ---------- EXPANSION: MISSION ANIMATIONS (cage fade, flying carrots) ----------
   tickMissionAnimations(dt);
+  if (bowlToppling.length > 0) tickBowlingTopple(dt);
 
   // ---------- EXPANSION: DEFENSE TOMATO IN FLIGHT ----------
   if (defenseState.flyingTomato) tickDefenseTomato(dt);
