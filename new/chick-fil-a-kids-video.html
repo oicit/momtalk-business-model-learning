@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐔 Chick-fil-A: Learn About Business! - Educational Video for Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Nunito', 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #FFF8DC 0%, #FFE4E1 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #E51636 0%, #C4102D 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5em;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .scene {
+            display: none;
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        .scene.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Scene backgrounds */
+        .scene-intro { background: linear-gradient(135deg, #FFF8DC 0%, #FFE4E1 100%); }
+        .scene-founder { background: linear-gradient(180deg, #87CEEB 0%, #FFF8DC 100%); }
+        .scene-business { background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); }
+        .scene-valuechain { background: linear-gradient(180deg, #87CEEB 0%, #90EE90 70%, #228B22 100%); }
+        .scene-special { background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); }
+        .scene-wins { background: linear-gradient(180deg, #E3F2FD 0%, #BBDEFB 100%); }
+        .scene-facts { background: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%); }
+        .scene-conclusion { background: linear-gradient(180deg, #FFD700 0%, #FF8C00 100%); }
+        
+        /* Typography */
+        .title {
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(28px, 5vw, 56px);
+            color: #E51636;
+            text-shadow: 3px 3px 0 white, 5px 5px 0 rgba(0,0,0,0.15);
+            text-align: center;
+            padding: 25px 20px 10px;
+            animation: bounceIn 0.8s ease;
+        }
+        
+        .title.white {
+            color: white;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+        }
+        
+        .title.small {
+            font-size: clamp(22px, 4vw, 40px);
+        }
+        
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .subtitle {
+            font-size: clamp(16px, 2.5vw, 26px);
+            color: #333;
+            text-align: center;
+            padding: 10px 30px;
+            line-height: 1.5;
+            animation: slideUp 0.6s ease 0.3s both;
+            font-weight: 700;
+        }
+        
+        .subtitle.white {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Characters Container */
+        .characters {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 40px;
+            flex-wrap: wrap;
+            padding: 20px;
+            flex-grow: 1;
+        }
+        
+        /* Chicken */
+        .chicken {
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        .chicken-body {
+            width: 90px;
+            height: 75px;
+            background: radial-gradient(ellipse, #FFFACD 60%, #F5DEB3 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .chicken-comb {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+        }
+        
+        .comb-piece {
+            width: 14px;
+            background: #E51636;
+            border-radius: 50%;
+        }
+        
+        .comb-piece:nth-child(1) { height: 18px; }
+        .comb-piece:nth-child(2) { height: 22px; }
+        .comb-piece:nth-child(3) { height: 18px; }
+        
+        .chicken-face {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+        }
+        
+        .chicken-eyes {
+            font-size: 18px;
+            letter-spacing: 18px;
+            margin-left: 10px;
+        }
+        
+        .chicken-beak {
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 18px solid #FFA500;
+            margin: 5px auto 0;
+        }
+        
+        .chicken-wing {
+            position: absolute;
+            width: 35px;
+            height: 22px;
+            background: #F5DEB3;
+            border-radius: 50%;
+            top: 28px;
+            animation: flap 0.5s ease-in-out infinite alternate;
+        }
+        
+        .chicken-wing.left {
+            left: -18px;
+            transform-origin: right center;
+        }
+        
+        .chicken-wing.right {
+            right: -18px;
+            transform-origin: left center;
+        }
+        
+        @keyframes flap {
+            from { transform: rotate(-10deg); }
+            to { transform: rotate(10deg); }
+        }
+        
+        /* Cow */
+        .cow {
+            animation: waddle 2s ease-in-out infinite;
+        }
+        
+        @keyframes waddle {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+        
+        .cow-body {
+            width: 110px;
+            height: 75px;
+            background: white;
+            border-radius: 45px 45px 35px 35px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .cow-spot {
+            position: absolute;
+            background: #333;
+            border-radius: 50%;
+        }
+        
+        .cow-spot:nth-child(1) { width: 22px; height: 18px; top: 18px; left: 18px; }
+        .cow-spot:nth-child(2) { width: 18px; height: 15px; top: 35px; right: 22px; }
+        
+        .cow-head {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 60px;
+            background: white;
+            border-radius: 35px 35px 25px 25px;
+        }
+        
+        .cow-ear {
+            position: absolute;
+            width: 22px;
+            height: 14px;
+            background: white;
+            border-radius: 50%;
+            top: 8px;
+        }
+        
+        .cow-ear.left { left: -12px; transform: rotate(-30deg); }
+        .cow-ear.right { right: -12px; transform: rotate(30deg); }
+        
+        .cow-eye {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #333;
+            border-radius: 50%;
+            top: 20px;
+        }
+        
+        .cow-eye.left { left: 15px; }
+        .cow-eye.right { right: 15px; }
+        
+        .cow-nose {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 22px;
+            background: #FFB6C1;
+            border-radius: 50%;
+        }
+        
+        .cow-nostril {
+            width: 7px;
+            height: 9px;
+            background: #333;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 8px 3px;
+        }
+        
+        .cow-sign {
+            position: absolute;
+            top: -75px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 3px solid #333;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 900;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Sandwich */
+        .sandwich {
+            animation: float 2.5s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-18px) rotate(2deg); }
+        }
+        
+        .bun-top {
+            width: 100px;
+            height: 45px;
+            background: linear-gradient(180deg, #D4A574 0%, #C4956A 100%);
+            border-radius: 50px 50px 10px 10px;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sesame {
+            position: absolute;
+            width: 8px;
+            height: 5px;
+            background: #FFF8DC;
+            border-radius: 50%;
+        }
+        
+        .sesame:nth-child(1) { top: 12px; left: 20px; transform: rotate(30deg); }
+        .sesame:nth-child(2) { top: 8px; left: 40px; transform: rotate(-20deg); }
+        .sesame:nth-child(3) { top: 15px; left: 55px; transform: rotate(45deg); }
+        .sesame:nth-child(4) { top: 10px; left: 70px; transform: rotate(-30deg); }
+        
+        .lettuce {
+            width: 110px;
+            height: 15px;
+            background: #90EE90;
+            margin-left: -5px;
+            clip-path: polygon(0% 50%, 8% 0%, 16% 50%, 24% 0%, 32% 50%, 40% 0%, 48% 50%, 56% 0%, 64% 50%, 72% 0%, 80% 50%, 88% 0%, 96% 50%, 100% 0%, 100% 100%, 0% 100%);
+        }
+        
+        .patty {
+            width: 95px;
+            height: 25px;
+            background: linear-gradient(180deg, #DAA520 0%, #CD853F 100%);
+            margin-left: 2px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .pickles {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-left: 2px;
+        }
+        
+        .pickle {
+            width: 28px;
+            height: 10px;
+            background: #6B8E23;
+            border-radius: 50%;
+        }
+        
+        .bun-bottom {
+            width: 100px;
+            height: 25px;
+            background: linear-gradient(180deg, #C4956A 0%, #B8860B 100%);
+            border-radius: 5px 5px 18px 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        /* Cards */
+        .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            padding: 15px;
+            flex-grow: 1;
+            align-items: center;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 18px;
+            width: 160px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            animation: popIn 0.5s ease backwards;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: scale(1.05);
+        }
+        
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .card-emoji {
+            font-size: 45px;
+            margin-bottom: 8px;
+        }
+        
+        .card-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 16px;
+            color: #E51636;
+            margin-bottom: 6px;
+        }
+        
+        .card-desc {
+            font-size: 13px;
+            color: #666;
+            font-weight: 700;
+        }
+        
+        /* Flow Diagram */
+        .flow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
+        
+        .flow-item {
+            text-align: center;
+            animation: fadeInUp 0.5s ease backwards;
+        }
+        
+        .flow-item:nth-child(1) { animation-delay: 0.1s; }
+        .flow-item:nth-child(2) { animation-delay: 0.2s; }
+        .flow-item:nth-child(3) { animation-delay: 0.3s; }
+        .flow-item:nth-child(4) { animation-delay: 0.4s; }
+        .flow-item:nth-child(5) { animation-delay: 0.5s; }
+        .flow-item:nth-child(6) { animation-delay: 0.6s; }
+        .flow-item:nth-child(7) { animation-delay: 0.7s; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .flow-icon {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .flow-arrow {
+            font-size: 35px;
+            color: #FF8C00;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+        
+        .flow-label {
+            font-size: 13px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-weight: 900;
+        }
+        
+        /* Winner Circles */
+        .winners-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            padding: 20px;
+            flex-grow: 1;
+            align-items: center;
+        }
+        
+        .winner {
+            text-align: center;
+            animation: popIn 0.6s ease backwards;
+        }
+        
+        .winner:nth-child(1) { animation-delay: 0.2s; }
+        .winner:nth-child(2) { animation-delay: 0.4s; }
+        .winner:nth-child(3) { animation-delay: 0.6s; }
+        
+        .winner-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            margin: 0 auto 12px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        }
+        
+        .winner-circle.gold { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); }
+        .winner-circle.red { background: linear-gradient(135deg, #E51636 0%, #C4102D 100%); }
+        .winner-circle.green { background: linear-gradient(135deg, #32CD32 0%, #228B22 100%); }
+        
+        .winner-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .winner-desc {
+            font-size: 14px;
+            color: #666;
+            font-weight: 700;
+        }
+        
+        /* Fun Fact Box */
+        .fact-box {
+            background: white;
+            border-radius: 25px;
+            padding: 25px 35px;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            animation: bounceIn 0.5s ease;
+        }
+        
+        .fact-emoji {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .fact-text {
+            font-size: clamp(18px, 3vw, 26px);
+            color: #333;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+        
+        /* Confetti */
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            animation: fall 4s linear infinite;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+        
+        /* Checklist */
+        .checklist {
+            text-align: left;
+            display: inline-block;
+            margin: 20px auto;
+            font-size: clamp(16px, 2.5vw, 24px);
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 900;
+        }
+        
+        .checklist-item {
+            margin: 12px 0;
+            animation: slideRight 0.5s ease backwards;
+        }
+        
+        .checklist-item:nth-child(1) { animation-delay: 0.3s; }
+        .checklist-item:nth-child(2) { animation-delay: 0.5s; }
+        .checklist-item:nth-child(3) { animation-delay: 0.7s; }
+        .checklist-item:nth-child(4) { animation-delay: 0.9s; }
+        
+        @keyframes slideRight {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Navigation */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 15px 35px;
+            font-size: 18px;
+            font-family: 'Fredoka One', cursive;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+        }
+        
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        }
+        
+        .nav-btn.prev {
+            background: linear-gradient(135deg, #87CEEB 0%, #5FA8D3 100%);
+            color: white;
+        }
+        
+        .nav-btn.next {
+            background: linear-gradient(135deg, #E51636 0%, #C4102D 100%);
+            color: white;
+        }
+        
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .scene-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 15px;
+        }
+        
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #DDD;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .dot:hover {
+            transform: scale(1.2);
+        }
+        
+        .dot.active {
+            background: #E51636;
+            transform: scale(1.3);
+        }
+        
+        /* Speech bubble */
+        .speech-bubble {
+            position: relative;
+            background: white;
+            padding: 12px 20px;
+            border-radius: 18px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-size: 16px;
+            font-weight: 900;
+            animation: popIn 0.5s ease 1s backwards;
+        }
+        
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 30px;
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 15px solid white;
+        }
+        
+        /* Story panel */
+        .story-panel {
+            background: #FFF8DC;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            animation: popIn 0.5s ease 0.3s backwards;
+        }
+        
+        .story-image {
+            font-size: 80px;
+            margin-bottom: 15px;
+        }
+        
+        .story-caption {
+            font-size: 16px;
+            color: #333;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            .card { width: 140px; padding: 15px; }
+            .card-emoji { font-size: 35px; }
+            .card-title { font-size: 14px; }
+            .card-desc { font-size: 11px; }
+            .flow-icon { width: 60px; height: 60px; font-size: 30px; }
+            .flow-arrow { font-size: 25px; }
+            .winner-circle { width: 90px; height: 90px; font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐔 Learn About Chick-fil-A! 🍗</h1>
+        <p>A Fun Business Adventure for Kids</p>
+    </div>
+    
+    <div class="video-container">
+        <!-- Scene 1: Introduction -->
+        <div class="scene scene-intro active" id="scene-1">
+            <div class="title">Let's Learn About</div>
+            <div class="title" style="margin-top: -15px;">Chick-fil-A! 🎉</div>
+            <div class="subtitle">The story of America's favorite chicken restaurant!</div>
+            
+            <div class="characters">
+                <div class="chicken">
+                    <div class="chicken-body">
+                        <div class="chicken-comb">
+                            <div class="comb-piece"></div>
+                            <div class="comb-piece"></div>
+                            <div class="comb-piece"></div>
+                        </div>
+                        <div class="chicken-wing left"></div>
+                        <div class="chicken-wing right"></div>
+                        <div class="chicken-face">
+                            <div class="chicken-eyes">◠ ◠</div>
+                            <div class="chicken-beak"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sandwich">
+                    <div class="bun-top">
+                        <div class="sesame"></div>
+                        <div class="sesame"></div>
+                        <div class="sesame"></div>
+                        <div class="sesame"></div>
+                    </div>
+                    <div class="lettuce"></div>
+                    <div class="patty"></div>
+                    <div class="pickles">
+                        <div class="pickle"></div>
+                        <div class="pickle"></div>
+                    </div>
+                    <div class="bun-bottom"></div>
+                </div>
+                
+                <div class="cow">
+                    <div class="cow-sign">EAT MOR CHIKIN!</div>
+                    <div class="cow-body">
+                        <div class="cow-spot"></div>
+                        <div class="cow-spot"></div>
+                        <div class="cow-head">
+                            <div class="cow-ear left"></div>
+                            <div class="cow-ear right"></div>
+                            <div class="cow-eye left"></div>
+                            <div class="cow-eye right"></div>
+                            <div class="cow-nose">
+                                <div class="cow-nostril"></div>
+                                <div class="cow-nostril"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 2: Founder Story -->
+        <div class="scene scene-founder" id="scene-2">
+            <div class="title" style="color: #5D3A1A;">Once Upon a Time... 📖</div>
+            
+            <div class="characters" style="gap: 60px;">
+                <div class="story-panel">
+                    <div class="story-image">👦🛒</div>
+                    <div class="story-caption">8-year-old Truett<br>sold sodas from a wagon!</div>
+                </div>
+                
+                <div style="text-align: left; max-width: 400px;">
+                    <div class="subtitle" style="text-align: left; padding: 10px 0;">
+                        🏠 In 1946, he opened a tiny restaurant called "Dwarf Grill" - it only had 10 seats!
+                    </div>
+                    <div class="subtitle" style="text-align: left; padding: 10px 0;">
+                        🥪 In 1967, he invented the FIRST chicken sandwich and started Chick-fil-A!
+                    </div>
+                    <div class="subtitle" style="text-align: left; padding: 10px 0;">
+                        ⭐ The "A" in the name means "A-grade" - the BEST quality!
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 3: Business Model -->
+        <div class="scene scene-business" id="scene-3">
+            <div class="title">How Does It Work? 🤔</div>
+            <div class="subtitle">Chick-fil-A picks special people called "Operators" to run each restaurant!</div>
+            
+            <div class="flow-container">
+                <div class="flow-item">
+                    <div class="flow-icon">🏢</div>
+                    <div class="flow-label" style="color: #333;">Chick-fil-A HQ</div>
+                </div>
+                <div class="flow-arrow">➜</div>
+                <div class="flow-item">
+                    <div class="flow-icon">🤝</div>
+                    <div class="flow-label" style="color: #333;">Partnership!</div>
+                </div>
+                <div class="flow-arrow">➜</div>
+                <div class="flow-item">
+                    <div class="flow-icon">👩‍💼</div>
+                    <div class="flow-label" style="color: #333;">Operator</div>
+                </div>
+            </div>
+            
+            <div class="subtitle">
+                💰 Operators only need $10,000 to start - way less than other restaurants!<br>
+                It's like being chosen for the best team!
+            </div>
+        </div>
+        
+        <!-- Scene 4: Value Chain -->
+        <div class="scene scene-valuechain" id="scene-4">
+            <div class="title white">From Farm to You! 🚜</div>
+            
+            <div class="flow-container">
+                <div class="flow-item">
+                    <div class="flow-icon">🌾🐔</div>
+                    <div class="flow-label">1️⃣ Farms</div>
+                </div>
+                <div class="flow-arrow" style="color: white;">➜</div>
+                <div class="flow-item">
+                    <div class="flow-icon">🏭</div>
+                    <div class="flow-label">2️⃣ Prepare</div>
+                </div>
+                <div class="flow-arrow" style="color: white;">➜</div>
+                <div class="flow-item">
+                    <div class="flow-icon">🚚</div>
+                    <div class="flow-label">3️⃣ Deliver</div>
+                </div>
+                <div class="flow-arrow" style="color: white;">➜</div>
+                <div class="flow-item">
+                    <div class="flow-icon">🏪</div>
+                    <div class="flow-label">4️⃣ Cook!</div>
+                </div>
+            </div>
+            
+            <div class="subtitle white">
+                🇺🇸 Chick-fil-A only uses REAL chicken from American farms!<br>
+                No funny stuff added - just fresh, delicious chicken! 🍗
+            </div>
+        </div>
+        
+        <!-- Scene 5: Special Ingredients -->
+        <div class="scene scene-special" id="scene-5">
+            <div class="title">Secret Ingredients! 🌟</div>
+            <div class="subtitle">What makes Chick-fil-A SO special?</div>
+            
+            <div class="card-container">
+                <div class="card">
+                    <div class="card-emoji">😊</div>
+                    <div class="card-title">Super Friendly</div>
+                    <div class="card-desc">"My Pleasure!"</div>
+                </div>
+                <div class="card">
+                    <div class="card-emoji">🍗</div>
+                    <div class="card-title">Simple Menu</div>
+                    <div class="card-desc">Focus on chicken!</div>
+                </div>
+                <div class="card">
+                    <div class="card-emoji">🌙</div>
+                    <div class="card-title">Closed Sundays</div>
+                    <div class="card-desc">Rest day for all!</div>
+                </div>
+                <div class="card">
+                    <div class="card-emoji">❤️</div>
+                    <div class="card-title">Care for People</div>
+                    <div class="card-desc">Treat everyone nice!</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scene 6: Everyone Wins -->
+        <div class="scene scene-wins" id="scene-6">
+            <div class="title">Everyone Wins! 🎉</div>
+            
+            <div class="winners-container">
+                <div class="winner">
+                    <div class="winner-circle gold">👨‍👩‍👧‍👦</div>
+                    <div class="winner-title">Customers</div>
+                    <div class="winner-desc">Yummy food &<br>great service!</div>
+                </div>
+                <div class="winner">
+                    <div class="winner-circle red">👩‍💼</div>
+                    <div class="winner-title">Operators</div>
+                    <div class="winner-desc">Run their own<br>business!</div>
+                </div>
+                <div class="winner">
+                    <div class="winner-circle green">🎓</div>
+                    <div class="winner-title">Team Members</div>
+                    <div class="winner-desc">Scholarships<br>for college!</div>
+                </div>
+            </div>
+            
+            <div class="subtitle">
+                📚 Chick-fil-A has given over $175 MILLION in scholarships to help workers go to college!
+            </div>
+        </div>
+        
+        <!-- Scene 7: Fun Facts -->
+        <div class="scene scene-facts" id="scene-7">
+            <div class="title" style="color: #9370DB;">Fun Facts! 🎈</div>
+            
+            <div class="fact-box" id="fact-box">
+                <div class="fact-emoji" id="fact-emoji">🍗</div>
+                <div class="fact-text" id="fact-text">Chick-fil-A sells over 3 BILLION nuggets every year!</div>
+            </div>
+            
+            <div class="characters" style="padding-top: 0;">
+                <div class="chicken" style="transform: scale(0.9);">
+                    <div class="chicken-body">
+                        <div class="chicken-comb">
+                            <div class="comb-piece"></div>
+                            <div class="comb-piece"></div>
+                            <div class="comb-piece"></div>
+                        </div>
+                        <div class="chicken-wing left"></div>
+                        <div class="chicken-wing right"></div>
+                        <div class="chicken-face">
+                            <div class="chicken-eyes">◠ ◠</div>
+                            <div class="chicken-beak"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cow" style="transform: scale(0.9);">
+                    <div class="cow-body">
+                        <div class="cow-spot"></div>
+                        <div class="cow-spot"></div>
+                        <div class="cow-head">
+                            <div class="cow-ear left"></div>
+                            <div class="cow-ear right"></div>
+                            <div class="cow-eye left"></div>
+                            <div class="cow-eye right"></div>
+                            <div class="cow-nose">
+                                <div class="cow-nostril"></div>
+                                <div class="cow-nostril"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="scene-indicator" style="padding: 5px;" id="fact-dots">
+                <div class="dot active" data-fact="0"></div>
+                <div class="dot" data-fact="1"></div>
+                <div class="dot" data-fact="2"></div>
+                <div class="dot" data-fact="3"></div>
+            </div>
+        </div>
+        
+        <!-- Scene 8: Conclusion -->
+        <div class="scene scene-conclusion" id="scene-8">
+            <div class="confetti-container" id="confetti"></div>
+            
+            <div class="title white small">You Learned About</div>
+            <div class="title white">Chick-fil-A! 🎉</div>
+            
+            <div class="checklist">
+                <div class="checklist-item">✅ Started by a boy with a dream</div>
+                <div class="checklist-item">✅ Partners with special Operators</div>
+                <div class="checklist-item">✅ Fresh chicken from American farms</div>
+                <div class="checklist-item">✅ Treats everyone with kindness</div>
+            </div>
+            
+            <div class="subtitle white" style="padding-top: 20px;">
+                Thanks for learning with us! 👋<br>
+                Now you know how a GREAT business works!
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="scene-indicator" id="main-dots"></div>
+        
+        <div class="nav-container">
+            <button class="nav-btn prev" id="prev-btn" disabled>⬅️ Back</button>
+            <button class="nav-btn next" id="next-btn">Next ➡️</button>
+        </div>
+    </div>
+    
+    <script>
+        const scenes = document.querySelectorAll('.scene');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const mainDots = document.getElementById('main-dots');
+        let currentScene = 0;
+        
+        // Create main navigation dots
+        scenes.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot${i === 0 ? ' active' : ''}`;
+            dot.addEventListener('click', () => goToScene(i));
+            mainDots.appendChild(dot);
+        });
+        
+        // Fun facts data
+        const facts = [
+            { emoji: '🍗', text: 'Chick-fil-A sells over 3 BILLION nuggets every year!' },
+            { emoji: '🐄', text: 'The famous cows have been saying "Eat Mor Chikin" since 1995!' },
+            { emoji: '🏪', text: 'There are over 3,000 restaurants across America!' },
+            { emoji: '🍟', text: 'Waffle fries are the #1 most ordered item!' }
+        ];
+        
+        let currentFact = 0;
+        const factEmoji = document.getElementById('fact-emoji');
+        const factText = document.getElementById('fact-text');
+        const factDots = document.querySelectorAll('#fact-dots .dot');
+        
+        factDots.forEach((dot, i) => {
+            dot.addEventListener('click', () => showFact(i));
+        });
+        
+        function showFact(index) {
+            currentFact = index;
+            factEmoji.textContent = facts[index].emoji;
+            factText.textContent = facts[index].text;
+            factDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+            
+            // Re-trigger animation
+            const factBox = document.getElementById('fact-box');
+            factBox.style.animation = 'none';
+            factBox.offsetHeight; // Trigger reflow
+            factBox.style.animation = 'bounceIn 0.5s ease';
+        }
+        
+        // Auto-rotate facts when on scene 7
+        setInterval(() => {
+            if (currentScene === 6) {
+                showFact((currentFact + 1) % facts.length);
+            }
+        }, 4000);
+        
+        // Create confetti for conclusion scene
+        function createConfetti() {
+            const container = document.getElementById('confetti');
+            container.innerHTML = '';
+            const colors = ['#E51636', '#FFD700', '#32CD32', '#87CEEB', '#FFB6C1', '#9370DB'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDuration = `${3 + Math.random() * 3}s`;
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                container.appendChild(confetti);
+            }
+        }
+        
+        function goToScene(index) {
+            scenes[currentScene].classList.remove('active');
+            currentScene = index;
+            scenes[currentScene].classList.add('active');
+            
+            // Update buttons
+            prevBtn.disabled = currentScene === 0;
+            nextBtn.disabled = currentScene === scenes.length - 1;
+            nextBtn.textContent = currentScene === scenes.length - 1 ? '🎉 Done!' : 'Next ➡️';
+            
+            // Update dots
+            mainDots.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentScene);
+            });
+            
+            // Create confetti for conclusion
+            if (currentScene === scenes.length - 1) {
+                createConfetti();
+            }
+        }
+        
+        prevBtn.addEventListener('click', () => {
+            if (currentScene > 0) goToScene(currentScene - 1);
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentScene < scenes.length - 1) goToScene(currentScene + 1);
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentScene < scenes.length - 1) {
+                goToScene(currentScene + 1);
+            } else if (e.key === 'ArrowLeft' && currentScene > 0) {
+                goToScene(currentScene - 1);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Blooming Flowers</title>
+<style>
+  :root{
+    --bg:#fadbb0;
+    --ink:#2a1f15;
+    --ink-dim:#5a3f28;
+    --hair:rgba(42,31,21,0.22);
+    --accent:#d83c2b;
+    --mono:'SF Mono','JetBrains Mono','Menlo','Consolas',monospace;
+    --serif:'Times New Roman',Georgia,serif;
+    --sans:-apple-system,'SF Pro Display','Inter','Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+    font-family:var(--sans);overflow:hidden;
+    -webkit-user-select:none;user-select:none;touch-action:none}
+  #scene{position:fixed;inset:0;display:block;width:100%;height:100%}
+
+  /* ---- Top parameter panel ---- */
+  .panel{
+    position:fixed;top:18px;left:18px;right:18px;z-index:5;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:1.4px;
+    color:var(--ink);text-transform:uppercase
+  }
+  .row{
+    display:flex;align-items:center;gap:14px;padding:7px 0;
+    border-top:1px solid var(--hair);
+  }
+  .row:last-of-type{border-bottom:1px solid var(--hair)}
+  .row .name{min-width:138px;font-weight:500}
+  .row input[type=range]{flex:1;-webkit-appearance:none;appearance:none;background:transparent;height:20px;margin:0;cursor:ew-resize}
+  .row input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--hair)}
+  .row input[type=range]::-moz-range-track{height:1px;background:var(--hair)}
+  .row input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:9px;height:9px;border-radius:50%;
+    background:var(--ink);margin-top:-4.5px;cursor:pointer;border:0
+  }
+  .row input[type=range]::-moz-range-thumb{
+    width:9px;height:9px;border-radius:50%;background:var(--ink);border:0;cursor:pointer
+  }
+  .row .val{min-width:62px;text-align:right;font-variant-numeric:tabular-nums}
+
+  /* ---- Editorial top-left title ---- */
+  .titleBlock{
+    position:fixed;top:18px;left:18px;z-index:6;color:var(--ink);
+    pointer-events:none;display:none /* sits behind panel; we move it elsewhere */
+  }
+
+  /* ---- Editorial mark — bottom-left ---- */
+  .mark{
+    position:fixed;left:18px;bottom:18px;z-index:6;color:var(--ink-dim);
+    font-family:var(--serif);font-style:italic;line-height:1.25;
+    pointer-events:none;max-width:42vw
+  }
+  .mark .t1{font-size:18px;letter-spacing:0.2px}
+  .mark .t2{font-family:var(--mono);font-style:normal;font-size:9.5px;
+    letter-spacing:2px;text-transform:uppercase;margin-top:6px;opacity:.7}
+
+  /* ---- Status readout — bottom-right ---- */
+  .status{
+    position:fixed;right:18px;bottom:18px;z-index:6;color:var(--ink-dim);
+    font-family:var(--mono);font-size:9.5px;letter-spacing:1.6px;
+    line-height:1.6;text-align:right;pointer-events:none;text-transform:uppercase
+  }
+  .status b{font-weight:500;color:var(--ink)}
+  .status .dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--accent);vertical-align:middle;margin-right:6px;
+    animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+
+  /* ---- Curved BLOOMING FLOWERS label sits behind the tree base ---- */
+  .label-wrap{
+    position:fixed;left:50%;bottom:8vh;transform:translateX(-50%);
+    width:min(34vmin,260px);height:min(34vmin,260px);
+    pointer-events:none;z-index:4;opacity:.5;mix-blend-mode:multiply
+  }
+  .label-wrap svg{width:100%;height:100%;display:block}
+  .label-wrap text{
+    font-size:11.5px;letter-spacing:7px;fill:var(--ink);
+    font-family:var(--sans);font-weight:500
+  }
+
+  /* ---- Aspect ratio safe marks (corner crosshairs) ---- */
+  .corner{position:fixed;width:14px;height:14px;z-index:3;pointer-events:none;
+    border:0 solid var(--ink-dim);opacity:.35}
+  .corner.tl{top:14px;left:14px;border-top-width:1px;border-left-width:1px}
+  .corner.tr{top:14px;right:14px;border-top-width:1px;border-right-width:1px}
+  .corner.bl{bottom:14px;left:14px;border-bottom-width:1px;border-left-width:1px}
+  .corner.br{bottom:14px;right:14px;border-bottom-width:1px;border-right-width:1px}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div class="panel">
+  <div class="row">
+    <span class="name">TREE GROWTH</span>
+    <input id="growth" type="range" min="0" max="100" step="0.1" value="0" />
+    <span class="val" id="growthV">0%</span>
+  </div>
+  <div class="row">
+    <span class="name">TREE ROTATION: Y</span>
+    <input id="rotY" type="range" min="-180" max="180" step="0.5" value="0" />
+    <span class="val" id="rotYV">0.0°</span>
+  </div>
+  <div class="row">
+    <span class="name">TREE ROTATION: Z</span>
+    <input id="rotZ" type="range" min="-45" max="45" step="0.5" value="-6" />
+    <span class="val" id="rotZV">-6.0°</span>
+  </div>
+</div>
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+
+<div class="label-wrap" aria-hidden="true">
+  <svg viewBox="0 0 280 280">
+    <defs>
+      <path id="circle" d="M 140,140 m -110,0 a 110,110 0 1,1 220,0 a 110,110 0 1,1 -220,0" />
+    </defs>
+    <text>
+      <textPath href="#circle" startOffset="25%" text-anchor="middle">BLOOMING&nbsp;&nbsp;FLOWERS</textPath>
+    </text>
+  </svg>
+</div>
+
+<div class="mark">
+  <div class="t1">In Bloom <span style="font-family:var(--mono);font-style:normal;font-size:11px;letter-spacing:2px"> ── No.&nbsp;074</span></div>
+  <div class="t2">A generative study in flora · Drag to rotate</div>
+</div>
+
+<div class="status">
+  <div><span class="dot"></span><b>RENDERING</b></div>
+  <div id="stTime">00:00:00</div>
+  <div id="stMeta">SEED 0000 · 0 NODES</div>
+  <div id="stFps">— FPS</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass }from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+
+// =========================================================================
+// Tree generation (collect raw data first; we'll center & build meshes later)
+// =========================================================================
+const segments=[]; // {start:Vector3, end:Vector3, order:int}
+const flowers =[]; // {pos:Vector3, order, hue, variant, scale, tilt, yaw, phase, driftAmp, driftSpeed}
+const buds    =[]; // {pos:Vector3, order, color, size}
+
+let segOrder=0;
+const rand=(a,b)=>a+Math.random()*(b-a);
+
+function grow(start, dir, length, depth, parentOrder){
+  if(depth<=0 || length<0.3){
+    // Curated 5-tone palette (no random hue picking).
+    // [coral, golden peach, blush, lilac, mint cream]
+    const PALETTE = [
+      { h: 358, s: 0.78, l: 0.66 },   // coral
+      { h:  26, s: 0.85, l: 0.66 },   // golden peach
+      { h: 340, s: 0.55, l: 0.78 },   // blush
+      { h: 282, s: 0.50, l: 0.74 },   // lilac
+      { h:  48, s: 0.65, l: 0.82 },   // butter cream
+    ];
+    const idx = Math.floor(Math.random()*PALETTE.length);
+    const p = PALETTE[idx];
+    flowers.push({
+      pos:start.clone(),
+      dir:dir.clone().normalize(),
+      order: parentOrder+1,
+      colorIdx: idx,
+      h:p.h, s:p.s, l:p.l,
+      variant: Math.floor(Math.random()*3),
+      scale: rand(0.55, 1.05),
+      tilt: rand(-0.22,0.22),
+      yaw:  rand(-0.22,0.22),
+      zRoll: Math.random()*Math.PI*2,
+      phase: Math.random()*Math.PI*2,
+      driftAmp: rand(0.03,0.10),
+      driftSpeed: rand(0.3,0.7)
+    });
+    return;
+  }
+  const end=start.clone().add(dir.clone().multiplyScalar(length));
+  const order=++segOrder;
+  segments.push({start:start.clone(), end:end.clone(), order});
+
+  if(Math.random()<0.25){
+    const t=rand(0.4,0.95);
+    // Buds in the same family — pick from same curated palette
+    const BUD_HUES = [358, 26, 340, 282, 48];
+    buds.push({
+      pos:start.clone().lerp(end,t),
+      order:Math.max(1,Math.floor(order*0.9)),
+      color:new THREE.Color().setHSL(
+        BUD_HUES[Math.floor(Math.random()*BUD_HUES.length)]/360,
+        0.45,
+        0.72
+      ),
+      size:rand(0.035,0.065)
+    });
+  }
+
+  const splits = depth>3 ? (Math.random()<0.55?2:3) : 2;
+
+  // For each split, pick a fresh 3D spread axis (perpendicular to dir).
+  // The azimuth around dir is randomized per-child, so children spread
+  // in different planes — producing real 3D branching instead of a fan.
+  const azStart = Math.random()*Math.PI*2;
+  for(let i=0;i<splits;i++){
+    // a vector not parallel to dir, used to find a perpendicular
+    const ref = Math.abs(dir.y) < 0.92
+      ? new THREE.Vector3(0,1,0)
+      : new THREE.Vector3(1,0,0);
+    // perpendicular to dir
+    const perp = new THREE.Vector3().crossVectors(dir, ref).normalize();
+    // rotate that perpendicular AROUND dir to set each child's azimuth
+    const az = azStart + (i / splits) * Math.PI*2 + rand(-0.6, 0.6);
+    perp.applyAxisAngle(dir, az);
+
+    // spread by some angle away from dir (around the chosen perp axis)
+    const spread = rand(0.45, 0.95);
+    const nd = dir.clone().applyAxisAngle(perp, spread);
+    // a tiny extra twist around dir for organic feel
+    nd.applyAxisAngle(dir, rand(-0.3, 0.3));
+    nd.normalize();
+    grow(end, nd, length*rand(0.55,0.78), depth-1, order);
+  }
+}
+
+// trunk: vertical stem from origin
+const root=new THREE.Vector3(0,0,0);
+const trunkTop=new THREE.Vector3(0,3.6,0);
+segments.push({start:root.clone(), end:trunkTop.clone(), order:++segOrder});
+
+// Main branches: distributed in 360° azimuth around the trunk top,
+// each tilted upward by ~45° from vertical → a vase / bouquet shape that
+// grows outward in every direction (not just left/right).
+const NUM_MAIN = 5;
+const trunkDir = new THREE.Vector3(0,1,0);
+for (let i=0; i<NUM_MAIN; i++){
+  const azim = (i / NUM_MAIN) * Math.PI*2 + rand(-0.25, 0.25);
+  const tilt = rand(0.7, 1.0);  // ~40-57° off vertical
+  const d = new THREE.Vector3(
+    Math.sin(tilt) * Math.cos(azim),
+    Math.cos(tilt),
+    Math.sin(tilt) * Math.sin(azim)
+  ).normalize();
+  grow(trunkTop, d, 2.3, 5, segOrder);
+}
+// plus one straight-up branch so the silhouette has a clear top
+grow(trunkTop, new THREE.Vector3(0, 1, 0), 1.8, 4, segOrder);
+
+const totalOrder=segOrder+2;
+
+// =========================================================================
+// Measure the tree. DO NOT translate it — the trunk lives on the Y axis
+// (X=0, Z=0), which is also the rotation axis. Translating X/Z would shift
+// the trunk off the rotation axis and make it sweep in a circle, which is
+// exactly what we don't want. We frame vertically with the camera instead.
+// =========================================================================
+const bbox=new THREE.Box3();
+segments.forEach(s=>{ bbox.expandByPoint(s.start); bbox.expandByPoint(s.end); });
+flowers .forEach(f=> bbox.expandByPoint(f.pos));
+buds    .forEach(b=> bbox.expandByPoint(b.pos));
+
+const bs=new THREE.Vector3(); bbox.getSize(bs);
+const treeH = bs.y;                    // vertical extent (root at y=0 → top at y≈treeH)
+const treeMinY = bbox.min.y;           // ≈ 0
+const treeMaxY = bbox.max.y;           // ≈ treeH
+
+// Max horizontal sweep radius from the Y axis (= the rotation axis)
+let treeMaxR = 0;
+const checkR = (p)=>{ const r=Math.hypot(p.x, p.z); if(r>treeMaxR) treeMaxR=r; };
+segments.forEach(s=>{ checkR(s.start); checkR(s.end); });
+flowers .forEach(f=> checkR(f.pos));
+buds    .forEach(b=> checkR(b.pos));
+
+// Ring sits at the (un-translated) root
+const ringY = 0;
+
+// =========================================================================
+// Renderer + ORTHOGRAPHIC camera, targeting the trunk on the Y axis.
+// Because the trunk lives at X=0, Z=0 and we rotate around the Y axis,
+// the trunk is GUARANTEED to project to the screen's horizontal center.
+// =========================================================================
+const canvas=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setClearColor(0xfadbb0, 1);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.18;
+
+const scene=new THREE.Scene();
+
+// PBR lighting — soft sky/ground (warm peach environment) plus a warm key
+// for petal modeling, and a cool back-rim for separation.
+const hemi = new THREE.HemisphereLight(0xfff0d4, 0xc28e62, 0.95);
+scene.add(hemi);
+const key = new THREE.DirectionalLight(0xfff0d8, 1.7);
+key.position.set(2.5, 4, 3);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0xb8c8ff, 0.55);
+rim.position.set(-2, 1.5, -3);
+scene.add(rim);
+scene.add(new THREE.AmbientLight(0xffe6c8, 0.30));
+
+// =========================================================================
+// Background — a fullscreen gradient with soft radial vignette + grain.
+// Drawn first inside the main scene (renderOrder = -1, depth disabled) so
+// it sits behind everything but goes through the composer + bloom passes.
+// The vertex shader emits NDC coords directly, so it always fills the view
+// regardless of camera position.
+// =========================================================================
+const bgMat = new THREE.ShaderMaterial({
+  depthTest:false, depthWrite:false,
+  uniforms:{
+    uTime:{ value:0 },
+    uAspect:{ value:1 },
+    uTop:    { value:new THREE.Color('#fcd6c0') },  // soft rose-cream high
+    uMid:    { value:new THREE.Color('#fadbb0') },  // peach body
+    uBot:    { value:new THREE.Color('#f4b88a') },  // saturated peach low
+  },
+  vertexShader:`
+    varying vec2 vUv;
+    void main(){
+      vUv = uv;
+      gl_Position = vec4(position.xy, 1.0, 1.0);
+    }
+  `,
+  fragmentShader:`
+    varying vec2 vUv;
+    uniform vec3 uTop, uMid, uBot;
+    uniform float uAspect, uTime;
+    void main(){
+      vec3 c = mix(uBot, uMid, smoothstep(0.0, 0.55, vUv.y));
+      c     = mix(c,    uTop, smoothstep(0.55, 1.0, vUv.y));
+      // SUBTLE radial vignette — was too aggressive before, made it grey
+      vec2  d = (vUv - 0.5) * vec2(uAspect, 1.0);
+      float r = length(d);
+      c *= mix(1.0, 0.92, smoothstep(0.55, 1.1, r));
+      // tiny film grain
+      float g = fract(sin(dot(vUv*vec2(789.,123.) + uTime*0.05,
+                              vec2(12.9898, 78.233))) * 43758.5453);
+      c += (g - 0.5) * 0.008;
+      gl_FragColor = vec4(c, 1.0);
+    }
+  `
+});
+const bgQuad = new THREE.Mesh(new THREE.PlaneGeometry(2,2), bgMat);
+bgQuad.frustumCulled = false;
+bgQuad.renderOrder   = -1;
+scene.add(bgQuad);
+
+// =========================================================================
+// Atmosphere — drifting pollen / dust motes
+// =========================================================================
+const NUM_DUST = 220;
+const dustGeo = new THREE.BufferGeometry();
+const dustPos = new Float32Array(NUM_DUST*3);
+const dustSeed= new Float32Array(NUM_DUST);
+for (let i=0; i<NUM_DUST; i++){
+  dustPos[i*3+0] = (Math.random()-0.5) * 18;
+  dustPos[i*3+1] = (Math.random()-0.5) * 14;
+  dustPos[i*3+2] = (Math.random()-0.5) * 8 + 4;
+  dustSeed[i]    = Math.random()*100;
+}
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+dustGeo.setAttribute('aSeed',    new THREE.BufferAttribute(dustSeed, 1));
+const dustMat = new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+  uniforms:{ uTime:{value:0}, uPx:{value:devicePixelRatio} },
+  vertexShader:`
+    attribute float aSeed;
+    varying float vAlpha;
+    uniform float uTime, uPx;
+    void main(){
+      vec3 p = position;
+      float t = uTime * 0.4 + aSeed * 6.28;
+      p.x += sin(t)*0.6;
+      p.y += cos(t*0.7)*0.4 + sin(uTime*0.1 + aSeed)*0.5;
+      p.z += sin(t*0.5+1.2)*0.3;
+      vAlpha = 0.18 + 0.22 * (0.5 + 0.5*sin(uTime*0.6 + aSeed*4.0));
+      vec4 mv = modelViewMatrix * vec4(p, 1.0);
+      gl_Position = projectionMatrix * mv;
+      gl_PointSize = (1.5 + 1.6*sin(aSeed*3.1)) * uPx;
+    }`,
+  fragmentShader:`
+    varying float vAlpha;
+    void main(){
+      vec2 d = gl_PointCoord - 0.5;
+      float a = smoothstep(0.5, 0.0, length(d));
+      gl_FragColor = vec4(1.0, 0.95, 0.82, a * vAlpha);
+    }`
+});
+const dust = new THREE.Points(dustGeo, dustMat);
+scene.add(dust);
+
+const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,100);
+
+// We want the tree to sit slightly lower in the frame so the ring/base
+// is near the bottom (matching the reference). View target Y is the
+// midpoint of the tree, biased a touch upward.
+const VIEW_TARGET_Y = (treeMinY + treeMaxY) * 0.5;
+
+camera.position.set(0, VIEW_TARGET_Y, 30);
+camera.lookAt(0, VIEW_TARGET_Y, 0);
+
+function fitCamera(){
+  const w=innerWidth, h=innerHeight;
+  const aspect = w/h;
+
+  // We need to enclose:
+  //   vertically:   treeH plus padding (≥ treeH * 1.2)
+  //   horizontally: 2 * treeMaxR plus padding (≥ treeMaxR * 2.3)
+  const wantHalfH = treeH    * 0.6;       // 20% top + 20% bottom padding
+  const wantHalfW = treeMaxR * 1.15;      // 15% padding on each side
+
+  // Pick halfH so BOTH constraints are met under the current aspect ratio
+  const halfH = Math.max(wantHalfH, wantHalfW / aspect);
+  const halfW = halfH * aspect;
+
+  camera.left=-halfW; camera.right=halfW;
+  camera.top=halfH;   camera.bottom=-halfH;
+  camera.updateProjectionMatrix();
+}
+
+// =========================================================================
+// Post-processing — bloom for glow on pistils, stamens & bright petals
+// =========================================================================
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(innerWidth, innerHeight),
+  0.7,    // strength
+  0.85,   // radius
+  0.85    // threshold — well above peach bg luminance, only emissive blooms
+);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+function resize(){
+  renderer.setSize(innerWidth,innerHeight,false);
+  composer.setSize(innerWidth,innerHeight);
+  bgMat.uniforms.uAspect.value = innerWidth/innerHeight;
+  fitCamera();
+}
+addEventListener('resize',resize); resize();
+
+// =========================================================================
+// Build meshes from the (now centered) data — single treeGroup at origin
+// =========================================================================
+const treeGroup=new THREE.Group();
+scene.add(treeGroup);
+
+// --- branches as a single LineSegments with per-vertex order attribute ---
+const positions=[]; const orders=[];
+segments.forEach(s=>{
+  positions.push(s.start.x,s.start.y,s.start.z, s.end.x,s.end.y,s.end.z);
+  orders.push(s.order,s.order);
+});
+const lineGeo=new THREE.BufferGeometry();
+lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+lineGeo.setAttribute('aOrder',   new THREE.Float32BufferAttribute(orders,1));
+
+const lineMat=new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{ uGrow:{value:0}, uTotal:{value:totalOrder}, uColor:{value:new THREE.Color('#6b5942')} },
+  vertexShader:`
+    attribute float aOrder;
+    varying float vVisible;
+    uniform float uGrow, uTotal;
+    void main(){
+      vVisible = step(aOrder - 0.5, uGrow * uTotal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }`,
+  fragmentShader:`
+    varying float vVisible;
+    uniform vec3 uColor;
+    void main(){
+      if(vVisible < 0.5) discard;
+      gl_FragColor = vec4(uColor, 0.5);
+    }`
+});
+treeGroup.add(new THREE.LineSegments(lineGeo,lineMat));
+
+// --- buds ---
+const budGroup=new THREE.Group(); treeGroup.add(budGroup);
+buds.forEach(b=>{
+  const m=new THREE.Mesh(
+    new THREE.SphereGeometry(b.size,16,12),
+    new THREE.MeshBasicMaterial({color:b.color, transparent:true, opacity:0})
+  );
+  m.position.copy(b.pos);
+  m.userData={order:b.order};
+  budGroup.add(m);
+});
+
+// --- flowers — multi-layered petals on PBR material; clustered stamen
+//
+// Real flowers have an outer ring of larger petals + an inner ring of smaller
+// brighter petals. We do that here, then add a tiny stamen cluster at the
+// center. All on MeshStandardMaterial so they react to PBR lighting and bloom.
+
+function makePetalGeometry(curl=0.18){
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 0);
+  shape.bezierCurveTo(0.38, 0.12, 0.46, 0.62, 0.20, 1.00);
+  shape.bezierCurveTo(0.08, 1.10, -0.08, 1.10, -0.20, 1.00);
+  shape.bezierCurveTo(-0.46, 0.62, -0.38, 0.12, 0, 0);
+  const geo = new THREE.ShapeGeometry(shape, 22);
+  const pos = geo.attributes.position;
+  for (let i=0; i<pos.count; i++){
+    const x = pos.getX(i), y = pos.getY(i);
+    const z = -curl * y * y + 0.04 * Math.abs(x) * y;
+    pos.setZ(i, z);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+const PETAL_OUTER = makePetalGeometry(0.20);
+const PETAL_INNER = makePetalGeometry(0.34);
+const PISTIL_GEO  = new THREE.SphereGeometry(0.085, 18, 14);
+const STAMEN_GEO  = new THREE.SphereGeometry(0.020, 8, 6);
+
+function buildFlower3D(f){
+  const g = new THREE.Group();
+  const hue = f.h/360;
+
+  // Color tones — base, slightly desaturated rim, brighter inner highlight
+  const baseColor   = new THREE.Color().setHSL(hue, f.s,        f.l);
+  const innerColor  = new THREE.Color().setHSL(hue, Math.min(1, f.s+0.08), Math.min(0.95, f.l+0.10));
+  const emiBase     = new THREE.Color().setHSL(hue, f.s*0.85, f.l*0.55);
+
+  const materials = [];
+
+  // ---- Outer petal ring (5-7 large) ----
+  const nOuter = 5 + (f.variant % 3);
+  for (let i=0; i<nOuter; i++){
+    const mat = new THREE.MeshStandardMaterial({
+      color: baseColor,
+      emissive: emiBase,
+      emissiveIntensity: 0.30,
+      roughness: 0.55,
+      metalness: 0.05,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0
+    });
+    const petal = new THREE.Mesh(PETAL_OUTER, mat);
+    const a = (i/nOuter)*Math.PI*2 + (Math.random()-0.5)*0.18;
+    petal.rotation.z = a;
+    petal.rotation.x = -0.40 - Math.random()*0.12;
+    petal.scale.set(0.62, 0.62, 0.62);
+    g.add(petal);
+    materials.push(mat);
+  }
+
+  // ---- Inner petal ring (smaller, brighter, offset half a slot) ----
+  const nInner = nOuter;
+  for (let i=0; i<nInner; i++){
+    const mat = new THREE.MeshStandardMaterial({
+      color: innerColor,
+      emissive: emiBase,
+      emissiveIntensity: 0.55,
+      roughness: 0.45,
+      metalness: 0.05,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0
+    });
+    const petal = new THREE.Mesh(PETAL_INNER, mat);
+    const a = (i/nInner)*Math.PI*2 + Math.PI/nInner + (Math.random()-0.5)*0.12;
+    petal.rotation.z = a;
+    petal.rotation.x = -0.55 - Math.random()*0.10;
+    petal.scale.set(0.40, 0.40, 0.40);
+    petal.position.z = 0.012;
+    g.add(petal);
+    materials.push(mat);
+  }
+
+  // ---- Center: small disk + stamen cluster (tiny spheres on the rim) ----
+  const pistilMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color().setHSL(0.12, 0.85, 0.62),
+    emissive: new THREE.Color().setHSL(0.13, 0.9, 0.48),
+    emissiveIntensity: 1.1,             // glow — picks up nicely under bloom
+    roughness: 0.35,
+    metalness: 0.0,
+    transparent: true,
+    opacity: 0
+  });
+  const pistil = new THREE.Mesh(PISTIL_GEO, pistilMat);
+  pistil.scale.set(0.85, 0.85, 0.48);
+  pistil.position.z = 0.04;
+  g.add(pistil);
+  materials.push(pistilMat);
+
+  // Stamen dots around the pistil (5-7 of them)
+  const stamenMat = new THREE.MeshStandardMaterial({
+    color: 0xfff1c2,
+    emissive: 0xffcf6a,
+    emissiveIntensity: 1.4,
+    roughness: 0.3,
+    transparent: true, opacity: 0
+  });
+  materials.push(stamenMat);
+  const nStam = 5;
+  for (let i=0; i<nStam; i++){
+    const s = new THREE.Mesh(STAMEN_GEO, stamenMat);
+    const a = (i/nStam)*Math.PI*2;
+    const r = 0.058;
+    s.position.set(Math.cos(a)*r, Math.sin(a)*r, 0.07);
+    g.add(s);
+  }
+
+  g.userData = { materials };
+  return g;
+}
+
+const flowerGroup=new THREE.Group(); treeGroup.add(flowerGroup);
+const _zAxis = new THREE.Vector3(0,0,1);
+flowers.forEach(f=>{
+  const m = buildFlower3D(f);
+  m.position.copy(f.pos);
+  const q = new THREE.Quaternion().setFromUnitVectors(_zAxis, f.dir);
+  m.quaternion.copy(q);
+  m.rotateZ(f.zRoll);
+  m.rotateX(f.tilt);
+  m.rotateY(f.yaw);
+  m.scale.setScalar(f.scale);
+  m.userData.order = f.order;
+  flowerGroup.add(m);
+});
+
+// --- ring + stem at the (centered) root ---
+const ring=new THREE.Mesh(
+  new THREE.RingGeometry(1.05,1.07,64),
+  new THREE.MeshBasicMaterial({color:0x7a6248,side:THREE.DoubleSide,transparent:true,opacity:0.45})
+);
+ring.rotation.x=-Math.PI/2;
+ring.position.y = ringY - 0.02;
+treeGroup.add(ring);
+
+// =========================================================================
+// Controls + drag rotation
+// =========================================================================
+const growthEl=document.getElementById('growth');
+const rotYEl=document.getElementById('rotY');
+const rotZEl=document.getElementById('rotZ');
+const growthV=document.getElementById('growthV');
+const rotYV=document.getElementById('rotYV');
+const rotZV=document.getElementById('rotZV');
+
+let growth=0, targetGrowth=100;
+let rotY=0, rotZ=-6;
+let userRotY=0, dragging=false, lastX=0, dragVel=0;
+
+function updateLabels(){
+  growthV.textContent = growth.toFixed(1)+'%';
+  rotYV.textContent  = (rotY+userRotY).toFixed(1)+'°';
+  rotZV.textContent  = rotZ.toFixed(1)+'°';
+}
+
+growthEl.addEventListener('input',e=>{ targetGrowth=parseFloat(e.target.value); });
+rotYEl.addEventListener('input',e=>{ rotY=parseFloat(e.target.value); userRotY=0; });
+rotZEl.addEventListener('input',e=>{ rotZ=parseFloat(e.target.value); });
+
+function pt(e){return e.touches?{x:e.touches[0].clientX,y:e.touches[0].clientY}:{x:e.clientX,y:e.clientY}}
+canvas.addEventListener('pointerdown',e=>{dragging=true; lastX=pt(e).x; canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{
+  if(!dragging) return;
+  const x=pt(e).x;
+  const dx=x-lastX;
+  userRotY += dx*0.45;
+  dragVel = dx*0.45;
+  lastX=x;
+  rotYEl.value = Math.max(-180,Math.min(180, rotY+userRotY));
+});
+canvas.addEventListener('pointerup',()=>{dragging=false});
+canvas.addEventListener('pointercancel',()=>{dragging=false});
+
+// kick off growth shortly after load
+setTimeout(()=>{ targetGrowth=100; growthEl.value=100; }, 250);
+
+// =========================================================================
+// Animation loop
+// =========================================================================
+let t0=performance.now(), clock=0;
+function tick(now){
+  const dt=Math.min(0.05,(now-t0)/1000); t0=now; clock+=dt;
+
+  // smooth growth toward target
+  growth += (targetGrowth-growth)*Math.min(1,dt*0.8);
+  if(Math.abs(growth-targetGrowth)<0.05) growth=targetGrowth;
+
+  // momentum after drag
+  if(!dragging){
+    userRotY += dragVel;
+    dragVel *= 0.94;
+    if(Math.abs(dragVel)<0.01) dragVel=0;
+  }
+
+  // rotations — applied to a group whose origin = tree's visual center
+  const idleSway = Math.sin(clock*0.4)*1.0;
+  treeGroup.rotation.set(
+    0,
+    THREE.MathUtils.degToRad(rotY+userRotY+idleSway),
+    THREE.MathUtils.degToRad(rotZ + Math.sin(clock*0.3)*0.3)
+  );
+
+  // branch reveal
+  lineMat.uniforms.uGrow.value = growth/100;
+  const visThresh = (growth/100) * totalOrder;
+
+  // buds — pulse + fade
+  budGroup.children.forEach((s,i)=>{
+    const visible = s.userData.order <= visThresh;
+    const tgtA = visible ? 0.65 : 0;
+    s.material.opacity += (tgtA - s.material.opacity)*Math.min(1,dt*3);
+    const pulse = 1 + Math.sin(clock*1.2+i)*0.06;
+    const tgtS = visible ? pulse : 0.1;
+    const cur=s.scale.x;
+    s.scale.setScalar(cur + (tgtS-cur)*Math.min(1,dt*3));
+  });
+
+  // flowers — fade in (all sub-materials together) + gentle floating drift
+  const _zAx = new THREE.Vector3(0,0,1);
+  flowerGroup.children.forEach((g,idx)=>{
+    const f=flowers[idx];
+    const visible = g.userData.order <= visThresh + 1.5;
+    const tgtA = visible ? 1 : 0;
+
+    // Animate every petal + pistil material in sync
+    let lastOp = 0;
+    g.userData.materials.forEach(mat=>{
+      mat.opacity += (tgtA - mat.opacity)*Math.min(1,dt*2.5);
+      lastOp = mat.opacity;
+    });
+
+    const drift  = Math.sin(clock*f.driftSpeed + f.phase)*f.driftAmp;
+    const driftX = Math.cos(clock*f.driftSpeed*0.7 + f.phase)*f.driftAmp*0.6;
+    g.position.set(f.pos.x + driftX, f.pos.y + drift, f.pos.z + drift*0.5);
+
+    // Re-apply base outward orientation, then add a small breathing wobble
+    g.quaternion.setFromUnitVectors(_zAx, f.dir);
+    g.rotateZ(f.zRoll + Math.sin(clock*0.4+f.phase)*0.05);
+    g.rotateX(f.tilt + Math.sin(clock*0.5+f.phase)*0.06);
+    g.rotateY(f.yaw  + Math.cos(clock*0.3+f.phase)*0.06);
+
+    g.scale.setScalar((0.05 + lastOp*0.95) * f.scale);
+  });
+
+  // dust + background time uniforms
+  dustMat.uniforms.uTime.value = clock;
+  bgMat.uniforms.uTime.value = clock;
+
+  // UI status tickers
+  uiTick(now);
+
+  updateLabels();
+
+  composer.render();
+
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+updateLabels();
+
+// =========================================================================
+// UI status tickers (timestamp, FPS, metadata)
+// =========================================================================
+const stTime = document.getElementById('stTime');
+const stMeta = document.getElementById('stMeta');
+const stFps  = document.getElementById('stFps');
+const startedAt = performance.now();
+let fpsCounter = 0, fpsLast = performance.now(), fpsValue = 0;
+const seed = Math.floor(1000 + Math.random()*9000);
+function uiTick(now){
+  // elapsed timestamp HH:MM:SS
+  const s = Math.floor((now - startedAt)/1000);
+  const hh = String(Math.floor(s/3600)).padStart(2,'0');
+  const mm = String(Math.floor((s/60)%60)).padStart(2,'0');
+  const ss = String(s%60).padStart(2,'0');
+  stTime.textContent = `${hh}:${mm}:${ss}`;
+  // fps every ~0.5s
+  fpsCounter++;
+  if (now - fpsLast > 500){
+    fpsValue = Math.round(fpsCounter * 1000 / (now - fpsLast));
+    fpsCounter = 0; fpsLast = now;
+    stFps.textContent = `${fpsValue} FPS`;
+  }
+  // metadata
+  stMeta.textContent = `SEED ${seed} · ${segments.length+flowers.length} NODES`;
+}
+</script>
+</body>
+</html>

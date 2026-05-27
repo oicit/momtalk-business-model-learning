@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MomTalk · 18 Playable Learning Scenes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --bg-2: #FBF1E0;
+    --surface: #FFFFFF;
+    --ink: #2A1F18;
+    --ink-soft: #5C4A3D;
+    --green: #2D6A4F;
+    --green-soft: #D8E8DF;
+    --green-dark: #1B4332;
+    --coral: #E07A5F;
+    --coral-soft: #FBE3D7;
+    --yellow: #F2C94C;
+    --yellow-soft: #FBEFC8;
+    --sky: #6FB3D2;
+    --sky-soft: #D4E8F2;
+    --lav: #B19CD9;
+    --lav-soft: #E8DEF5;
+    --pink: #F4A6CD;
+    --pink-soft: #FCE0EE;
+    --brown: #8B6F47;
+    --border: #EDE3D4;
+    --shadow: 0 4px 16px rgba(42, 31, 24, 0.08);
+    --shadow-hover: 0 8px 32px rgba(42, 31, 24, 0.14);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  .scene { display: none; min-height: 100vh; }
+  .scene.active { display: block; }
+
+  .back-btn {
+    position: fixed; top: 20px; left: 20px; z-index: 200;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 10px 18px; border-radius: 999px;
+    font: 600 14px inherit; cursor: pointer; color: var(--ink);
+    box-shadow: var(--shadow); transition: all 0.15s ease;
+  }
+  .back-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+  /* ============ HOME ============ */
+  #home { padding: 64px 24px 96px; max-width: 1200px; margin: 0 auto; }
+
+  .home-header { text-align: center; margin-bottom: 56px; }
+  .home-eyebrow {
+    display: inline-block; background: var(--coral-soft); color: var(--coral);
+    padding: 6px 16px; border-radius: 999px;
+    font: 700 12px/1 inherit; letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .home-header h1 {
+    font-size: clamp(32px, 5vw, 52px); line-height: 1.1;
+    margin-bottom: 16px; letter-spacing: -0.02em;
+  }
+  .home-header p { font-size: 17px; color: var(--ink-soft); max-width: 620px; margin: 0 auto; }
+
+  .home-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px;
+  }
+
+  .tile {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden; cursor: pointer;
+    transition: all 0.2s ease; display: flex; flex-direction: column;
+  }
+  .tile:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+
+  .tile-preview {
+    height: 130px; position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-body { padding: 14px 18px 18px; }
+  .tile-num {
+    font: 700 11px/1 "SF Mono", Menlo, monospace;
+    color: var(--ink-soft); letter-spacing: 0.12em; margin-bottom: 6px;
+  }
+  .tile h3 { font-size: 15px; margin-bottom: 4px; line-height: 1.25; letter-spacing: -0.01em; }
+  .tile p { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+
+  /* Tile gradient backgrounds */
+  .bg-green { background: linear-gradient(135deg, #D8E8DF, #B8DCC9); }
+  .bg-coral { background: linear-gradient(135deg, #FBE3D7, #F8C9B3); }
+  .bg-yellow { background: linear-gradient(135deg, #FBEFC8, #F6E08A); }
+  .bg-sky { background: linear-gradient(135deg, #D4E8F2, #B2D8E8); }
+  .bg-lav { background: linear-gradient(135deg, #E8DEF5, #D5C2EE); }
+  .bg-pink { background: linear-gradient(135deg, #FCE0EE, #F8C8E0); }
+
+  /* ============ SHARED SCENE LAYOUT ============ */
+  .scene-wrap {
+    max-width: 880px; margin: 0 auto; padding: 80px 24px 64px;
+  }
+  .scene-title {
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 6px;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700;
+    font-family: "SF Mono", Menlo, monospace;
+  }
+  .scene-name { font-size: 28px; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .scene-sub { color: var(--ink-soft); margin-bottom: 32px; }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; box-shadow: var(--shadow); overflow: hidden;
+  }
+
+  .btn {
+    background: var(--green); color: white; border: none;
+    padding: 12px 20px; border-radius: 999px; font: 600 14px inherit;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(45,106,79,0.3); }
+  .btn-coral { background: var(--coral); }
+  .btn-coral:hover { box-shadow: 0 4px 12px rgba(224,122,95,0.3); }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg-2); }
+
+  /* ============ MOMO AVATAR ============ */
+  .momo-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--yellow), var(--coral));
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(224,122,95,0.3);
+  }
+
+  /* ============ SCENE 01: CHAT QUEST ============ */
+  #scene-01 .chat-window {
+    background: var(--bg-2); padding: 24px; min-height: 480px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .msg { display: flex; gap: 12px; max-width: 85%; }
+  .msg.kid { margin-left: auto; flex-direction: row-reverse; }
+  .msg-bubble {
+    background: var(--surface); padding: 12px 16px; border-radius: 18px;
+    border-top-left-radius: 4px; box-shadow: var(--shadow); font-size: 15px;
+  }
+  .msg.kid .msg-bubble {
+    background: var(--green); color: white;
+    border-top-left-radius: 18px; border-top-right-radius: 4px;
+  }
+  .quest-card {
+    background: linear-gradient(135deg, var(--yellow-soft), var(--coral-soft));
+    border: 2px dashed var(--coral); border-radius: 16px;
+    padding: 16px; margin-top: 4px;
+  }
+  .quest-card .label { font-size: 11px; font-weight: 700; color: var(--coral); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .quest-card .quest { font-size: 16px; font-weight: 600; }
+  .reply-options {
+    display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 24px 24px;
+    background: var(--bg-2);
+  }
+  .reply-options button {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 999px; font: 500 14px inherit;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .reply-options button:hover { border-color: var(--green); color: var(--green); }
+  .sticker-reward {
+    background: var(--surface); padding: 20px; text-align: center;
+    border-top: 1px dashed var(--border);
+  }
+  .sticker {
+    display: inline-block; padding: 16px 24px; background: var(--yellow-soft);
+    border: 3px solid var(--yellow); border-radius: 20px;
+    font-size: 14px; font-weight: 700; transform: rotate(-3deg);
+    animation: pop 0.5s ease;
+  }
+  @keyframes pop {
+    0% { transform: rotate(-3deg) scale(0); }
+    60% { transform: rotate(-3deg) scale(1.15); }
+    100% { transform: rotate(-3deg) scale(1); }
+  }
+
+  /* ============ SCENE 02: MOMO'S WORLD 3D ============ */
+  #scene-02 { background: linear-gradient(180deg, #B2D8E8 0%, #D8E8DF 100%); min-height: 100vh; }
+  #momo-world-canvas { display: block; width: 100%; height: 100vh; }
+  .world-overlay {
+    position: fixed; top: 20px; right: 20px; z-index: 100;
+    background: rgba(255,255,255,0.95); padding: 16px 20px;
+    border-radius: 16px; box-shadow: var(--shadow);
+    max-width: 280px; font-size: 13px;
+  }
+  .world-overlay h4 { margin-bottom: 8px; font-size: 14px; }
+  .world-overlay kbd {
+    display: inline-block; padding: 2px 6px; background: var(--bg-2);
+    border-radius: 4px; border: 1px solid var(--border);
+    font: 600 11px "SF Mono", monospace; margin: 0 2px;
+  }
+  .location-label {
+    position: fixed; left: 50%; bottom: 60px; transform: translateX(-50%);
+    background: var(--surface); padding: 14px 24px; border-radius: 999px;
+    box-shadow: var(--shadow); font-weight: 600; z-index: 100;
+    display: none;
+  }
+  .location-label.show { display: block; animation: pop 0.3s ease; }
+
+  /* ============ SCENE 03: SKILL TREE MAP ============ */
+  #scene-03 .map-container {
+    background: linear-gradient(180deg, #FBEFC8 0%, #FBE3D7 100%);
+    padding: 0; position: relative; min-height: 540px; overflow: hidden;
+  }
+  .map-svg { width: 100%; height: 540px; display: block; }
+  .map-node {
+    cursor: pointer; transition: transform 0.2s;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .map-node:hover { transform: scale(1.15); }
+  .node-info {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: white; padding: 16px 24px; border-radius: 16px;
+    box-shadow: var(--shadow); max-width: 400px; display: none;
+  }
+  .node-info.show { display: block; animation: pop 0.3s; }
+
+  /* ============ SCENE 04: RECAP VIDEO ============ */
+  #scene-04 .video-frame {
+    background: #1B4332; aspect-ratio: 16/9; position: relative;
+    overflow: hidden; display: flex; align-items: center; justify-content: center;
+  }
+  .video-slide {
+    position: absolute; inset: 0; padding: 40px; color: white;
+    display: flex; flex-direction: column; justify-content: center;
+    opacity: 0; transition: opacity 0.6s;
+    text-align: center;
+  }
+  .video-slide.active { opacity: 1; }
+  .video-slide h2 { font-size: 36px; margin-bottom: 12px; }
+  .video-slide p { font-size: 18px; opacity: 0.9; }
+  .video-controls {
+    background: #0F2A1F; padding: 12px 20px; display: flex; align-items: center; gap: 12px;
+  }
+  .play-btn {
+    width: 40px; height: 40px; border-radius: 50%; background: white; border: none;
+    color: var(--green-dark); cursor: pointer; font-size: 16px;
+  }
+  .progress { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 100%; width: 0%; background: var(--yellow); transition: width 0.3s; }
+  .video-time { color: white; font-size: 13px; font-family: "SF Mono", monospace; }
+
+  /* ============ SCENE 05: FAMILY STREAK ============ */
+  #scene-05 .streak-header {
+    background: linear-gradient(135deg, var(--coral), var(--yellow));
+    padding: 32px; color: white; text-align: center;
+  }
+  .streak-count { font-size: 64px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .streak-label { opacity: 0.9; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .calendar { padding: 24px; }
+  .cal-week { font-size: 11px; color: var(--ink-soft); text-align: center; font-weight: 700; padding: 6px 0; letter-spacing: 0.05em; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-day {
+    aspect-ratio: 1; background: var(--bg-2); border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; gap: 4px; position: relative;
+  }
+  .cal-day.both {
+    background: var(--green); color: white;
+  }
+  .cal-day.half {
+    background: var(--yellow-soft);
+  }
+  .cal-day.today { box-shadow: 0 0 0 3px var(--coral); }
+  .day-dots { display: flex; gap: 2px; height: 6px; }
+  .day-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); }
+  .day-dot.filled { background: white; }
+  .cal-day:not(.both) .day-dot { background: var(--border); }
+  .cal-day:not(.both) .day-dot.filled { background: var(--coral); }
+  .streak-footer { padding: 16px 24px 24px; text-align: center; color: var(--ink-soft); font-size: 13px; }
+
+  /* ============ SCENE 06: WEBGL SOLAR SYSTEM ============ */
+  #scene-06 { background: #0B0F26; color: white; min-height: 100vh; position: relative; }
+  #solar-canvas { display: block; width: 100%; height: 100vh; cursor: grab; }
+  #solar-canvas:active { cursor: grabbing; }
+  .solar-overlay {
+    position: fixed; top: 20px; right: 20px; z-index: 100;
+    background: rgba(255,255,255,0.96); color: var(--ink);
+    padding: 16px 20px; border-radius: 16px; max-width: 260px; font-size: 13px;
+  }
+  .planet-card {
+    position: fixed; left: 20px; bottom: 20px; z-index: 100;
+    background: rgba(255,255,255,0.96); color: var(--ink);
+    padding: 20px 24px; border-radius: 20px; max-width: 320px;
+    display: none;
+  }
+  .planet-card.show { display: block; animation: pop 0.3s; }
+  .planet-card h3 { font-size: 22px; margin-bottom: 6px; }
+  .planet-card .stat { font-size: 12px; color: var(--ink-soft); margin-bottom: 12px; }
+  .planet-card p { font-size: 14px; }
+
+  /* ============ SCENE 07: BRANCHING STORY ============ */
+  #scene-07 .story-art {
+    height: 200px;
+    background: linear-gradient(180deg, #D4E8F2 0%, #B2D8E8 60%, #B8DCC9 100%);
+    display: flex; align-items: center; justify-content: center; font-size: 80px;
+    position: relative; overflow: hidden;
+  }
+  .story-body { padding: 28px 32px 32px; }
+  .story-text { font-size: 17px; line-height: 1.6; margin-bottom: 24px; }
+  .story-choices { display: flex; flex-direction: column; gap: 10px; }
+  .story-choices button {
+    text-align: left; background: var(--bg-2); border: 1px solid var(--border);
+    padding: 14px 18px; border-radius: 14px; font: 500 15px inherit; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .story-choices button:hover { background: var(--green-soft); border-color: var(--green); transform: translateX(4px); }
+  .check-q { background: var(--coral-soft); border-left: 4px solid var(--coral); padding: 14px 18px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; }
+
+  /* ============ SCENE 08: DAILY PUZZLE ============ */
+  #scene-08 .puzzle-wrap { padding: 28px; text-align: center; }
+  .puzzle-prompt { font-size: 16px; color: var(--ink-soft); margin-bottom: 16px; }
+  .puzzle-rows { display: flex; flex-direction: column; gap: 6px; align-items: center; margin: 20px 0; }
+  .puzzle-row { display: flex; gap: 6px; }
+  .puzzle-cell {
+    width: 56px; height: 56px; border: 2px solid var(--border);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font: 700 24px inherit; text-transform: uppercase; background: var(--surface);
+    transition: all 0.3s;
+  }
+  .puzzle-cell.correct { background: var(--green); color: white; border-color: var(--green); }
+  .puzzle-cell.present { background: var(--yellow); color: white; border-color: var(--yellow); }
+  .puzzle-cell.absent { background: var(--ink-soft); color: white; border-color: var(--ink-soft); opacity: 0.6; }
+  .keyboard { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .key-row { display: flex; gap: 4px; }
+  .key {
+    min-width: 32px; height: 44px; padding: 0 8px; background: var(--bg-2);
+    border: none; border-radius: 6px; font: 600 14px inherit; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .key:hover { background: var(--border); }
+  .key.wide { padding: 0 14px; font-size: 11px; }
+  .puzzle-done {
+    margin-top: 20px; padding: 16px; background: var(--green-soft); border-radius: 12px;
+    color: var(--green-dark); font-weight: 600;
+  }
+
+  /* ============ SCENE 09: KNOWLEDGE CARDS ============ */
+  #scene-09 .cards-wrap { padding: 28px; }
+  .cards-counter { display: flex; justify-content: space-between; margin-bottom: 16px; font-size: 13px; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  .know-card {
+    aspect-ratio: 3/4; border-radius: 14px; cursor: pointer;
+    perspective: 1000px; position: relative;
+  }
+  .card-inner {
+    width: 100%; height: 100%; transition: transform 0.5s;
+    transform-style: preserve-3d; position: relative;
+  }
+  .know-card.flipped .card-inner { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; inset: 0; border-radius: 14px;
+    backface-visibility: hidden; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 10px;
+  }
+  .card-back {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: white; transform: rotateY(180deg);
+  }
+  .card-front { font-size: 32px; }
+  .card-front.locked { background: var(--bg-2); color: var(--ink-soft); opacity: 0.5; font-size: 20px; }
+  .card-rare { background: linear-gradient(135deg, var(--yellow-soft), var(--coral-soft)); border: 2px solid var(--yellow); }
+  .card-common { background: var(--green-soft); border: 2px solid var(--green-soft); }
+  .card-blue { background: var(--sky-soft); border: 2px solid var(--sky-soft); }
+  .card-back .name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .card-back .desc { font-size: 10px; opacity: 0.85; text-align: center; line-height: 1.3; }
+
+  /* ============ SCENE 10: KNOWLEDGE GARDEN ============ */
+  #scene-10 .garden {
+    background: linear-gradient(180deg, #D4E8F2 0%, #B8DCC9 70%, #8B6F47 100%);
+    height: 480px; position: relative; overflow: hidden;
+  }
+  .garden-stat {
+    position: absolute; top: 20px; left: 20px;
+    background: rgba(255,255,255,0.95); padding: 12px 16px;
+    border-radius: 12px; font-size: 13px; font-weight: 600;
+  }
+  .plant {
+    position: absolute; bottom: 30px; transform-origin: bottom center;
+    animation: sway 4s ease-in-out infinite;
+  }
+  .plant.p2 { animation-duration: 5s; animation-delay: -1s; }
+  .plant.p3 { animation-duration: 4.5s; animation-delay: -2s; }
+  .plant.p4 { animation-duration: 5.5s; animation-delay: -0.5s; }
+  .plant.p5 { animation-duration: 4.2s; animation-delay: -1.5s; }
+  @keyframes sway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  .water-btn {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--coral); color: white; border: none;
+    padding: 12px 24px; border-radius: 999px; font: 600 14px inherit; cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+  .new-bloom {
+    position: absolute; padding: 8px 14px; background: white; border-radius: 999px;
+    box-shadow: var(--shadow); font-size: 12px; font-weight: 600;
+    animation: floatUp 2s ease forwards; opacity: 0;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-60px); }
+  }
+
+  /* ============ SCENE 11: FIND-IT SCENE ============ */
+  #scene-11 .find-wrap { padding: 0; }
+  .find-header { padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; background: var(--bg-2); border-bottom: 1px solid var(--border); }
+  .find-list { display: flex; gap: 10px; flex-wrap: wrap; }
+  .find-item {
+    padding: 6px 12px; background: white; border: 1px solid var(--border);
+    border-radius: 999px; font-size: 13px; font-weight: 600;
+  }
+  .find-item.found { background: var(--green); color: white; border-color: var(--green); text-decoration: line-through; }
+  .find-scene-svg { width: 100%; display: block; cursor: pointer; }
+  .find-target { cursor: pointer; transition: all 0.3s; }
+  .find-target:hover { filter: brightness(1.1); }
+  .find-target.found { filter: drop-shadow(0 0 12px var(--yellow)); }
+  .find-victory {
+    position: absolute; inset: 0; background: rgba(45,106,79,0.95); color: white;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 700; border-radius: 20px;
+  }
+  .find-victory.show { display: flex; animation: pop 0.4s; }
+
+  /* ============ SCENE 12: PHOTO QUEST ============ */
+  #scene-12 .quest-prompt {
+    background: var(--coral); color: white; padding: 20px 28px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .quest-prompt .label { font-size: 11px; opacity: 0.85; letter-spacing: 0.1em; text-transform: uppercase; }
+  .quest-prompt h3 { font-size: 22px; }
+  .camera-view {
+    background: #1a1a1a; aspect-ratio: 4/3; position: relative;
+    display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
+  }
+  .photo-options {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 24px;
+  }
+  .photo-option {
+    aspect-ratio: 1; border-radius: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 48px; transition: all 0.2s; border: 3px solid transparent;
+  }
+  .photo-option:hover { transform: scale(1.05); }
+  .photo-option.correct { border-color: var(--green); }
+  .photo-option.wrong { border-color: var(--coral); }
+  .photo-result {
+    padding: 20px 28px; background: var(--bg-2); border-top: 1px solid var(--border);
+    display: none;
+  }
+  .photo-result.show { display: block; }
+  .photo-result.success h4 { color: var(--green); }
+
+  /* ============ SCENE 13: MYSTERY ARCHIVES ============ */
+  #scene-13 .archive-search {
+    padding: 20px 28px; background: var(--bg-2); border-bottom: 1px solid var(--border);
+  }
+  .archive-search input {
+    width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+    border-radius: 12px; font: 500 15px inherit; background: white;
+  }
+  .archive-search input:focus { outline: none; border-color: var(--green); }
+  .archive-results {
+    padding: 20px 28px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+    min-height: 200px;
+  }
+  .clue-card {
+    background: var(--bg-2); padding: 14px; border-radius: 12px;
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+  }
+  .clue-card:hover { background: var(--yellow-soft); border-color: var(--yellow); }
+  .clue-type { font-size: 10px; font-weight: 700; color: var(--coral); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .clue-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .clue-preview { font-size: 12px; color: var(--ink-soft); }
+  .case-bar { padding: 16px 28px; background: var(--green-dark); color: white; display: flex; justify-content: space-between; align-items: center; }
+
+  /* ============ SCENE 14: AUDIO WORLD ============ */
+  #scene-14 { background: linear-gradient(180deg, #1B4332 0%, #2D6A4F 100%); min-height: 100vh; color: white; }
+  #scene-14 .scene-wrap { padding-top: 80px; }
+  .audio-stage {
+    background: rgba(255,255,255,0.08); border-radius: 24px; padding: 0;
+    overflow: hidden; backdrop-filter: blur(10px);
+  }
+  .audio-art {
+    height: 280px; position: relative; overflow: hidden;
+    background: linear-gradient(180deg, #2D6A4F 0%, #1B4332 100%);
+  }
+  .firefly {
+    position: absolute; width: 4px; height: 4px; background: #F2C94C;
+    border-radius: 50%; box-shadow: 0 0 8px #F2C94C;
+    animation: fly 8s linear infinite;
+  }
+  @keyframes fly {
+    0% { transform: translate(0, 0); opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translate(400px, -100px); opacity: 0; }
+  }
+  .audio-controls { padding: 24px 28px; display: flex; align-items: center; gap: 16px; }
+  .audio-controls .play-btn { background: var(--yellow); color: var(--ink); width: 48px; height: 48px; }
+  .audio-info h3 { font-size: 18px; margin-bottom: 2px; }
+  .audio-info p { font-size: 13px; opacity: 0.7; }
+  .audio-narration {
+    padding: 20px 28px; background: rgba(0,0,0,0.2); font-style: italic;
+    border-top: 1px solid rgba(255,255,255,0.1); min-height: 60px;
+  }
+  .wave { display: flex; gap: 2px; align-items: center; height: 24px; }
+  .wave span {
+    width: 3px; background: var(--yellow); border-radius: 2px;
+    animation: wave 1s ease-in-out infinite;
+  }
+  .wave span:nth-child(2) { animation-delay: 0.1s; }
+  .wave span:nth-child(3) { animation-delay: 0.2s; }
+  .wave span:nth-child(4) { animation-delay: 0.3s; }
+  .wave span:nth-child(5) { animation-delay: 0.4s; }
+  @keyframes wave {
+    0%, 100% { height: 6px; }
+    50% { height: 22px; }
+  }
+
+  /* ============ SCENE 15: FRIEND GHOSTS ============ */
+  #scene-15 .friends-map {
+    background: linear-gradient(135deg, #FBEFC8, #D4E8F2);
+    height: 480px; position: relative; overflow: hidden;
+  }
+  .ghost {
+    position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    animation: bob 3s ease-in-out infinite;
+  }
+  .ghost-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: white; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    border: 3px solid white;
+  }
+  .ghost-name {
+    background: rgba(255,255,255,0.95); padding: 3px 10px;
+    border-radius: 999px; font-size: 11px; font-weight: 600;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .me-pin {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 60px; height: 60px; background: var(--coral);
+    border-radius: 50%; box-shadow: 0 0 0 8px rgba(224,122,95,0.2), 0 4px 16px rgba(224,122,95,0.4);
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    border: 4px solid white;
+  }
+  .activity-feed { padding: 20px 28px; background: var(--bg-2); border-top: 1px solid var(--border); }
+  .activity-feed h4 { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 10px; }
+  .activity { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 13px; }
+
+  /* ============ SCENE 16: MOMO COMPANION ============ */
+  #scene-16 .companion-window {
+    background: var(--bg-2); padding: 24px; min-height: 420px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .quick-prompts {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    padding: 16px 24px 24px; background: var(--bg-2);
+  }
+  .quick-prompts button {
+    background: white; border: 1px solid var(--border); padding: 12px 14px;
+    border-radius: 12px; font: 500 13px inherit; cursor: pointer; text-align: left;
+    transition: all 0.15s;
+  }
+  .quick-prompts button:hover { border-color: var(--coral); background: var(--coral-soft); }
+  .mom-banner {
+    background: var(--green-dark); color: white; padding: 10px 24px;
+    font-size: 12px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ============ SCENE 17: RHYTHM DRILL ============ */
+  #scene-17 { background: linear-gradient(180deg, #B19CD9 0%, #6FB3D2 100%); min-height: 100vh; color: white; }
+  #scene-17 .scene-wrap { padding-top: 80px; }
+  .rhythm-stage {
+    background: rgba(255,255,255,0.1); border-radius: 24px; padding: 40px;
+    text-align: center; backdrop-filter: blur(10px);
+  }
+  .rhythm-question { font-size: 64px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 32px; min-height: 80px; }
+  .rhythm-track {
+    position: relative; height: 80px; background: rgba(0,0,0,0.2);
+    border-radius: 40px; overflow: hidden; margin-bottom: 32px;
+  }
+  .rhythm-line {
+    position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+    width: 8px; height: 60px; background: var(--yellow); border-radius: 4px;
+    box-shadow: 0 0 16px var(--yellow);
+  }
+  .rhythm-note {
+    position: absolute; right: -50px; top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px; background: var(--coral); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: white;
+  }
+  .rhythm-note.moving { animation: slideLeft 2s linear forwards; }
+  @keyframes slideLeft {
+    from { right: -50px; }
+    to { right: calc(100% - 100px); }
+  }
+  .rhythm-options { display: flex; gap: 12px; justify-content: center; }
+  .rhythm-opt {
+    width: 64px; height: 64px; border-radius: 50%; border: none;
+    font: 800 24px inherit; cursor: pointer; background: var(--surface); color: var(--ink);
+    transition: all 0.1s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .rhythm-opt:hover { transform: translateY(-2px); }
+  .rhythm-opt.hit-correct { background: var(--green); color: white; }
+  .rhythm-opt.hit-wrong { background: var(--coral); color: white; }
+  .rhythm-score { font-size: 14px; opacity: 0.9; margin-top: 16px; }
+
+  /* ============ SCENE 18: SOKOBAN ============ */
+  #scene-18 .sokoban-wrap { padding: 28px; text-align: center; }
+  .sokoban-grid {
+    display: inline-grid; gap: 2px; padding: 16px;
+    background: var(--bg-2); border-radius: 12px; margin-bottom: 20px;
+  }
+  .sok-cell {
+    width: 56px; height: 56px; background: var(--surface); border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; transition: all 0.15s;
+  }
+  .sok-cell.wall { background: var(--brown); }
+  .sok-cell.target { background: var(--yellow-soft); border: 2px dashed var(--coral); }
+  .sok-cell.box { background: var(--coral-soft); font-size: 28px; }
+  .sok-cell.box-on-target { background: var(--green); }
+  .sok-cell.player { background: var(--green-soft); }
+  .sok-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 16px 0; }
+  .sok-row { display: flex; gap: 6px; }
+  .sok-btn {
+    width: 44px; height: 44px; border: 1px solid var(--border); background: white;
+    border-radius: 8px; font: 600 18px inherit; cursor: pointer;
+  }
+  .sok-btn:hover { background: var(--bg-2); }
+  .sok-win {
+    padding: 16px; background: var(--green-soft); border-radius: 12px;
+    color: var(--green-dark); font-weight: 700; display: none;
+  }
+  .sok-win.show { display: block; animation: pop 0.4s; }
+
+  @media (max-width: 600px) {
+    .home-grid { grid-template-columns: 1fr; }
+    .scene-wrap { padding: 70px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================== HOME ============================================== -->
+<div id="home" class="scene active">
+  <div class="home-header">
+    <span class="home-eyebrow">MomTalk · 18 Playable Scenes</span>
+    <h1>Learning gamification, demoed end-to-end</h1>
+    <p>Each tile is a real interactive scene — chat, 3D worlds, puzzles, rhythm games, idle gardens. Tap any to play. <strong>Warm hooks, no dark patterns.</strong></p>
+  </div>
+
+  <div class="home-grid">
+    <div class="tile" onclick="showScene('scene-01')">
+      <div class="tile-preview bg-yellow">💬</div>
+      <div class="tile-body"><div class="tile-num">SCENE 01</div><h3>Chat-Quest with Momo</h3><p>Daily quest, kid replies, sticker drops</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-02')">
+      <div class="tile-preview bg-green">🏝️</div>
+      <div class="tile-body"><div class="tile-num">SCENE 02</div><h3>Momo's World 3D</h3><p>Walk around, approach learning lands</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-03')">
+      <div class="tile-preview bg-coral">🗺️</div>
+      <div class="tile-body"><div class="tile-num">SCENE 03</div><h3>Skill-Tree Map</h3><p>The journey as a treasure map</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-04')">
+      <div class="tile-preview bg-lav">🎬</div>
+      <div class="tile-body"><div class="tile-num">SCENE 04</div><h3>Weekly Recap Video</h3><p>AI-generated, kid as the hero</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-05')">
+      <div class="tile-preview bg-coral">🔥</div>
+      <div class="tile-body"><div class="tile-num">SCENE 05</div><h3>Family Streak</h3><p>Counts when both engage</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-06')">
+      <div class="tile-preview bg-sky">🪐</div>
+      <div class="tile-body"><div class="tile-num">SCENE 06</div><h3>WebGL Solar System</h3><p>Drag to rotate, tap a planet</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-07')">
+      <div class="tile-preview bg-sky">📖</div>
+      <div class="tile-body"><div class="tile-num">SCENE 07</div><h3>Branching Story</h3><p>Choices shape the plot</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-08')">
+      <div class="tile-preview bg-yellow">🧩</div>
+      <div class="tile-body"><div class="tile-num">SCENE 08</div><h3>Daily Family Puzzle</h3><p>One word a day, solve together</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-09')">
+      <div class="tile-preview bg-green">🃏</div>
+      <div class="tile-body"><div class="tile-num">SCENE 09</div><h3>Knowledge Cards</h3><p>Collect, flip, combine</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-10')">
+      <div class="tile-preview bg-green">🌱</div>
+      <div class="tile-body"><div class="tile-num">SCENE 10</div><h3>Knowledge Garden</h3><p>Grows from real learning, idle</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-11')">
+      <div class="tile-preview bg-sky">🔍</div>
+      <div class="tile-body"><div class="tile-num">SCENE 11</div><h3>Find-It Scene</h3><p>One illustration, many lessons</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-12')">
+      <div class="tile-preview bg-pink">📸</div>
+      <div class="tile-body"><div class="tile-num">SCENE 12</div><h3>Photo Quest</h3><p>Outdoor hunt, real-world identification</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-13')">
+      <div class="tile-preview bg-lav">🕵️</div>
+      <div class="tile-body"><div class="tile-num">SCENE 13</div><h3>Mystery Archives</h3><p>Search clues, solve the case</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-14')">
+      <div class="tile-preview bg-green">🌌</div>
+      <div class="tile-body"><div class="tile-num">SCENE 14</div><h3>Atmospheric Audio</h3><p>Bedtime exploration mode</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-15')">
+      <div class="tile-preview bg-yellow">👻</div>
+      <div class="tile-body"><div class="tile-num">SCENE 15</div><h3>Friend Ghosts</h3><p>Presence, not competition</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-16')">
+      <div class="tile-preview bg-coral">🤗</div>
+      <div class="tile-body"><div class="tile-num">SCENE 16</div><h3>Momo Companion</h3><p>Guardrailed AI tutor chat</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-17')">
+      <div class="tile-preview bg-lav">🎵</div>
+      <div class="tile-body"><div class="tile-num">SCENE 17</div><h3>Rhythm Drilling</h3><p>Times tables to a beat</p></div>
+    </div>
+    <div class="tile" onclick="showScene('scene-18')">
+      <div class="tile-preview bg-pink">📦</div>
+      <div class="tile-body"><div class="tile-num">SCENE 18</div><h3>Tinker-Lab Sokoban</h3><p>Push the boxes, think in steps</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 01 ============================================== -->
+<div id="scene-01" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 01 · Daily Habits</div>
+    <h2 class="scene-name">Chat-Quest with Momo</h2>
+    <p class="scene-sub">Momo gives a quest, kid replies, the artifact lands on the family wall.</p>
+    <div class="panel">
+      <div class="chat-window" id="chat-01">
+        <div class="msg">
+          <div class="momo-avatar">🦊</div>
+          <div class="msg-bubble">Good morning, Emma! Ready for today's quest?</div>
+        </div>
+        <div class="msg">
+          <div class="momo-avatar">🦊</div>
+          <div class="msg-bubble">
+            <div class="quest-card">
+              <div class="label">QUEST OF THE DAY</div>
+              <div class="quest">🌊 Find 3 things in your house that float in water!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reply-options" id="reply-01">
+        <button onclick="chatReply('A rubber duck! 🦆')">A rubber duck! 🦆</button>
+        <button onclick="chatReply('My plastic toy boat')">My plastic toy boat</button>
+        <button onclick="chatReply('An apple from the kitchen')">An apple from the kitchen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 02 ============================================== -->
+<div id="scene-02" class="scene">
+  <button class="back-btn" onclick="goHome(); stopWorld()">← All Scenes</button>
+  <canvas id="momo-world-canvas"></canvas>
+  <div class="world-overlay">
+    <h4>🏝️ Momo's World</h4>
+    <div>Move: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrows</div>
+    <div style="margin-top:6px; color: var(--ink-soft); font-size:12px;">Walk near a building to enter</div>
+  </div>
+  <div class="location-label" id="location-label"></div>
+</div>
+
+<!-- ============================================== SCENE 03 ============================================== -->
+<div id="scene-03" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 03 · World &amp; Companion</div>
+    <h2 class="scene-name">Skill-Tree Map</h2>
+    <p class="scene-sub">The curriculum as a hand-drawn treasure map. Tap a node to see what's there.</p>
+    <div class="panel">
+      <div class="map-container">
+        <svg class="map-svg" viewBox="0 0 800 540">
+          <!-- background islands -->
+          <ellipse cx="120" cy="430" rx="80" ry="20" fill="#8B6F47" opacity="0.2"/>
+          <ellipse cx="380" cy="280" rx="100" ry="22" fill="#8B6F47" opacity="0.2"/>
+          <ellipse cx="660" cy="160" rx="90" ry="22" fill="#8B6F47" opacity="0.2"/>
+
+          <!-- path -->
+          <path d="M 120 430 Q 250 380 380 280 T 660 160" stroke="#8B6F47" stroke-width="4" fill="none" stroke-dasharray="8 6" opacity="0.6"/>
+
+          <!-- decorative trees -->
+          <g transform="translate(60,400)"><circle cx="0" cy="-15" r="14" fill="#2D6A4F"/><rect x="-2" y="-2" width="4" height="8" fill="#8B6F47"/></g>
+          <g transform="translate(190,360)"><circle cx="0" cy="-12" r="10" fill="#2D6A4F"/><rect x="-2" y="-3" width="4" height="6" fill="#8B6F47"/></g>
+          <g transform="translate(310,250)"><circle cx="0" cy="-15" r="14" fill="#2D6A4F"/><rect x="-2" y="-2" width="4" height="8" fill="#8B6F47"/></g>
+          <g transform="translate(500,200)"><circle cx="0" cy="-12" r="10" fill="#2D6A4F"/><rect x="-2" y="-3" width="4" height="6" fill="#8B6F47"/></g>
+          <g transform="translate(720,140)"><circle cx="0" cy="-15" r="14" fill="#2D6A4F"/><rect x="-2" y="-2" width="4" height="8" fill="#8B6F47"/></g>
+
+          <!-- nodes -->
+          <g class="map-node" onclick="showNode('Letters', 'Mastered all 26 letters!', '🔤')">
+            <circle cx="120" cy="430" r="22" fill="#2D6A4F"/>
+            <text x="120" y="438" text-anchor="middle" fill="white" font-size="20">✓</text>
+          </g>
+          <g class="map-node" onclick="showNode('Phonics', 'Sounding out 3-letter words!', '🔊')">
+            <circle cx="250" cy="370" r="22" fill="#2D6A4F"/>
+            <text x="250" y="378" text-anchor="middle" fill="white" font-size="20">✓</text>
+          </g>
+          <g class="map-node" onclick="showNode('Sight Words', 'You are here — 12 of 25 done', '📖')">
+            <circle cx="380" cy="280" r="26" fill="#E07A5F" stroke="white" stroke-width="4"/>
+            <text x="380" y="290" text-anchor="middle" fill="white" font-size="22">🌟</text>
+          </g>
+          <g class="map-node" onclick="showNode('First Sentences', 'Locked — finish Sight Words!', '🔒')">
+            <circle cx="520" cy="220" r="22" fill="#EDE3D4"/>
+            <text x="520" y="228" text-anchor="middle" fill="#5C4A3D" font-size="18">🔒</text>
+          </g>
+          <g class="map-node" onclick="showNode('Chapter Books', 'Locked — keep going!', '🔒')">
+            <circle cx="660" cy="160" r="22" fill="#EDE3D4"/>
+            <text x="660" y="168" text-anchor="middle" fill="#5C4A3D" font-size="18">🔒</text>
+          </g>
+        </svg>
+        <div class="node-info" id="node-info"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 04 ============================================== -->
+<div id="scene-04" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 04 · Family Bonding</div>
+    <h2 class="scene-name">Weekly Recap Video</h2>
+    <p class="scene-sub">45-second AI-generated story. Auto-shipped to mom every Friday. The artifact families keep.</p>
+    <div class="panel">
+      <div class="video-frame">
+        <div class="video-slide active" data-slide="0">
+          <h2>Hey Emma! 👋</h2>
+          <p>Here's what you learned this week...</p>
+        </div>
+        <div class="video-slide" data-slide="1">
+          <h2>🔤 12 New Sight Words</h2>
+          <p>"because", "friend", "together"...</p>
+        </div>
+        <div class="video-slide" data-slide="2">
+          <h2>🌊 Floating Quest Solved</h2>
+          <p>You found 7 things that float!</p>
+        </div>
+        <div class="video-slide" data-slide="3">
+          <h2>⭐ See you next week!</h2>
+          <p>Mom got your weekly story 💌</p>
+        </div>
+      </div>
+      <div class="video-controls">
+        <button class="play-btn" id="video-play" onclick="toggleVideo()">▶</button>
+        <div class="progress"><div class="progress-bar" id="video-progress"></div></div>
+        <div class="video-time" id="video-time">0:00 / 0:45</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 05 ============================================== -->
+<div id="scene-05" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 05 · Daily Habits</div>
+    <h2 class="scene-name">Family Streak</h2>
+    <p class="scene-sub">Counts only when mom <em>and</em> kid both engage. Pulls, not pushes.</p>
+    <div class="panel">
+      <div class="streak-header">
+        <div class="streak-count">14</div>
+        <div class="streak-label">Days Together</div>
+      </div>
+      <div class="calendar">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px;">
+          <div class="cal-week">M</div><div class="cal-week">T</div><div class="cal-week">W</div><div class="cal-week">T</div><div class="cal-week">F</div><div class="cal-week">S</div><div class="cal-week">S</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="streak-footer">💚 You and Emma both showed up. Today's tiny ritual: 2-minute story together.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 06 ============================================== -->
+<div id="scene-06" class="scene">
+  <button class="back-btn" onclick="goHome(); stopSolar()">← All Scenes</button>
+  <canvas id="solar-canvas"></canvas>
+  <div class="solar-overlay">
+    <h4 style="margin-bottom:8px;">🪐 Solar System</h4>
+    <div style="font-size:12px;color:var(--ink-soft);">Drag to rotate · Click a planet to learn</div>
+  </div>
+  <div class="planet-card" id="planet-card"></div>
+</div>
+
+<!-- ============================================== SCENE 07 ============================================== -->
+<div id="scene-07" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 07 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Branching Story Lesson</h2>
+    <p class="scene-sub">Read, choose, branch. Comprehension checks become plot decisions.</p>
+    <div class="panel">
+      <div class="story-art" id="story-art">🌳</div>
+      <div class="story-body" id="story-body">
+        <div class="story-text">Lily walked deep into the <strong>whispering forest</strong>. The trees seemed to lean toward her, as if they were sharing a secret. Suddenly, she heard a tiny voice say, "Look <em>up</em>."</div>
+        <div class="check-q">📚 Quick check: where did the voice come from?</div>
+        <div class="story-choices">
+          <button onclick="storyChoose('up')">↑ Lily looked up at the branches</button>
+          <button onclick="storyChoose('down')">↓ Lily looked down at the roots</button>
+          <button onclick="storyChoose('run')">→ Lily ran the other way</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 08 ============================================== -->
+<div id="scene-08" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 08 · Daily Habits</div>
+    <h2 class="scene-name">Today's Family Puzzle</h2>
+    <p class="scene-sub">One puzzle, everyone gets the same. Built for the breakfast table.</p>
+    <div class="panel">
+      <div class="puzzle-wrap">
+        <div class="puzzle-prompt">A 4-letter word for <strong>a baby cat</strong> 🐾</div>
+        <div class="puzzle-rows" id="puzzle-rows"></div>
+        <div class="keyboard" id="keyboard"></div>
+        <div class="puzzle-done" id="puzzle-done" style="display:none">🎉 You got it! Mom solved it in 14 seconds too. New puzzle tomorrow.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 09 ============================================== -->
+<div id="scene-09" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 09 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Knowledge Card Collection</h2>
+    <p class="scene-sub">Earn a card every time you master a concept. Tap to flip.</p>
+    <div class="panel">
+      <div class="cards-wrap">
+        <div class="cards-counter">
+          <span>📚 Collection: <strong>9 / 16</strong></span>
+          <span style="color:var(--coral)">⭐ 2 Rare Cards Unlocked</span>
+        </div>
+        <div class="card-grid" id="card-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 10 ============================================== -->
+<div id="scene-10" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 10 · Daily Habits</div>
+    <h2 class="scene-name">Knowledge Garden</h2>
+    <p class="scene-sub">Grows from real learning — never from just opening the app.</p>
+    <div class="panel">
+      <div class="garden" id="garden">
+        <div class="garden-stat">🌱 <strong>7 plants</strong> from this week's lessons</div>
+        <div class="plant" style="left:10%;"><svg width="80" height="120"><line x1="40" y1="120" x2="40" y2="60" stroke="#2D6A4F" stroke-width="4"/><circle cx="40" cy="50" r="20" fill="#E07A5F"/><circle cx="40" cy="50" r="10" fill="#F2C94C"/></svg></div>
+        <div class="plant p2" style="left:25%;"><svg width="80" height="140"><line x1="40" y1="140" x2="40" y2="70" stroke="#2D6A4F" stroke-width="4"/><circle cx="30" cy="65" r="14" fill="#F4A6CD"/><circle cx="50" cy="65" r="14" fill="#F4A6CD"/><circle cx="40" cy="50" r="14" fill="#F4A6CD"/></svg></div>
+        <div class="plant p3" style="left:42%;"><svg width="80" height="160"><line x1="40" y1="160" x2="40" y2="80" stroke="#2D6A4F" stroke-width="4"/><ellipse cx="25" cy="80" rx="14" ry="6" fill="#2D6A4F" transform="rotate(-30 25 80)"/><ellipse cx="55" cy="80" rx="14" ry="6" fill="#2D6A4F" transform="rotate(30 55 80)"/><circle cx="40" cy="60" r="18" fill="#F2C94C"/></svg></div>
+        <div class="plant p4" style="left:60%;"><svg width="80" height="130"><line x1="40" y1="130" x2="40" y2="65" stroke="#2D6A4F" stroke-width="4"/><circle cx="40" cy="55" r="16" fill="#B19CD9"/><circle cx="40" cy="55" r="8" fill="white"/></svg></div>
+        <div class="plant p5" style="left:78%;"><svg width="80" height="150"><line x1="40" y1="150" x2="40" y2="75" stroke="#2D6A4F" stroke-width="4"/><circle cx="30" cy="70" r="11" fill="#6FB3D2"/><circle cx="50" cy="70" r="11" fill="#6FB3D2"/><circle cx="40" cy="55" r="11" fill="#6FB3D2"/></svg></div>
+        <button class="water-btn" onclick="growPlant()">🌟 Add today's learning</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 11 ============================================== -->
+<div id="scene-11" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 11 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Find-It Scene</h2>
+    <p class="scene-sub">One scene, many lessons. This week: find all the <strong>shapes</strong>.</p>
+    <div class="panel" style="position:relative;">
+      <div class="find-header">
+        <div class="find-list" id="find-list">
+          <div class="find-item" data-shape="circle">⭕ Circle</div>
+          <div class="find-item" data-shape="square">🟪 Square</div>
+          <div class="find-item" data-shape="triangle">🔺 Triangle</div>
+          <div class="find-item" data-shape="star">⭐ Star</div>
+          <div class="find-item" data-shape="heart">❤️ Heart</div>
+        </div>
+      </div>
+      <svg class="find-scene-svg" viewBox="0 0 800 400" style="background:linear-gradient(180deg,#D4E8F2 0%,#B8DCC9 100%);">
+        <!-- ground -->
+        <rect x="0" y="320" width="800" height="80" fill="#8B6F47" opacity="0.3"/>
+        <!-- sun (circle) -->
+        <circle cx="120" cy="80" r="35" fill="#F2C94C" class="find-target" data-shape="circle" onclick="findShape(this, 'circle')"/>
+        <!-- house body (square) -->
+        <rect x="280" y="200" width="100" height="100" fill="#E07A5F" class="find-target" data-shape="square" onclick="findShape(this, 'square')"/>
+        <!-- roof (triangle) -->
+        <polygon points="280,200 330,140 380,200" fill="#1B4332" class="find-target" data-shape="triangle" onclick="findShape(this, 'triangle')"/>
+        <!-- decorative star -->
+        <polygon points="550,80 558,105 583,105 562,120 570,145 550,130 530,145 538,120 517,105 542,105" fill="#F2C94C" class="find-target" data-shape="star" onclick="findShape(this, 'star')"/>
+        <!-- balloon (heart-shape with custom path) -->
+        <path d="M 680,180 C 680,170 670,160 660,160 C 650,160 645,170 645,180 C 645,190 660,205 660,205 C 660,205 680,190 680,180 Z" fill="#F4A6CD" class="find-target" data-shape="heart" onclick="findShape(this, 'heart')" transform="translate(0,0) scale(1.5) translate(-220,-60)"/>
+        <!-- distractors -->
+        <rect x="450" y="270" width="40" height="40" fill="#B19CD9" opacity="0.5"/>
+        <circle cx="200" cy="260" r="15" fill="#2D6A4F" opacity="0.5"/>
+        <!-- tree (distractor) -->
+        <rect x="730" y="240" width="14" height="80" fill="#8B6F47"/>
+        <circle cx="737" cy="230" r="30" fill="#2D6A4F"/>
+      </svg>
+      <div class="find-victory" id="find-victory">🎉 You found all 5 shapes!<br><span style="font-size:14px;font-weight:400;opacity:0.9;margin-top:8px;">+1 plant in your garden 🌱</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 12 ============================================== -->
+<div id="scene-12" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 12 · Family Bonding</div>
+    <h2 class="scene-name">Real-World Photo Quest</h2>
+    <p class="scene-sub">Outside-together hunt. Mom-kid bonding pattern with built-in identification.</p>
+    <div class="panel">
+      <div class="quest-prompt">
+        <div style="font-size:32px;">📸</div>
+        <div>
+          <div class="label">TODAY'S PHOTO QUEST</div>
+          <h3>Find something with <strong>3 sides</strong>!</h3>
+        </div>
+      </div>
+      <div class="photo-options" id="photo-options">
+        <div class="photo-option bg-sky" onclick="pickPhoto(this, false)">🌕</div>
+        <div class="photo-option bg-yellow" onclick="pickPhoto(this, true)">🔺</div>
+        <div class="photo-option bg-coral" onclick="pickPhoto(this, false)">🎈</div>
+        <div class="photo-option bg-lav" onclick="pickPhoto(this, false)">🍎</div>
+        <div class="photo-option bg-pink" onclick="pickPhoto(this, true)">🍕</div>
+        <div class="photo-option bg-green" onclick="pickPhoto(this, false)">⚽</div>
+      </div>
+      <div class="photo-result" id="photo-result">
+        <h4>✨ Great eye!</h4>
+        <p style="margin-top:4px;font-size:14px;color:var(--ink-soft);">A triangle has 3 sides and 3 corners. Where else have you seen triangles?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 13 ============================================== -->
+<div id="scene-13" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 13 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Mystery Archives</h2>
+    <p class="scene-sub">Detective database for kids. Search clues, solve the case.</p>
+    <div class="panel">
+      <div class="case-bar">
+        <div><strong>🕵️ Case #007:</strong> The Missing Cookies</div>
+        <div style="font-size:12px; opacity:0.85;">3 of 6 clues found</div>
+      </div>
+      <div class="archive-search">
+        <input type="text" placeholder="Search clues... try 'kitchen' or 'paw'" id="archive-input" oninput="archiveSearch()"/>
+      </div>
+      <div class="archive-results" id="archive-results"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 14 ============================================== -->
+<div id="scene-14" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 14 · Calm &amp; Immersive</div>
+    <h2 class="scene-name">Atmospheric Audio World</h2>
+    <p class="scene-sub">Bedtime mode. Audio-led exploration with screen optional.</p>
+    <div class="audio-stage">
+      <div class="audio-art" id="audio-art">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:80px;">🌲</div>
+        <!-- fireflies -->
+        <div class="firefly" style="left:5%; top:80%; animation-delay:0s"></div>
+        <div class="firefly" style="left:10%; top:60%; animation-delay:-2s"></div>
+        <div class="firefly" style="left:20%; top:90%; animation-delay:-4s"></div>
+        <div class="firefly" style="left:30%; top:70%; animation-delay:-1s"></div>
+        <div class="firefly" style="left:15%; top:85%; animation-delay:-3s"></div>
+        <div class="firefly" style="left:25%; top:75%; animation-delay:-5s"></div>
+      </div>
+      <div class="audio-controls">
+        <button class="play-btn" id="audio-play" onclick="toggleAudio()">▶</button>
+        <div class="audio-info">
+          <h3>The Whispering Forest</h3>
+          <p>Chapter 1 of 5 · Ecosystems · 4 min</p>
+        </div>
+        <div class="wave" id="audio-wave" style="display:none;"><span></span><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="audio-narration" id="audio-narration">
+        Press play to begin. Lights low, screen optional.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 15 ============================================== -->
+<div id="scene-15" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 15 · Family Bonding</div>
+    <h2 class="scene-name">Friend Ghosts</h2>
+    <p class="scene-sub">Friends as soft presence on your map. No scores, no leaderboards.</p>
+    <div class="panel">
+      <div class="friends-map">
+        <div class="me-pin">🌟</div>
+        <div class="ghost" style="left:20%; top:25%;"><div class="ghost-avatar">🐻</div><div class="ghost-name">Maya</div></div>
+        <div class="ghost" style="left:75%; top:30%; animation-delay:-1s;"><div class="ghost-avatar">🐰</div><div class="ghost-name">Sam</div></div>
+        <div class="ghost" style="left:15%; top:70%; animation-delay:-2s;"><div class="ghost-avatar">🦁</div><div class="ghost-name">Liam</div></div>
+        <div class="ghost" style="left:70%; top:75%; animation-delay:-0.5s;"><div class="ghost-avatar">🐼</div><div class="ghost-name">Zoe</div></div>
+        <div class="ghost" style="left:45%; top:15%; animation-delay:-1.5s;"><div class="ghost-avatar">🐧</div><div class="ghost-name">Noah</div></div>
+      </div>
+      <div class="activity-feed">
+        <h4>Today's Quiet News</h4>
+        <div class="activity">🐻 Maya planted her 8th flower in her garden</div>
+        <div class="activity">🐰 Sam finished today's puzzle</div>
+        <div class="activity">🦁 Liam read 2 chapters together with his dad</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 16 ============================================== -->
+<div id="scene-16" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 16 · World &amp; Companion</div>
+    <h2 class="scene-name">Momo Companion</h2>
+    <p class="scene-sub">Guardrailed AI tutor. Character locked, topics curriculum-bound, transcripts mom-visible.</p>
+    <div class="panel">
+      <div class="mom-banner">👩‍👧 Mom can see every conversation in her Friday digest</div>
+      <div class="companion-window" id="companion-window">
+        <div class="msg">
+          <div class="momo-avatar">🦊</div>
+          <div class="msg-bubble">Hi Emma! What can I help you with today?</div>
+        </div>
+      </div>
+      <div class="quick-prompts" id="quick-prompts">
+        <button onclick="momoReply('explain')">💡 Explain today's lesson again</button>
+        <button onclick="momoReply('story')">📖 Tell a story using my new words</button>
+        <button onclick="momoReply('hint')">🤔 Give me a hint, not the answer</button>
+        <button onclick="momoReply('stuck')">😕 I'm stuck on something</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 17 ============================================== -->
+<div id="scene-17" class="scene">
+  <button class="back-btn" onclick="goHome(); stopRhythm()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 17 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Rhythm Drilling</h2>
+    <p class="scene-sub">Times tables to a beat. Drilling becomes a song you want stuck in your head.</p>
+    <div class="rhythm-stage">
+      <div class="rhythm-question" id="rhythm-q">Press start to play 🎵</div>
+      <div class="rhythm-track">
+        <div class="rhythm-line"></div>
+        <div class="rhythm-note" id="rhythm-note" style="display:none;"></div>
+      </div>
+      <div class="rhythm-options" id="rhythm-options">
+        <button class="rhythm-opt" onclick="rhythmAnswer(0)" data-idx="0">?</button>
+        <button class="rhythm-opt" onclick="rhythmAnswer(1)" data-idx="1">?</button>
+        <button class="rhythm-opt" onclick="rhythmAnswer(2)" data-idx="2">?</button>
+        <button class="rhythm-opt" onclick="rhythmAnswer(3)" data-idx="3">?</button>
+      </div>
+      <div class="rhythm-score" id="rhythm-score">Score: 0 · Streak: 0</div>
+      <button class="btn" style="margin-top:24px;background:#F2C94C;color:#2A1F18;" onclick="startRhythm()">▶ Start Round</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================== SCENE 18 ============================================== -->
+<div id="scene-18" class="scene">
+  <button class="back-btn" onclick="goHome()">← All Scenes</button>
+  <div class="scene-wrap">
+    <div class="scene-title">Scene 18 · Content &amp; Mastery</div>
+    <h2 class="scene-name">Tinker-Lab Sokoban</h2>
+    <p class="scene-sub">Push every 📦 onto a 🎯. Teaches sequencing, planning, debugging — without saying "code."</p>
+    <div class="panel">
+      <div class="sokoban-wrap">
+        <div class="sokoban-grid" id="sokoban-grid"></div>
+        <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;">Moves: <strong id="sok-moves">0</strong></div>
+        <div class="sok-controls">
+          <button class="sok-btn" onclick="sokMove(0,-1)">↑</button>
+          <div class="sok-row">
+            <button class="sok-btn" onclick="sokMove(-1,0)">←</button>
+            <button class="sok-btn" onclick="sokReset()">↻</button>
+            <button class="sok-btn" onclick="sokMove(1,0)">→</button>
+          </div>
+          <button class="sok-btn" onclick="sokMove(0,1)">↓</button>
+        </div>
+        <div class="sok-win" id="sok-win">🎉 Solved in <span id="sok-final"></span> moves! Try again to do it in fewer.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================== ROUTER ============================================== */
+function showScene(id) {
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  if (id === 'scene-02') initWorld();
+  if (id === 'scene-05') initCalendar();
+  if (id === 'scene-06') initSolar();
+  if (id === 'scene-08') initPuzzle();
+  if (id === 'scene-09') initCards();
+  if (id === 'scene-13') initArchive();
+  if (id === 'scene-18') initSokoban();
+}
+function goHome() { showScene('home'); }
+
+/* ============================================== SCENE 01: CHAT QUEST ============================================== */
+function chatReply(text) {
+  const win = document.getElementById('chat-01');
+  const opts = document.getElementById('reply-01');
+  const kidMsg = document.createElement('div');
+  kidMsg.className = 'msg kid';
+  kidMsg.innerHTML = `<div class="msg-bubble">${text}</div>`;
+  win.appendChild(kidMsg);
+  opts.style.display = 'none';
+  setTimeout(() => {
+    const momo = document.createElement('div');
+    momo.className = 'msg';
+    momo.innerHTML = `<div class="momo-avatar">🦊</div><div class="msg-bubble">Wonderful! That's 3 floating things! 🌟<br>Quest complete!</div>`;
+    win.appendChild(momo);
+    setTimeout(() => {
+      const reward = document.createElement('div');
+      reward.className = 'sticker-reward';
+      reward.innerHTML = `<div class="sticker">🌊 Floating Master · sticker for the family wall</div><div style="margin-top:12px;font-size:12px;color:var(--ink-soft);">📬 Mom will see this in tonight's digest</div>`;
+      win.appendChild(reward);
+      win.scrollTop = win.scrollHeight;
+    }, 500);
+  }, 600);
+}
+
+/* ============================================== SCENE 02: MOMO'S WORLD 3D ============================================== */
+let worldState = null;
+function initWorld() {
+  if (worldState) { worldState.running = true; return; }
+  const canvas = document.getElementById('momo-world-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xB2D8E8);
+  scene.fog = new THREE.Fog(0xB2D8E8, 30, 80);
+
+  const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+
+  // Lights
+  const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+  scene.add(ambient);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+  sun.position.set(20, 30, 10);
+  scene.add(sun);
+
+  // Ground
+  const groundGeo = new THREE.PlaneGeometry(100, 100, 1, 1);
+  const groundMat = new THREE.MeshLambertMaterial({ color: 0x9BC9A1 });
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.rotation.x = -Math.PI / 2;
+  scene.add(ground);
+
+  // Path
+  const pathGeo = new THREE.PlaneGeometry(2, 60);
+  const pathMat = new THREE.MeshLambertMaterial({ color: 0xD4B896 });
+  const path = new THREE.Mesh(pathGeo, pathMat);
+  path.rotation.x = -Math.PI / 2;
+  path.position.y = 0.01;
+  scene.add(path);
+
+  // Locations (buildings)
+  const locations = [
+    { name: 'Math Mountain ⛰️', color: 0xE07A5F, x: -12, z: -8, shape: 'cone' },
+    { name: 'Reading Forest 🌲', color: 0x2D6A4F, x: 12, z: -6, shape: 'tree' },
+    { name: 'Tinker Lab 🔧', color: 0xB19CD9, x: 0, z: -20, shape: 'box' },
+    { name: 'Music Garden 🎵', color: 0xF2C94C, x: -8, z: 10, shape: 'sphere' },
+  ];
+
+  const buildings = [];
+  locations.forEach(loc => {
+    let mesh;
+    if (loc.shape === 'cone') {
+      mesh = new THREE.Mesh(new THREE.ConeGeometry(3, 6, 6), new THREE.MeshLambertMaterial({ color: loc.color }));
+      mesh.position.set(loc.x, 3, loc.z);
+    } else if (loc.shape === 'tree') {
+      const group = new THREE.Group();
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 2), new THREE.MeshLambertMaterial({ color: 0x8B6F47 }));
+      trunk.position.y = 1;
+      const leaves = new THREE.Mesh(new THREE.SphereGeometry(2.2, 8, 6), new THREE.MeshLambertMaterial({ color: loc.color }));
+      leaves.position.y = 3;
+      group.add(trunk); group.add(leaves);
+      group.position.set(loc.x, 0, loc.z);
+      mesh = group;
+    } else if (loc.shape === 'box') {
+      mesh = new THREE.Mesh(new THREE.BoxGeometry(4, 3, 4), new THREE.MeshLambertMaterial({ color: loc.color }));
+      mesh.position.set(loc.x, 1.5, loc.z);
+      // roof
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(3, 2, 4), new THREE.MeshLambertMaterial({ color: 0xE07A5F }));
+      roof.position.y = 2.5;
+      roof.rotation.y = Math.PI / 4;
+      mesh.add(roof);
+    } else {
+      mesh = new THREE.Mesh(new THREE.SphereGeometry(2, 12, 10), new THREE.MeshLambertMaterial({ color: loc.color }));
+      mesh.position.set(loc.x, 2, loc.z);
+    }
+    scene.add(mesh);
+    buildings.push({ mesh, ...loc });
+  });
+
+  // Decorative trees
+  for (let i = 0; i < 20; i++) {
+    const tree = new THREE.Group();
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 1.2), new THREE.MeshLambertMaterial({ color: 0x8B6F47 }));
+    t.position.y = 0.6;
+    const l = new THREE.Mesh(new THREE.SphereGeometry(1, 6, 5), new THREE.MeshLambertMaterial({ color: 0x4A8B64 }));
+    l.position.y = 1.8;
+    tree.add(t); tree.add(l);
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 25 + Math.random() * 15;
+    tree.position.set(Math.cos(angle) * dist, 0, Math.sin(angle) * dist);
+    scene.add(tree);
+  }
+
+  // Player (just a sphere with a cone hat)
+  const playerGroup = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 10), new THREE.MeshLambertMaterial({ color: 0xF2C94C }));
+  body.position.y = 0.6;
+  const hat = new THREE.Mesh(new THREE.ConeGeometry(0.5, 0.8, 8), new THREE.MeshLambertMaterial({ color: 0xE07A5F }));
+  hat.position.y = 1.4;
+  playerGroup.add(body); playerGroup.add(hat);
+  playerGroup.position.set(0, 0, 5);
+  scene.add(playerGroup);
+
+  const player = { pos: new THREE.Vector3(0, 0, 5), mesh: playerGroup };
+
+  // Keys
+  const keys = {};
+  const onKeyDown = e => { keys[e.key.toLowerCase()] = true; };
+  const onKeyUp = e => { keys[e.key.toLowerCase()] = false; };
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+
+  worldState = { renderer, scene, camera, player, buildings, keys, onKeyDown, onKeyUp, running: true };
+
+  // Resize handler
+  function onResize() {
+    if (!worldState) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  window.addEventListener('resize', onResize);
+  worldState.onResize = onResize;
+
+  let lastTime = performance.now();
+  function animate(now) {
+    if (!worldState || !worldState.running) return;
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    const speed = 8;
+    let dx = 0, dz = 0;
+    if (keys['w'] || keys['arrowup']) dz -= 1;
+    if (keys['s'] || keys['arrowdown']) dz += 1;
+    if (keys['a'] || keys['arrowleft']) dx -= 1;
+    if (keys['d'] || keys['arrowright']) dx += 1;
+    const len = Math.hypot(dx, dz);
+    if (len > 0) { dx /= len; dz /= len; }
+    player.pos.x += dx * speed * dt;
+    player.pos.z += dz * speed * dt;
+    player.pos.x = Math.max(-40, Math.min(40, player.pos.x));
+    player.pos.z = Math.max(-40, Math.min(40, player.pos.z));
+    player.mesh.position.copy(player.pos);
+    if (len > 0) player.mesh.rotation.y = Math.atan2(dx, dz) + Math.PI;
+    // gentle bob
+    player.mesh.position.y = Math.abs(Math.sin(now / 100)) * 0.1;
+
+    // Camera follow (3rd person)
+    const camTarget = new THREE.Vector3(player.pos.x, player.pos.y + 2, player.pos.z);
+    const camOffset = new THREE.Vector3(0, 8, 12);
+    camera.position.lerp(camTarget.clone().add(camOffset), 0.1);
+    camera.lookAt(player.pos.x, player.pos.y + 1, player.pos.z);
+
+    // Building proximity check
+    let near = null;
+    let minD = Infinity;
+    buildings.forEach(b => {
+      const d = Math.hypot(b.x - player.pos.x, b.z - player.pos.z);
+      if (d < 6 && d < minD) { minD = d; near = b; }
+    });
+    const label = document.getElementById('location-label');
+    if (near) {
+      label.textContent = `📍 ${near.name} — walk closer to enter`;
+      label.classList.add('show');
+    } else {
+      label.classList.remove('show');
+    }
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+}
+function stopWorld() {
+  if (worldState) {
+    worldState.running = false;
+    window.removeEventListener('keydown', worldState.onKeyDown);
+    window.removeEventListener('keyup', worldState.onKeyUp);
+    window.removeEventListener('resize', worldState.onResize);
+    worldState = null;
+  }
+}
+
+/* ============================================== SCENE 03: MAP ============================================== */
+function showNode(name, msg, emoji) {
+  const info = document.getElementById('node-info');
+  info.innerHTML = `<div style="font-size:32px;margin-bottom:4px;">${emoji}</div><div style="font-weight:700;margin-bottom:4px;">${name}</div><div style="font-size:13px;color:var(--ink-soft);">${msg}</div>`;
+  info.classList.add('show');
+}
+
+/* ============================================== SCENE 04: RECAP VIDEO ============================================== */
+let videoState = { playing: false, time: 0, interval: null };
+function toggleVideo() {
+  const btn = document.getElementById('video-play');
+  if (videoState.playing) {
+    btn.textContent = '▶';
+    clearInterval(videoState.interval);
+    videoState.playing = false;
+    return;
+  }
+  if (videoState.time >= 45) videoState.time = 0;
+  btn.textContent = '⏸';
+  videoState.playing = true;
+  videoState.interval = setInterval(() => {
+    videoState.time += 0.1;
+    if (videoState.time >= 45) {
+      videoState.time = 45;
+      clearInterval(videoState.interval);
+      videoState.playing = false;
+      btn.textContent = '↻';
+    }
+    const pct = (videoState.time / 45) * 100;
+    document.getElementById('video-progress').style.width = pct + '%';
+    const m = Math.floor(videoState.time / 60);
+    const s = Math.floor(videoState.time % 60);
+    document.getElementById('video-time').textContent = `0:${s.toString().padStart(2,'0')} / 0:45`;
+    const slideIdx = Math.min(3, Math.floor(videoState.time / 11.25));
+    document.querySelectorAll('#scene-04 .video-slide').forEach((sl, i) => {
+      sl.classList.toggle('active', i === slideIdx);
+    });
+  }, 100);
+}
+
+/* ============================================== SCENE 05: STREAK CALENDAR ============================================== */
+function initCalendar() {
+  const grid = document.getElementById('cal-grid');
+  if (grid.children.length) return;
+  // 28 days. Last 14 = streak. Today is day 21 (index)
+  const days = [];
+  for (let i = 0; i < 28; i++) {
+    let cls = '';
+    let bothDots = false;
+    if (i < 6) { cls = 'half'; bothDots = false; } // early days mom only
+    else if (i === 6) { cls = ''; } // gap day
+    else if (i >= 7 && i < 21) { cls = 'both'; bothDots = true; } // 14-day streak!
+    else if (i === 20) { cls = 'both today'; bothDots = true; } // today
+    const dotsHtml = bothDots
+      ? `<div class="day-dots"><div class="day-dot filled"></div><div class="day-dot filled"></div></div>`
+      : (cls === 'half'
+        ? `<div class="day-dots"><div class="day-dot filled"></div><div class="day-dot"></div></div>`
+        : `<div class="day-dots"><div class="day-dot"></div><div class="day-dot"></div></div>`);
+    grid.innerHTML += `<div class="cal-day ${cls}"><div>${i + 1}</div>${dotsHtml}</div>`;
+  }
+}
+
+/* ============================================== SCENE 06: SOLAR SYSTEM ============================================== */
+let solarState = null;
+function initSolar() {
+  if (solarState) { solarState.running = true; return; }
+  const canvas = document.getElementById('solar-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0B0F26);
+
+  // Stars
+  const starsGeo = new THREE.BufferGeometry();
+  const starPos = [];
+  for (let i = 0; i < 800; i++) {
+    starPos.push((Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200, (Math.random() - 0.5) * 200);
+  }
+  starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starsGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.3 }));
+  scene.add(stars);
+
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+  camera.position.set(0, 12, 28);
+  camera.lookAt(0, 0, 0);
+
+  // Sun
+  const sun = new THREE.Mesh(new THREE.SphereGeometry(2.5, 32, 24), new THREE.MeshBasicMaterial({ color: 0xF2C94C }));
+  scene.add(sun);
+  const sunGlow = new THREE.PointLight(0xffeaa0, 2, 100);
+  scene.add(sunGlow);
+
+  // Planets
+  const planetData = [
+    { name: 'Mercury', size: 0.4, dist: 5, color: 0x8B6F47, speed: 1.5, fact: 'The smallest planet — and the fastest! It zips around the sun in just 88 days.' },
+    { name: 'Venus', size: 0.7, dist: 7, color: 0xE07A5F, speed: 1.1, fact: 'The hottest planet. Hotter than an oven! Even hotter than Mercury.' },
+    { name: 'Earth', size: 0.75, dist: 9, color: 0x6FB3D2, speed: 0.9, fact: 'Our home! The only planet we know with oceans, life, and pizza.' },
+    { name: 'Mars', size: 0.5, dist: 11.5, color: 0xC44C30, speed: 0.7, fact: 'The red planet. It has the biggest volcano in the solar system — 3 times taller than Everest!' },
+    { name: 'Jupiter', size: 1.6, dist: 15, color: 0xD8A878, speed: 0.4, fact: 'A giant! Over 1,300 Earths could fit inside Jupiter. It has a storm bigger than our whole planet.' },
+    { name: 'Saturn', size: 1.3, dist: 19, color: 0xE8D9A0, speed: 0.3, fact: 'The one with rings! Made of millions of pieces of ice and rock.', rings: true },
+    { name: 'Uranus', size: 0.9, dist: 22.5, color: 0xA0D8DE, speed: 0.2, fact: 'It rotates on its side, like a ball rolling around the sun.' },
+    { name: 'Neptune', size: 0.85, dist: 25.5, color: 0x4A6FE0, speed: 0.15, fact: 'The windiest planet. Winds blow faster than the speed of sound!' },
+  ];
+  const planets = [];
+  planetData.forEach(p => {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(p.size, 24, 18), new THREE.MeshLambertMaterial({ color: p.color }));
+    scene.add(mesh);
+    if (p.rings) {
+      const rings = new THREE.Mesh(new THREE.RingGeometry(p.size * 1.4, p.size * 2, 32), new THREE.MeshBasicMaterial({ color: 0xE8D9A0, side: THREE.DoubleSide, opacity: 0.7, transparent: true }));
+      rings.rotation.x = Math.PI / 2 - 0.3;
+      mesh.add(rings);
+    }
+    const angle = Math.random() * Math.PI * 2;
+    planets.push({ mesh, ...p, angle });
+  });
+
+  // Mouse rotation
+  let rotX = 0.4, rotY = 0;
+  let dragging = false, lastX = 0, lastY = 0;
+  canvas.addEventListener('mousedown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  canvas.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    rotY += (e.clientX - lastX) * 0.005;
+    rotX += (e.clientY - lastY) * 0.005;
+    rotX = Math.max(0, Math.min(Math.PI / 2.2, rotX));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  // Touch
+  canvas.addEventListener('touchstart', e => { dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; });
+  window.addEventListener('touchend', () => { dragging = false; });
+  canvas.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    rotY += (e.touches[0].clientX - lastX) * 0.005;
+    rotX += (e.touches[0].clientY - lastY) * 0.005;
+    rotX = Math.max(0, Math.min(Math.PI / 2.2, rotX));
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  });
+
+  // Click planet
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  canvas.addEventListener('click', e => {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const meshes = planets.map(p => p.mesh);
+    const intersects = raycaster.intersectObjects(meshes);
+    if (intersects.length > 0) {
+      const hit = planets.find(p => p.mesh === intersects[0].object || p.mesh.children.includes(intersects[0].object));
+      if (hit) {
+        const card = document.getElementById('planet-card');
+        card.innerHTML = `<h3>${hit.name}</h3><div class="stat">Distance from sun: ${hit.dist} AU · Size rank: ${planets.indexOf(hit) + 1}</div><p>${hit.fact}</p>`;
+        card.classList.add('show');
+      }
+    }
+  });
+
+  function onResize() {
+    if (!solarState) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  window.addEventListener('resize', onResize);
+
+  solarState = { renderer, scene, camera, planets, running: true, onResize, rotX, rotY };
+
+  let t = 0;
+  function animate() {
+    if (!solarState || !solarState.running) return;
+    t += 0.01;
+    planets.forEach(p => {
+      p.angle += p.speed * 0.005;
+      p.mesh.position.x = Math.cos(p.angle) * p.dist;
+      p.mesh.position.z = Math.sin(p.angle) * p.dist;
+      p.mesh.rotation.y += 0.01;
+    });
+    sun.rotation.y += 0.002;
+    // Camera orbit
+    const r = 30;
+    camera.position.x = Math.sin(rotY) * Math.cos(rotX) * r;
+    camera.position.z = Math.cos(rotY) * Math.cos(rotX) * r;
+    camera.position.y = Math.sin(rotX) * r;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+}
+function stopSolar() {
+  if (solarState) {
+    solarState.running = false;
+    window.removeEventListener('resize', solarState.onResize);
+    solarState = null;
+  }
+}
+
+/* ============================================== SCENE 07: BRANCHING STORY ============================================== */
+const storySteps = {
+  up: {
+    art: '🦉',
+    text: 'Lily looked up. A little <strong>owl</strong> peeked at her from a branch. "Are you lost?" it whispered. "I can show you the way."',
+    q: 'Will Lily trust the owl?',
+    choices: [
+      { text: 'Follow the owl deeper into the forest', next: 'follow' },
+      { text: 'Politely say no, thank you', next: 'no' }
+    ]
+  },
+  down: {
+    art: '🐭',
+    text: 'Lily looked down. A tiny <strong>mouse</strong> peeked from a hole in a tree root. "Wrong way!" it squeaked. "The voice was up there!"',
+    q: 'What does Lily do now?',
+    choices: [
+      { text: 'Thank the mouse and look up', next: 'up' }
+    ]
+  },
+  run: {
+    art: '🌬️',
+    text: 'Lily ran. But the wind picked up and gently turned her around. "Don\'t be afraid," whispered the voice. "I just wanted to share a secret."',
+    q: 'What now?',
+    choices: [
+      { text: 'Stop and listen', next: 'up' }
+    ]
+  },
+  follow: {
+    art: '✨',
+    text: 'The owl led Lily to a clearing filled with <strong>glowing flowers</strong>. "This is the secret," it said. "It only blooms when someone listens."',
+    q: '',
+    choices: [
+      { text: '🌟 The end — you finished the story!', next: 'restart' }
+    ]
+  },
+  no: {
+    art: '🌳',
+    text: 'Lily walked home alone. But she remembered the owl, and came back the next day. The owl was still there. And so was the secret.',
+    q: '',
+    choices: [
+      { text: '🌟 The end — you finished the story!', next: 'restart' }
+    ]
+  }
+};
+function storyChoose(key) {
+  if (key === 'restart') { showScene('scene-07'); location.reload(); return; }
+  const step = storySteps[key];
+  if (!step) return;
+  document.getElementById('story-art').textContent = step.art;
+  let html = `<div class="story-text">${step.text}</div>`;
+  if (step.q) html += `<div class="check-q">📚 ${step.q}</div>`;
+  html += `<div class="story-choices">`;
+  step.choices.forEach(c => {
+    html += `<button onclick="storyChoose('${c.next}')">${c.text}</button>`;
+  });
+  html += `</div>`;
+  document.getElementById('story-body').innerHTML = html;
+}
+
+/* ============================================== SCENE 08: DAILY PUZZLE ============================================== */
+const puzzleAnswer = 'KITTEN'.substring(0, 4); // KITT? actually let's use KITTY
+const ANSWER = 'KITTY';
+let puzzleGuesses = [];
+let currentGuess = '';
+function initPuzzle() {
+  const rows = document.getElementById('puzzle-rows');
+  const kb = document.getElementById('keyboard');
+  if (rows.children.length) return;
+  // 4 rows of 5 cells
+  for (let r = 0; r < 4; r++) {
+    const row = document.createElement('div');
+    row.className = 'puzzle-row';
+    row.dataset.row = r;
+    for (let c = 0; c < 5; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'puzzle-cell';
+      cell.dataset.col = c;
+      row.appendChild(cell);
+    }
+    rows.appendChild(row);
+  }
+  const keyRows = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'];
+  keyRows.forEach((kr, i) => {
+    const row = document.createElement('div');
+    row.className = 'key-row';
+    if (i === 2) {
+      const enter = document.createElement('button');
+      enter.className = 'key wide';
+      enter.textContent = 'ENTER';
+      enter.onclick = puzzleSubmit;
+      row.appendChild(enter);
+    }
+    [...kr].forEach(ch => {
+      const k = document.createElement('button');
+      k.className = 'key';
+      k.textContent = ch;
+      k.dataset.letter = ch;
+      k.onclick = () => puzzleType(ch);
+      row.appendChild(k);
+    });
+    if (i === 2) {
+      const del = document.createElement('button');
+      del.className = 'key wide';
+      del.textContent = '⌫';
+      del.onclick = puzzleBack;
+      row.appendChild(del);
+    }
+    kb.appendChild(row);
+  });
+}
+function puzzleType(ch) {
+  if (puzzleGuesses.length >= 4) return;
+  if (currentGuess.length >= 5) return;
+  currentGuess += ch;
+  updatePuzzleDisplay();
+}
+function puzzleBack() {
+  currentGuess = currentGuess.slice(0, -1);
+  updatePuzzleDisplay();
+}
+function updatePuzzleDisplay() {
+  const row = document.querySelector(`#puzzle-rows .puzzle-row[data-row="${puzzleGuesses.length}"]`);
+  if (!row) return;
+  [...row.children].forEach((cell, i) => {
+    cell.textContent = currentGuess[i] || '';
+  });
+}
+function puzzleSubmit() {
+  if (currentGuess.length !== 5) return;
+  const row = document.querySelector(`#puzzle-rows .puzzle-row[data-row="${puzzleGuesses.length}"]`);
+  [...row.children].forEach((cell, i) => {
+    const ch = currentGuess[i];
+    if (ch === ANSWER[i]) cell.classList.add('correct');
+    else if (ANSWER.includes(ch)) cell.classList.add('present');
+    else cell.classList.add('absent');
+  });
+  puzzleGuesses.push(currentGuess);
+  if (currentGuess === ANSWER) {
+    document.getElementById('puzzle-done').style.display = 'block';
+  } else if (puzzleGuesses.length >= 4) {
+    document.getElementById('puzzle-done').innerHTML = `Today's word was <strong>${ANSWER}</strong>. Tomorrow brings a new one!`;
+    document.getElementById('puzzle-done').style.display = 'block';
+  }
+  currentGuess = '';
+}
+
+/* ============================================== SCENE 09: CARDS ============================================== */
+const cardData = [
+  { e: '🦋', name: 'Butterfly', desc: 'A metamorphosis champion!', rare: false, locked: false, color: 'common' },
+  { e: '🐉', name: 'Dragon Words', desc: 'Mastered ALL silent letters!', rare: true, locked: false, color: 'rare' },
+  { e: '🌙', name: 'Moon Phases', desc: '8 phases learned in order', rare: false, locked: false, color: 'blue' },
+  { e: '🐢', name: 'Sea Turtle', desc: 'Lives up to 100 years!', rare: false, locked: false, color: 'common' },
+  { e: '➕', name: 'Add to 10', desc: 'All pairs that make 10!', rare: false, locked: false, color: 'common' },
+  { e: '🔥', name: 'Volcano', desc: 'Hot rocks from inside Earth', rare: false, locked: false, color: 'common' },
+  { e: '✨', name: 'Magic Words', desc: '"Please" and "thank you" mastery!', rare: true, locked: false, color: 'rare' },
+  { e: '🌊', name: 'Ocean Layers', desc: 'From sunlit to abyssal', rare: false, locked: false, color: 'blue' },
+  { e: '🍎', name: 'Fruit Words', desc: 'Spelled 5 fruits correctly', rare: false, locked: false, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+  { e: '?', name: '', desc: '', locked: true, color: 'common' },
+];
+function initCards() {
+  const grid = document.getElementById('card-grid');
+  if (grid.children.length) return;
+  cardData.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'know-card';
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-front card-${c.color} ${c.locked ? 'locked' : ''}">${c.e}</div>
+        <div class="card-face card-back">
+          <div class="name">${c.name}</div>
+          <div class="desc">${c.desc}</div>
+        </div>
+      </div>`;
+    if (!c.locked) {
+      card.onclick = () => card.classList.toggle('flipped');
+    }
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================== SCENE 10: GARDEN ============================================== */
+function growPlant() {
+  const garden = document.getElementById('garden');
+  const bloom = document.createElement('div');
+  bloom.className = 'new-bloom';
+  bloom.style.left = (20 + Math.random() * 60) + '%';
+  bloom.style.bottom = '120px';
+  bloom.textContent = '+1 ' + ['🌸 Math', '🌻 Reading', '🌷 Science'][Math.floor(Math.random() * 3)];
+  garden.appendChild(bloom);
+  setTimeout(() => bloom.remove(), 2200);
+}
+
+/* ============================================== SCENE 11: FIND-IT ============================================== */
+let foundShapes = new Set();
+function findShape(el, shape) {
+  if (foundShapes.has(shape)) return;
+  foundShapes.add(shape);
+  el.classList.add('found');
+  document.querySelector(`#find-list .find-item[data-shape="${shape}"]`).classList.add('found');
+  if (foundShapes.size === 5) {
+    setTimeout(() => {
+      document.getElementById('find-victory').classList.add('show');
+    }, 400);
+  }
+}
+
+/* ============================================== SCENE 12: PHOTO QUEST ============================================== */
+function pickPhoto(el, correct) {
+  document.querySelectorAll('#photo-options .photo-option').forEach(o => {
+    o.classList.remove('correct', 'wrong');
+  });
+  el.classList.add(correct ? 'correct' : 'wrong');
+  const result = document.getElementById('photo-result');
+  if (correct) {
+    result.classList.add('show', 'success');
+    result.innerHTML = `<h4 style="color:var(--green);">✨ Great eye!</h4><p style="margin-top:4px;font-size:14px;color:var(--ink-soft);">That has 3 sides! Triangles are everywhere — pizza slices, traffic signs, mountain peaks. Mom can verify the real photo when you get home 📸</p>`;
+  } else {
+    result.classList.add('show');
+    result.classList.remove('success');
+    result.innerHTML = `<h4 style="color:var(--coral);">Hmm, look again 🤔</h4><p style="margin-top:4px;font-size:14px;color:var(--ink-soft);">Count the sides — Momo's looking for something with exactly 3.</p>`;
+  }
+}
+
+/* ============================================== SCENE 13: MYSTERY ARCHIVE ============================================== */
+const clues = [
+  { type: 'photo', title: 'Kitchen Floor', preview: 'Crumbs near the counter', keywords: ['kitchen', 'floor', 'crumb'] },
+  { type: 'photo', title: 'Paw Prints', preview: 'Small prints leading away', keywords: ['paw', 'print', 'animal'] },
+  { type: 'note', title: 'Mom\'s Note', preview: '"Don\'t open until Friday!"', keywords: ['note', 'mom', 'friday', 'cookie'] },
+  { type: 'audio', title: 'Recorded Sound', preview: 'Crinkle... crunch... at 3pm', keywords: ['sound', 'crinkle', 'crunch'] },
+  { type: 'photo', title: 'Empty Jar', preview: 'Lid missing, jar on floor', keywords: ['jar', 'cookie', 'kitchen'] },
+  { type: 'note', title: 'Sticky Note', preview: 'In dog\'s bed, says "sorry"', keywords: ['dog', 'note', 'sorry', 'paw'] },
+];
+function initArchive() {
+  archiveSearch();
+}
+function archiveSearch() {
+  const q = document.getElementById('archive-input').value.toLowerCase().trim();
+  const results = document.getElementById('archive-results');
+  const matches = q
+    ? clues.filter(c => c.keywords.some(k => k.includes(q)) || c.title.toLowerCase().includes(q))
+    : clues;
+  results.innerHTML = matches.map(c => `
+    <div class="clue-card" onclick="alert('Clue opened: ${c.title}\\n\\n${c.preview}')">
+      <div class="clue-type">${c.type}</div>
+      <div class="clue-title">${c.title}</div>
+      <div class="clue-preview">${c.preview}</div>
+    </div>
+  `).join('') || '<div style="grid-column:1/-1;text-align:center;color:var(--ink-soft);padding:30px;">No clues match. Try another keyword.</div>';
+}
+
+/* ============================================== SCENE 14: AUDIO WORLD ============================================== */
+let audioState = { playing: false, idx: 0, interval: null };
+const audioLines = [
+  'You step softly into the forest. The air smells like rain and pine...',
+  'A small fern brushes your ankle. Did you know ferns have been on Earth for 360 million years?',
+  'Up ahead, fireflies blink — they\'re actually beetles, not flies.',
+  'Listen. Can you hear the brook? Water carved this path drop by drop.',
+  'Close your eyes. The forest is breathing too. That\'s photosynthesis.',
+];
+let audioCtx = null;
+function toggleAudio() {
+  const btn = document.getElementById('audio-play');
+  const wave = document.getElementById('audio-wave');
+  if (audioState.playing) {
+    btn.textContent = '▶';
+    wave.style.display = 'none';
+    clearInterval(audioState.interval);
+    audioState.playing = false;
+    return;
+  }
+  btn.textContent = '⏸';
+  wave.style.display = 'flex';
+  audioState.playing = true;
+  // gentle synth tone for atmosphere
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch(e) {}
+  }
+  if (audioCtx) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 220;
+    gain.gain.value = 0.04;
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    audioState.osc = osc;
+    audioState.gain = gain;
+  }
+  document.getElementById('audio-narration').textContent = audioLines[audioState.idx];
+  audioState.interval = setInterval(() => {
+    audioState.idx = (audioState.idx + 1) % audioLines.length;
+    document.getElementById('audio-narration').textContent = audioLines[audioState.idx];
+    if (audioCtx && audioState.osc) {
+      const freqs = [220, 247, 277, 220, 196];
+      audioState.osc.frequency.exponentialRampToValueAtTime(freqs[audioState.idx % 5], audioCtx.currentTime + 0.5);
+    }
+  }, 4000);
+}
+
+/* ============================================== SCENE 16: MOMO COMPANION ============================================== */
+const momoReplies = {
+  explain: "Today we learned that words with 'ai' make a long 'A' sound — like in <strong>rain</strong>, <strong>train</strong>, and <strong>paint</strong>. Want me to read 3 example sentences slowly?",
+  story: "Here's one! 🌧️ <em>The little raindrops fell on Emma's painting. Drip, drip — the paint mixed into a rainbow. Even the rain wanted to play!</em>",
+  hint: "Sure! Look at the letters that come together. What sound does 'ai' usually make? Think of the word 'train' 🚂",
+  stuck: "That's totally okay. Want to take a break? We can come back to it. Or I can try explaining it a different way — your choice."
+};
+function momoReply(key) {
+  const win = document.getElementById('companion-window');
+  const opts = document.getElementById('quick-prompts');
+  const labels = {
+    explain: '💡 Explain today\'s lesson again',
+    story: '📖 Tell a story using my new words',
+    hint: '🤔 Give me a hint, not the answer',
+    stuck: '😕 I\'m stuck on something'
+  };
+  const kid = document.createElement('div');
+  kid.className = 'msg kid';
+  kid.innerHTML = `<div class="msg-bubble">${labels[key]}</div>`;
+  win.appendChild(kid);
+  setTimeout(() => {
+    const m = document.createElement('div');
+    m.className = 'msg';
+    m.innerHTML = `<div class="momo-avatar">🦊</div><div class="msg-bubble">${momoReplies[key]}</div>`;
+    win.appendChild(m);
+    win.scrollTop = win.scrollHeight;
+  }, 500);
+}
+
+/* ============================================== SCENE 17: RHYTHM DRILL ============================================== */
+let rhythmState = { playing: false, score: 0, streak: 0, q: null, timeout: null, audioCtx: null };
+function startRhythm() {
+  if (rhythmState.playing) return;
+  rhythmState.playing = true;
+  if (!rhythmState.audioCtx) {
+    try { rhythmState.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  nextRhythm();
+}
+function playBeep(freq, dur=0.1) {
+  if (!rhythmState.audioCtx) return;
+  const osc = rhythmState.audioCtx.createOscillator();
+  const gain = rhythmState.audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.value = 0.15;
+  osc.connect(gain).connect(rhythmState.audioCtx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001, rhythmState.audioCtx.currentTime + dur);
+  osc.stop(rhythmState.audioCtx.currentTime + dur);
+}
+function nextRhythm() {
+  if (!rhythmState.playing) return;
+  const a = Math.floor(Math.random() * 6) + 2;
+  const b = Math.floor(Math.random() * 6) + 2;
+  const correct = a * b;
+  const options = [correct];
+  while (options.length < 4) {
+    const d = correct + Math.floor(Math.random() * 7) - 3;
+    if (d > 0 && d !== correct && !options.includes(d)) options.push(d);
+  }
+  options.sort(() => Math.random() - 0.5);
+  rhythmState.q = { a, b, correct, options, correctIdx: options.indexOf(correct) };
+  document.getElementById('rhythm-q').innerHTML = `${a} × ${b} = ?`;
+  document.querySelectorAll('#rhythm-options .rhythm-opt').forEach((btn, i) => {
+    btn.textContent = options[i];
+    btn.classList.remove('hit-correct', 'hit-wrong');
+  });
+  // animate note
+  const note = document.getElementById('rhythm-note');
+  note.style.display = 'flex';
+  note.textContent = '♪';
+  note.classList.remove('moving');
+  void note.offsetWidth; // reflow
+  note.classList.add('moving');
+  playBeep(440);
+  rhythmState.timeout = setTimeout(() => {
+    if (!rhythmState.playing) return;
+    // missed
+    rhythmState.streak = 0;
+    playBeep(180, 0.2);
+    document.getElementById('rhythm-score').textContent = `Score: ${rhythmState.score} · Streak: 0 (missed!)`;
+    setTimeout(nextRhythm, 800);
+  }, 2200);
+}
+function rhythmAnswer(idx) {
+  if (!rhythmState.playing || !rhythmState.q) return;
+  clearTimeout(rhythmState.timeout);
+  const btn = document.querySelectorAll('#rhythm-options .rhythm-opt')[idx];
+  if (idx === rhythmState.q.correctIdx) {
+    btn.classList.add('hit-correct');
+    rhythmState.score += 10;
+    rhythmState.streak += 1;
+    playBeep(660, 0.15);
+    setTimeout(() => playBeep(880, 0.15), 100);
+  } else {
+    btn.classList.add('hit-wrong');
+    rhythmState.streak = 0;
+    playBeep(180, 0.2);
+  }
+  document.getElementById('rhythm-score').textContent = `Score: ${rhythmState.score} · Streak: ${rhythmState.streak}`;
+  document.getElementById('rhythm-note').style.display = 'none';
+  setTimeout(nextRhythm, 700);
+}
+function stopRhythm() {
+  rhythmState.playing = false;
+  clearTimeout(rhythmState.timeout);
+}
+
+/* ============================================== SCENE 18: SOKOBAN ============================================== */
+const SOK_LEVEL = [
+  '#####',
+  '#.@ #',
+  '# $ #',
+  '# . #',
+  '#  $#',
+  '#####'
+];
+// # wall, @ player, $ box, . target, space floor
+let sokState = null;
+function parseSok() {
+  const grid = SOK_LEVEL.map(r => r.split(''));
+  let player, boxes = [], targets = [];
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      const c = grid[y][x];
+      if (c === '@') { player = { x, y }; grid[y][x] = ' '; }
+      else if (c === '$') { boxes.push({ x, y }); grid[y][x] = ' '; }
+      else if (c === '.') { targets.push({ x, y }); grid[y][x] = ' '; }
+    }
+  }
+  return { grid, player, boxes, targets };
+}
+function initSokoban() {
+  sokState = { ...parseSok(), moves: 0, won: false };
+  renderSok();
+}
+function renderSok() {
+  const g = document.getElementById('sokoban-grid');
+  const cols = sokState.grid[0].length;
+  g.style.gridTemplateColumns = `repeat(${cols}, 56px)`;
+  g.innerHTML = '';
+  for (let y = 0; y < sokState.grid.length; y++) {
+    for (let x = 0; x < sokState.grid[y].length; x++) {
+      const cell = document.createElement('div');
+      cell.className = 'sok-cell';
+      const isWall = sokState.grid[y][x] === '#';
+      const isTarget = sokState.targets.some(t => t.x === x && t.y === y);
+      const isBox = sokState.boxes.some(b => b.x === x && b.y === y);
+      const isPlayer = sokState.player.x === x && sokState.player.y === y;
+      if (isWall) cell.classList.add('wall');
+      else if (isBox && isTarget) { cell.classList.add('box-on-target'); cell.textContent = '✓'; }
+      else if (isBox) { cell.classList.add('box'); cell.textContent = '📦'; }
+      else if (isTarget) { cell.classList.add('target'); cell.textContent = '🎯'; }
+      if (isPlayer && !isWall) { cell.classList.add('player'); cell.textContent = '🦊'; }
+      g.appendChild(cell);
+    }
+  }
+  document.getElementById('sok-moves').textContent = sokState.moves;
+}
+function sokMove(dx, dy) {
+  if (!sokState || sokState.won) return;
+  const nx = sokState.player.x + dx, ny = sokState.player.y + dy;
+  if (sokState.grid[ny] && sokState.grid[ny][nx] === '#') return;
+  const boxAhead = sokState.boxes.find(b => b.x === nx && b.y === ny);
+  if (boxAhead) {
+    const bx = nx + dx, by = ny + dy;
+    if (sokState.grid[by] && sokState.grid[by][bx] === '#') return;
+    if (sokState.boxes.some(b => b.x === bx && b.y === by)) return;
+    boxAhead.x = bx; boxAhead.y = by;
+  }
+  sokState.player.x = nx; sokState.player.y = ny;
+  sokState.moves++;
+  renderSok();
+  // Check win
+  const allOn = sokState.boxes.every(b => sokState.targets.some(t => t.x === b.x && t.y === b.y));
+  if (allOn) {
+    sokState.won = true;
+    document.getElementById('sok-final').textContent = sokState.moves;
+    document.getElementById('sok-win').classList.add('show');
+  }
+}
+function sokReset() {
+  document.getElementById('sok-win').classList.remove('show');
+  initSokoban();
+}
+
+// Keyboard support for sokoban
+window.addEventListener('keydown', e => {
+  if (!document.getElementById('scene-18').classList.contains('active')) return;
+  if (e.key === 'ArrowUp' || e.key === 'w') { sokMove(0, -1); e.preventDefault(); }
+  if (e.key === 'ArrowDown' || e.key === 's') { sokMove(0, 1); e.preventDefault(); }
+  if (e.key === 'ArrowLeft' || e.key === 'a') { sokMove(-1, 0); e.preventDefault(); }
+  if (e.key === 'ArrowRight' || e.key === 'd') { sokMove(1, 0); e.preventDefault(); }
+});
+</script>
+
+</body>
+</html>

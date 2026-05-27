@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🤖 AI Class for Kids! 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Fredoka', system-ui, sans-serif;
+    background: #FFF3D6;
+    color: #2C1810;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* Floating background shapes */
+  .bg-shape {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 0.3;
+    z-index: 0;
+    pointer-events: none;
+    animation: float 8s ease-in-out infinite;
+  }
+  .bg-shape:nth-child(1) { top: 10%; left: 5%; width: 80px; height: 80px; background: #FF6B9D; animation-delay: 0s; }
+  .bg-shape:nth-child(2) { top: 60%; right: 8%; width: 120px; height: 120px; background: #4ECDC4; animation-delay: 2s; }
+  .bg-shape:nth-child(3) { top: 30%; right: 15%; width: 60px; height: 60px; background: #FFD93D; animation-delay: 4s; }
+  .bg-shape:nth-child(4) { bottom: 20%; left: 10%; width: 100px; height: 100px; background: #95E1D3; animation-delay: 6s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-30px) rotate(10deg); }
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Hero */
+  .hero {
+    background: linear-gradient(135deg, #FF6B9D 0%, #FFD93D 100%);
+    border-radius: 30px;
+    padding: 40px 30px;
+    text-align: center;
+    margin: 20px 0 30px;
+    border: 5px solid #2C1810;
+    box-shadow: 8px 8px 0 #2C1810;
+    transform: rotate(-1deg);
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    color: #2C1810;
+    margin-bottom: 10px;
+    line-height: 1.1;
+    text-shadow: 3px 3px 0 #fff;
+  }
+  .hero .subtitle {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .hero .badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .badge {
+    background: #fff;
+    border: 3px solid #2C1810;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    box-shadow: 3px 3px 0 #2C1810;
+  }
+
+  /* Sections */
+  section {
+    margin: 40px 0;
+  }
+  .section-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #2C1810;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-num {
+    background: #2C1810;
+    color: #FFD93D;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'Comic Neue', monospace;
+  }
+
+  /* Pizza shop / bottleneck */
+  .pizza-box {
+    background: #fff;
+    border: 5px solid #2C1810;
+    border-radius: 25px;
+    padding: 25px;
+    box-shadow: 8px 8px 0 #FF6B9D;
+  }
+  .pizza-box p { font-size: 1.1rem; margin-bottom: 15px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: #FFF3D6;
+    border: 3px solid #2C1810;
+    border-radius: 15px;
+    padding: 15px;
+    text-align: center;
+  }
+  .stat .emoji { font-size: 2rem; display: block; margin-bottom: 5px; }
+  .stat .label { font-weight: 600; font-size: 0.95rem; }
+  .stat .number { font-size: 1.4rem; font-weight: 700; color: #E63946; margin-top: 5px; }
+  .stat.problem { background: #FFE5E5; border-color: #E63946; }
+  .stat.problem .number { color: #E63946; font-size: 1.8rem; }
+  .alert-box {
+    background: #FFD93D;
+    border: 4px solid #2C1810;
+    border-radius: 15px;
+    padding: 15px 20px;
+    margin-top: 15px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* Guest speakers */
+  .speakers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+  }
+  .speaker {
+    background: #fff;
+    border: 4px solid #2C1810;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 5px 5px 0 #4ECDC4;
+    transition: transform 0.2s;
+  }
+  .speaker:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #4ECDC4; }
+  .speaker:nth-child(2n) { box-shadow: 5px 5px 0 #FF6B9D; }
+  .speaker:nth-child(2n):hover { box-shadow: 7px 7px 0 #FF6B9D; }
+  .speaker:nth-child(3n) { box-shadow: 5px 5px 0 #FFD93D; }
+  .speaker:nth-child(3n):hover { box-shadow: 7px 7px 0 #FFD93D; }
+  .speaker .avatar {
+    font-size: 2.5rem;
+    background: #FFF3D6;
+    border: 3px solid #2C1810;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  .speaker .name { font-size: 1.2rem; font-weight: 700; }
+  .speaker .company { font-weight: 600; color: #E63946; margin-top: 4px; }
+  .speaker .what { font-size: 0.95rem; margin-top: 8px; color: #555; }
+
+  /* Weeks */
+  .week {
+    background: #fff;
+    border: 4px solid #2C1810;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-shadow: 5px 5px 0 #2C1810;
+  }
+  .week-header {
+    padding: 18px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #FFF3D6;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .week-header:hover { background: #FFE9B0; }
+  .week-num {
+    background: #2C1810;
+    color: #FFD93D;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+  }
+  .week-info { flex: 1; min-width: 0; }
+  .week-title { font-size: 1.15rem; font-weight: 600; }
+  .week-date { font-size: 0.85rem; color: #888; font-weight: 500; }
+  .week-toggle {
+    font-size: 1.5rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .week.open .week-toggle { transform: rotate(45deg); }
+  .week-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+    padding: 0 20px;
+  }
+  .week.open .week-body { max-height: 2000px; padding: 0 20px 20px; }
+  .week-body p { margin-bottom: 12px; font-size: 1rem; }
+  .week-body .guest {
+    background: #95E1D3;
+    border: 2px dashed #2C1810;
+    border-radius: 12px;
+    padding: 10px 15px;
+    margin-top: 12px;
+    font-weight: 600;
+  }
+  .week-body .learn-box {
+    background: #FFE9B0;
+    border: 3px solid #2C1810;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin: 12px 0;
+  }
+  .week-body .learn-box .learn-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+    font-size: 1.02rem;
+  }
+  .week-body .learn-box ul {
+    padding-left: 22px;
+  }
+  .week-body .learn-box li {
+    margin-bottom: 5px;
+    font-size: 0.97rem;
+  }
+  .week-body .fun-fact {
+    background: #FFD1E8;
+    border: 3px solid #2C1810;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin: 12px 0;
+    font-weight: 600;
+    font-size: 0.98rem;
+  }
+  .week-body .imagine {
+    background: #D4F1F4;
+    border: 3px solid #2C1810;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin: 12px 0;
+    font-style: italic;
+    font-size: 0.98rem;
+  }
+
+  /* Rules */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+  }
+  .rule {
+    background: #95E1D3;
+    border: 4px solid #2C1810;
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 5px 5px 0 #2C1810;
+  }
+  .rule .icon { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+  .rule .title { font-weight: 700; font-size: 1.1rem; margin-bottom: 5px; }
+  .rule .desc { font-size: 0.95rem; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    background: #2C1810;
+    color: #FFD93D;
+    border-radius: 25px;
+    margin: 40px 0 20px;
+    border: 5px solid #2C1810;
+  }
+  footer p { margin: 5px 0; }
+  footer .big { font-size: 1.5rem; font-weight: 700; }
+
+  /* Fun call-out */
+  .callout {
+    background: #FF6B9D;
+    color: #fff;
+    border: 4px solid #2C1810;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-shadow: 6px 6px 0 #2C1810;
+    transform: rotate(1deg);
+  }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2rem; }
+    .section-title { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+<div class="bg-shape"></div>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>🤖 The AI Money Class! 🚀</h1>
+    <p class="subtitle">How robots get built and who makes money from them</p>
+    <div class="badges">
+      <span class="badge">🏫 Stanford University</span>
+      <span class="badge">📅 9 Weeks</span>
+      <span class="badge">⏰ 1 Hour/Week</span>
+      <span class="badge">🎒 Any Kid Welcome</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    👋 Hi! This is a super-famous college class — but explained for YOU (a 10-year-old). Let's learn how AI actually works as a business! 💼✨
+  </div>
+
+  <!-- Pizza Shop -->
+  <section>
+    <h2 class="section-title"><span class="section-num">001</span> The Big Puzzle 🍕</h2>
+    <div class="pizza-box">
+      <p><strong>Imagine AI is a giant pizza shop. 🍕</strong> Everyone in the world is hungry and wants AI pizza (answers, pictures, stories, songs). To make pizza, you need lots of stuff:</p>
+
+      <div class="stats-grid">
+        <div class="stat">
+          <span class="emoji">🧠</span>
+          <span class="label">Chips (the ovens)</span>
+          <div class="number">+45%/yr</div>
+        </div>
+        <div class="stat">
+          <span class="emoji">💾</span>
+          <span class="label">Memory (the counters)</span>
+          <div class="number">+28%/yr</div>
+        </div>
+        <div class="stat">
+          <span class="emoji">⚡</span>
+          <span class="label">Electricity (to bake!)</span>
+          <div class="number">+15%/yr</div>
+        </div>
+        <div class="stat">
+          <span class="emoji">🌐</span>
+          <span class="label">Internet wires</span>
+          <div class="number">+35%/yr</div>
+        </div>
+        <div class="stat problem">
+          <span class="emoji">🙋‍♀️🙋‍♂️</span>
+          <span class="label">People wanting AI</span>
+          <div class="number">+310%/yr</div>
+        </div>
+      </div>
+
+      <div class="alert-box">
+        ⚡ <strong>The problem:</strong> We have ovens and counters, but NOT enough electricity to bake all the pizzas everyone wants! That's the big mystery this class tries to solve. 🔌
+      </div>
+    </div>
+  </section>
+
+  <!-- Companies as Case Studies -->
+  <section>
+    <h2 class="section-title"><span class="section-num">002</span> The Companies You'll Study 🏢</h2>
+    <p style="margin-bottom: 15px; font-size: 1.05rem;">These are the REAL AI companies building the future right now. You'll learn how each one makes money, what they build, and whether they'll win or lose. They're your case studies! 🔍</p>
+
+    <div class="speakers-grid">
+      <div class="speaker">
+        <div class="avatar">🧠</div>
+        <div class="name">NVIDIA</div>
+        <div class="company">Chips Layer</div>
+        <div class="what">Makes the GPU chips that power basically EVERY AI on Earth 🌍</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">⚡</div>
+        <div class="name">Groq</div>
+        <div class="company">Chips Layer</div>
+        <div class="what">A new kind of AI chip — super fast, totally different design</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">🤖</div>
+        <div class="name">OpenAI</div>
+        <div class="company">AI Brains Layer</div>
+        <div class="what">The company behind ChatGPT — the world's most famous AI</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">🌟</div>
+        <div class="name">Anthropic</div>
+        <div class="company">AI Brains Layer</div>
+        <div class="what">Built Claude — the AI that helped make THIS very page! 👋</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">📊</div>
+        <div class="name">Databricks</div>
+        <div class="company">Big Business AI</div>
+        <div class="what">Helps giant companies make sense of their mountains of data</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">🧩</div>
+        <div class="name">Applied Compute</div>
+        <div class="company">Big Business AI</div>
+        <div class="what">Builds custom AI brains that learn one company inside-out</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">🎙️</div>
+        <div class="name">ElevenLabs</div>
+        <div class="company">Apps Layer</div>
+        <div class="what">Robot voices so real you can't tell they're not human 🤯</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">🚀</div>
+        <div class="name">Baseten</div>
+        <div class="company">Behind-the-Scenes</div>
+        <div class="what">The engine room — runs AI apps so they don't crash</div>
+      </div>
+      <div class="speaker">
+        <div class="avatar">💻</div>
+        <div class="name">Vercel</div>
+        <div class="company">Apps Layer</div>
+        <div class="what">Where millions of websites live — now built by AI coders!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Weekly Schedule -->
+  <section>
+    <h2 class="section-title"><span class="section-num">003</span> The 9-Week Adventure 📅</h2>
+    <p style="margin-bottom: 15px; font-size: 1.05rem;">Tap any week to peek inside! 👇</p>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">1</div>
+        <div class="week-info">
+          <div class="week-title">🎬 What IS the AI Economy?</div>
+          <div class="week-date">April 2</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>"Generative AI" means AI that <strong>creates new stuff</strong> — pictures, stories, songs, even computer code. It's not just looking things up — it's actually <em>making</em> things that never existed before! 🎨</p>
+        <p>Your teacher walks you through the WHOLE AI world from bottom to top. Think of AI like a giant layer cake 🎂:</p>
+        <div class="learn-box">
+          <div class="learn-title">🎂 The AI Layer Cake</div>
+          <ul>
+            <li>🔌 <strong>Bottom layer:</strong> Chips (the physical brains)</li>
+            <li>☁️ <strong>Middle layer:</strong> Cloud computers (where AI lives)</li>
+            <li>🧠 <strong>Upper layer:</strong> AI models (like ChatGPT or Claude)</li>
+            <li>📱 <strong>Top layer:</strong> Apps you actually use every day</li>
+          </ul>
+        </div>
+        <p>The big question: <strong>WHO makes money at each layer?</strong> Who's winning? Who might lose? That's the mystery you'll be solving all 9 weeks! 🕵️</p>
+        <div class="fun-fact">💡 Fun fact: AI companies made more money in 2024 than the entire global movie industry!</div>
+        <div class="guest">🗺️ Case Study: The AI map — preview of every company you'll study</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">2</div>
+        <div class="week-info">
+          <div class="week-title">🧠 The Chip Wizards</div>
+          <div class="week-date">April 9</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>Every AI brain needs a special kind of computer chip called a <strong>GPU</strong>. Here's the wild part: GPUs were originally built for <strong>VIDEO GAMES</strong> 🎮 — to draw cool graphics fast. Then someone realized: the same math that draws explosions in Fortnite is EXACTLY what AI needs! Surprise hit! 💥</p>
+        <div class="learn-box">
+          <div class="learn-title">🧠 Cool things you'll learn:</div>
+          <ul>
+            <li>Why one AI chip can cost <strong>$40,000+</strong> 💸</li>
+            <li>Why ONE company (NVIDIA) makes almost ALL of them</li>
+            <li>How Groq built a totally different chip that's even faster</li>
+            <li>Why countries are racing to build chip factories</li>
+          </ul>
+        </div>
+        <div class="fun-fact">🤯 Fun fact: The chip in your phone has BILLIONS of tiny switches, each smaller than a virus!</div>
+        <div class="imagine">🍳 Imagine this: A regular computer chip is like ONE chef cooking one meal at a time. A GPU is like 10,000 chefs cooking 10,000 meals at the SAME TIME. That's why AI loves them!</div>
+        <div class="guest">🏢 Case Studies: NVIDIA (the $3 trillion king) + Groq (the fast challenger)</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">3</div>
+        <div class="week-info">
+          <div class="week-title">🎙️ Robot Voices</div>
+          <div class="week-date">April 16</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>ElevenLabs makes AI that can talk in <strong>ANY voice</strong>. Want a voice that sounds like a movie narrator? A friendly grandma? A scary villain? They've got it. They can even <em>clone</em> any real person's voice from just a few seconds of audio! 🎙️✨</p>
+        <div class="learn-box">
+          <div class="learn-title">🎤 Cool things you'll learn:</div>
+          <ul>
+            <li>How AI learns to talk by listening to <strong>thousands of hours</strong> of people</li>
+            <li>How audiobooks, video games, and movies use AI voices now</li>
+            <li>Why it's AMAZING (helps blind people read books!) and a little SCARY (fake voices can trick people)</li>
+            <li>How they make money — companies pay <strong>per second</strong> of audio created</li>
+          </ul>
+        </div>
+        <div class="imagine">🌍 Imagine: One actor records their voice ONCE. Now AI can make them say ANYTHING — in 30 different languages — without them ever stepping into a studio again!</div>
+        <div class="fun-fact">🎬 Fun fact: Some Hollywood movies now use AI voices for tiny background characters because it's WAY cheaper than hiring actors!</div>
+        <div class="guest">🏢 Case Study: ElevenLabs — the world leader in AI voice cloning</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">4</div>
+        <div class="week-info">
+          <div class="week-title">🏢 AI for Giant Companies</div>
+          <div class="week-date">April 23</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>"Enterprise" is a fancy word for <strong>HUGE companies</strong> — like banks, hospitals, and stores with thousands of locations. They've been collecting data (information!) for DECADES. Databricks helps them dig through it all with AI. 📊</p>
+        <div class="learn-box">
+          <div class="learn-title">🏢 Cool things you'll learn:</div>
+          <ul>
+            <li>What "data" really means — every order, every email, every photo ever!</li>
+            <li>A NEW idea called <strong>"Service as a Software"</strong> — instead of buying tools, you pay for RESULTS</li>
+            <li>Why big companies will spend BILLIONS on AI this year alone</li>
+            <li>Why selling to giant companies is super different from selling to regular people</li>
+          </ul>
+        </div>
+        <div class="imagine">🛒 Imagine: Walmart has data on EVERY single purchase ever made in their stores — billions of them! AI can spot patterns no human could ever notice. (Like: "people who buy diapers also buy beer at 9pm" — that's a real thing they found! 🤣)</div>
+        <div class="fun-fact">💰 Fun fact: Databricks is worth over $60 BILLION dollars — more than many famous airlines!</div>
+        <div class="guest">🏢 Case Study: Databricks — the $60+ billion enterprise AI giant</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">5</div>
+        <div class="week-info">
+          <div class="week-title">🎁 The Mystery Visitor!</div>
+          <div class="week-date">April 30</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>The biggest AI brains in the world come from <strong>"frontier labs"</strong> — companies like <strong>OpenAI</strong> (who built ChatGPT) and <strong>Anthropic</strong> (who built Claude — yes, the one writing this for you! 👋). These labs spend HUNDREDS OF MILLIONS of dollars to train just ONE AI! 💰</p>
+        <div class="learn-box">
+          <div class="learn-title">🚀 Cool things you'll learn:</div>
+          <ul>
+            <li>Why training one AI costs <strong>$100 million+</strong> (millions of GPU hours!)</li>
+            <li>How they make money back (you paying $20/month + companies paying to use them)</li>
+            <li>Why these labs are worth more than entire countries' economies</li>
+            <li>The big race — who will build "super-smart AI" first?</li>
+          </ul>
+        </div>
+        <div class="fun-fact">⚡ Wild fact: Training a single big AI model uses as much electricity as a small city for MONTHS!</div>
+        <div class="imagine">🏆 It's like the Olympics — but instead of running races, companies are racing to build the smartest AI. The winner could change the whole world!</div>
+        <div class="guest">🏢 Case Studies: OpenAI (ChatGPT) + Anthropic (Claude) — the brain builders</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">6</div>
+        <div class="week-info">
+          <div class="week-title">📂 AI That Reads ALL Your Stuff</div>
+          <div class="week-date">May 7</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>Imagine if YOUR school had an AI that read every textbook, every teacher note, every old test — and could answer ANY question about your school. That's what Applied Compute builds for big companies! 📚🔍</p>
+        <div class="learn-box">
+          <div class="learn-title">🧩 Cool things you'll learn:</div>
+          <ul>
+            <li>Why a company's <strong>secret internal info</strong> is its biggest superpower</li>
+            <li>How to teach AI brand new knowledge it didn't learn from the internet</li>
+            <li>Why this is REALLY hard (info is messy, scattered, and often top-secret 🤫)</li>
+            <li>How smart companies turn their boring data into an AI superpower</li>
+          </ul>
+        </div>
+        <div class="imagine">🏥 Imagine: A new doctor joins a hospital. Normally it takes YEARS to learn how everything works. With a custom AI? She knows the whole hospital in DAYS. That's a HUGE deal!</div>
+        <div class="fun-fact">🤖 Cool fact: Most regular AIs only know stuff from the public internet. But companies have WAY MORE info inside their own walls — and that's where the real money is!</div>
+        <div class="guest">🏢 Case Study: Applied Compute — custom AI brains for big businesses</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">7</div>
+        <div class="week-info">
+          <div class="week-title">🤖 Helper Robots (Agents!)</div>
+          <div class="week-date">May 14</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>Here's the big difference: <strong>Chatbots TALK to you. Agents DO STUFF for you.</strong> Like: "Hey AI, book me a haircut next Tuesday at 4pm AND reorder my dog food." And it... just does it! 🐕✂️</p>
+        <div class="learn-box">
+          <div class="learn-title">🤖 Cool things you'll learn:</div>
+          <ul>
+            <li>The huge difference between <strong>answering</strong> and <strong>acting</strong></li>
+            <li>Should agents charge per task? Per month? Per RESULT? (Big question!)</li>
+            <li>Why agents are tricky — if they mess up, it can cost real money 😬</li>
+            <li>How the "behind the scenes" tech works (someone has to run those computers!)</li>
+          </ul>
+        </div>
+        <div class="imagine">📝 Imagine: An agent that does your whole homework process — checks the assignment, gathers info, drafts answers, even prints it out. (Don't worry — you still gotta actually LEARN the stuff yourself!)</div>
+        <div class="fun-fact">💸 Fun fact: Some companies are testing agents that do the work of FULL-TIME employees — for less than $100/month. That's like hiring a tiny robot worker!</div>
+        <div class="guest">🏢 Case Study: Baseten — the engine room running AI agents at scale</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">8</div>
+        <div class="week-info">
+          <div class="week-title">⌨️ AI That Writes Code</div>
+          <div class="week-date">May 21</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>"Code" is the secret language that makes apps and websites work. AI can now write code <strong>BY ITSELF</strong>. Just describe what you want — and boom, AI writes it! 💻✨ Vercel is the place where millions of websites live, so they have a front-row seat to this revolution.</p>
+        <div class="learn-box">
+          <div class="learn-title">⌨️ Cool things you'll learn:</div>
+          <ul>
+            <li>How AI learned to code (it studied <strong>millions</strong> of programs!)</li>
+            <li>What happens to coder jobs — fewer jobs? Or MORE? (Could be both!) 🤔</li>
+            <li>Why building websites just got <strong>100x faster</strong></li>
+            <li>The new job: humans who DIRECT the AI to build stuff (you'd be GREAT at this!)</li>
+          </ul>
+        </div>
+        <div class="fun-fact">🚀 Wild fact: Some teenagers have built apps used by MILLIONS of people — without writing a single line of code themselves! They just told AI what to build.</div>
+        <div class="imagine">🎨 It's like the difference between painting a picture and DESCRIBING a picture for someone else to paint. The "describer" is becoming the most important job!</div>
+        <div class="guest">🏢 Case Study: Vercel — home to millions of AI-built websites</div>
+      </div>
+    </div>
+
+    <div class="week">
+      <div class="week-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="week-num">9</div>
+        <div class="week-info">
+          <div class="week-title">🎤 Show Your Big Idea!</div>
+          <div class="week-date">May 28</div>
+        </div>
+        <div class="week-toggle">+</div>
+      </div>
+      <div class="week-body">
+        <p>The final week is <strong>SHARK TANK STYLE</strong> 🦈! Students get on stage and pitch their own ideas about AI companies. There are two kinds of bets:</p>
+        <div class="learn-box">
+          <div class="learn-title">📊 The Two Bets:</div>
+          <ul>
+            <li>📈 <strong>LONG</strong> = "I bet this company will WIN BIG and their stock will go UP!"</li>
+            <li>📉 <strong>SHORT</strong> = "I bet this company will FAIL and their stock will go DOWN!"</li>
+          </ul>
+        </div>
+        <div class="learn-box">
+          <div class="learn-title">🎤 Cool things you'll learn:</div>
+          <ul>
+            <li>How to RESEARCH a company like a real Wall Street pro</li>
+            <li>How to spot which AI companies are real winners vs. just hype 🎪</li>
+            <li>How to actually PRESENT your ideas (public speaking is scary at first!)</li>
+            <li>Why being WRONG sometimes is totally fine — even pros are wrong half the time!</li>
+          </ul>
+        </div>
+        <div class="fun-fact">💡 Inspiring fact: Some of the world's smartest investors started by "paper trading" as KIDS — just writing down their guesses on paper to see how they would have done!</div>
+        <div class="guest">🌟 Students present their LONG and SHORT pitches!</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rules -->
+  <section>
+    <h2 class="section-title"><span class="section-num">004</span> The Rules 📋</h2>
+    <div class="rules-grid">
+      <div class="rule">
+        <span class="icon">⏰</span>
+        <div class="title">1 Hour a Week</div>
+        <div class="desc">Thursdays, 4:30 to 5:20 PM. Done!</div>
+      </div>
+      <div class="rule">
+        <span class="icon">📖</span>
+        <div class="title">Tiny Reading</div>
+        <div class="desc">Read a little something before class — that's it</div>
+      </div>
+      <div class="rule">
+        <span class="icon">✍️</span>
+        <div class="title">Quick Thoughts</div>
+        <div class="desc">Write a short note about what you learned after</div>
+      </div>
+      <div class="rule">
+        <span class="icon">🎉</span>
+        <div class="title">No Math Needed</div>
+        <div class="desc">You don't need to be a coder or math whiz!</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="big">🚀 Come learn how the future is built! 🚀</p>
+    <p>Stanford University · Spring 2026</p>
+    <p style="margin-top: 15px; font-size: 0.9rem;">Made with 💛 — based on the real MS&E 435 course</p>
+  </footer>
+
+</div>
+
+<script>
+  // Open the first week by default so kids see how it works
+  document.querySelector('.week').classList.add('open');
+</script>
+
+</body>
+</html>

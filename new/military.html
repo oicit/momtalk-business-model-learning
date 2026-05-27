@@ -1,0 +1,2723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🪖 MISSION READY — Command Center</title>
+<style>
+/* ============ DESIGN TOKENS ============ */
+:root {
+  --olive-dark: #2a3a1a;
+  --olive: #4a5b2f;
+  --olive-light: #7a8c4a;
+  --khaki: #d4c39a;
+  --khaki-light: #efe6c8;
+  --navy: #0e2238;
+  --navy-mid: #1a3a5c;
+  --gold: #ffd700;
+  --gold-deep: #d4af37;
+  --red: #c1272d;
+  --red-bright: #e63946;
+  --green-hud: #00ff88;
+  --green-radar: #4caf50;
+  --amber: #ffb300;
+  --cream: #faf6ec;
+  --shadow-lg: 0 8px 0 rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 0 rgba(0,0,0,0.2);
+  --shadow-sm: 0 2px 0 rgba(0,0,0,0.18);
+  --font-display: 'Impact', 'Arial Black', sans-serif;
+  --font-body: 'Trebuchet MS', system-ui, sans-serif;
+  --font-mono: 'Courier New', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overscroll-behavior: none; }
+body {
+  font-family: var(--font-body);
+  background: var(--olive-dark);
+  color: #fff;
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Animated camo background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 25%, rgba(80,100,55,0.5) 0, transparent 12%),
+    radial-gradient(circle at 70% 60%, rgba(74,91,47,0.4) 0, transparent 15%),
+    radial-gradient(circle at 40% 80%, rgba(40,55,25,0.5) 0, transparent 10%),
+    radial-gradient(circle at 90% 15%, rgba(40,55,25,0.4) 0, transparent 8%),
+    repeating-linear-gradient(45deg, transparent 0px, transparent 40px, rgba(0,0,0,0.05) 40px, rgba(0,0,0,0.05) 60px),
+    linear-gradient(180deg, #3a4a2a 0%, #2a3a1a 100%);
+  z-index: 0;
+}
+
+/* Subtle radar sweep on body */
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 70%, rgba(0,255,136,0.04) 95%, transparent 100%);
+  animation: radarSweep 8s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes radarSweep { to { transform: rotate(360deg); } }
+
+.wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 14px; }
+
+/* ============ BOOT SEQUENCE ============ */
+#bootScreen {
+  position: fixed; inset: 0; background: #000; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); color: var(--green-hud);
+  flex-direction: column; gap: 12px;
+  font-size: 14px;
+  padding: 20px;
+}
+#bootScreen .boot-logo {
+  font-family: var(--font-display); font-size: clamp(28px, 6vw, 50px);
+  color: var(--gold); letter-spacing: 4px; text-align: center;
+  text-shadow: 0 0 20px var(--gold);
+}
+#bootScreen .boot-lines { max-width: 500px; }
+#bootScreen .boot-line { opacity: 0; }
+#bootScreen .boot-line.show { opacity: 1; animation: bootIn 0.3s ease; }
+@keyframes bootIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+.fade-out { animation: fadeOut 0.6s ease forwards; }
+@keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+
+/* ============ HEADER ============ */
+header.hq {
+  background: linear-gradient(180deg, rgba(14,34,56,0.95), rgba(26,58,92,0.95));
+  border: 3px solid var(--gold);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: var(--shadow-lg), inset 0 0 30px rgba(0,0,0,0.4);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  position: relative;
+}
+header.hq::before {
+  content: '★ COMMAND CENTER ★';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: var(--navy);
+  padding: 2px 14px; border-radius: 12px; font-weight: 900;
+  letter-spacing: 3px; font-size: 11px; border: 2px solid var(--navy);
+  white-space: nowrap;
+}
+.logo {
+  font-family: var(--font-display); font-size: clamp(20px, 4vw, 30px);
+  color: var(--gold); text-shadow: 2px 2px 0 var(--navy);
+  letter-spacing: 2px; line-height: 1;
+}
+.logo small {
+  display: block; font-size: 10px; color: var(--khaki);
+  letter-spacing: 4px; font-weight: normal; margin-top: 2px;
+}
+.recruit-badge {
+  background: var(--cream); color: var(--navy);
+  padding: 8px 12px; border-radius: 10px; border: 3px solid var(--gold);
+  box-shadow: var(--shadow-sm); flex: 1; min-width: 180px;
+}
+.rank-line { display: flex; align-items: center; gap: 8px; }
+.rank-emoji { font-size: 26px; line-height: 1; }
+.recruit-badge .name { font-size: 12px; font-weight: 900; color: var(--olive-dark); letter-spacing: 1px; }
+.recruit-badge .rank { font-size: 16px; font-weight: 900; color: var(--red); }
+.xp-bar {
+  height: 12px; background: #ccc; border-radius: 10px; overflow: hidden;
+  margin-top: 6px; border: 2px solid var(--navy); position: relative;
+}
+.xp-fill {
+  height: 100%; background: linear-gradient(90deg, var(--gold), var(--red-bright));
+  width: 0%; transition: width 0.8s cubic-bezier(.5,1.5,.5,1);
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+.xp-text {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: var(--navy); text-shadow: 0 0 3px white;
+}
+.hq-btn {
+  background: var(--red-bright); color: white; border: 3px solid white;
+  padding: 8px 14px; border-radius: 10px; font-weight: 900; cursor: pointer;
+  font-family: var(--font-display); letter-spacing: 2px; font-size: 13px;
+  box-shadow: var(--shadow-sm); transition: transform 0.1s;
+}
+.hq-btn:active { transform: translateY(2px); box-shadow: none; }
+
+/* ============ MAIN ============ */
+main { margin-top: 18px; }
+.panel {
+  background: var(--cream); color: var(--navy);
+  border: 4px solid var(--navy); border-radius: 16px;
+  padding: 18px; box-shadow: var(--shadow-lg);
+  position: relative;
+}
+.panel h2 {
+  font-family: var(--font-display); color: var(--red);
+  font-size: clamp(20px, 3.5vw, 28px); letter-spacing: 2px;
+  border-bottom: 3px dashed var(--olive); padding-bottom: 6px; margin-bottom: 12px;
+}
+.panel h3 { font-family: var(--font-display); color: var(--olive-dark); letter-spacing: 1px; margin: 12px 0 6px; }
+.panel p { line-height: 1.5; }
+
+/* ============ HOME ============ */
+.welcome-card {
+  background: linear-gradient(135deg, var(--navy), var(--olive));
+  color: white; padding: 18px; border-radius: 14px; margin-bottom: 16px;
+  border: 3px solid var(--gold); text-align: center; position: relative;
+  overflow: hidden;
+}
+.welcome-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, rgba(255,215,0,0.04) 0px, rgba(255,215,0,0.04) 2px, transparent 2px, transparent 8px);
+  pointer-events: none;
+}
+.welcome-card h1 {
+  font-family: var(--font-display); font-size: clamp(22px, 5vw, 34px);
+  letter-spacing: 3px; color: var(--gold); margin-bottom: 6px;
+  text-shadow: 0 0 15px rgba(255,215,0,0.5);
+}
+.welcome-card p { font-size: 14px; line-height: 1.5; max-width: 700px; margin: 0 auto; opacity: 0.95; }
+.name-row {
+  display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap;
+}
+.name-row input {
+  padding: 10px 14px; border-radius: 10px; border: 3px solid var(--gold);
+  font-size: 16px; font-weight: bold; min-width: 200px; text-align: center;
+  text-transform: uppercase; font-family: var(--font-display); letter-spacing: 2px;
+}
+.name-row button {
+  background: var(--gold); color: var(--navy); border: 3px solid white;
+  padding: 10px 16px; border-radius: 10px; font-weight: 900; cursor: pointer;
+  font-family: var(--font-display); letter-spacing: 1px;
+  box-shadow: var(--shadow-sm);
+}
+.name-row button:active { transform: translateY(2px); box-shadow: none; }
+
+.mission-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+.mission-card {
+  background: white; border: 4px solid var(--olive-dark);
+  border-radius: 16px; padding: 14px; cursor: pointer; position: relative;
+  transition: all 0.15s; box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.mission-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(255,215,0,0.1) 100%);
+  pointer-events: none;
+}
+.mission-card:hover, .mission-card:active {
+  transform: translateY(-4px) rotate(-1deg); box-shadow: 0 12px 0 rgba(0,0,0,0.25);
+}
+.mission-card .ribbon {
+  position: absolute; top: 8px; right: -28px; background: var(--green-radar); color: white;
+  padding: 2px 30px; transform: rotate(35deg); font-size: 9px; font-weight: 900; letter-spacing: 2px;
+  z-index: 2;
+}
+.mission-card .new-tag {
+  position: absolute; top: 6px; left: 6px; background: var(--red-bright); color: white;
+  padding: 2px 8px; border-radius: 8px; font-size: 9px; font-weight: 900; letter-spacing: 1px;
+  animation: pulse 1.5s ease infinite;
+}
+@keyframes pulse { 50% { transform: scale(1.1); } }
+.mission-card .emoji { font-size: 44px; display: block; line-height: 1; }
+.mission-card h3 {
+  font-family: var(--font-display); color: var(--navy);
+  letter-spacing: 1px; margin: 8px 0 4px; font-size: 17px;
+}
+.mission-card p { font-size: 12px; color: #555; line-height: 1.4; }
+.mission-card .stat {
+  margin-top: 8px; font-size: 10px; font-weight: 900;
+  color: var(--olive); letter-spacing: 1px; display: flex; align-items: center; gap: 4px;
+}
+
+/* ============ BUTTONS ============ */
+.btn {
+  background: var(--olive); color: white; border: 3px solid var(--navy);
+  padding: 10px 14px; border-radius: 10px; font-weight: 900; cursor: pointer;
+  font-family: var(--font-display); letter-spacing: 1.5px; font-size: 14px;
+  box-shadow: var(--shadow-sm); transition: transform 0.1s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:active { transform: translateY(2px); box-shadow: none; }
+.btn.gold { background: var(--gold); color: var(--navy); }
+.btn.red  { background: var(--red-bright); }
+.btn.navy { background: var(--navy-mid); }
+.btn.big  { padding: 14px 22px; font-size: 18px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* ============ CANVAS GAMES ============ */
+.game-stage {
+  position: relative;
+  background: #0a1a2a;
+  border: 4px solid var(--gold);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), inset 0 0 60px rgba(0,0,0,0.5);
+  aspect-ratio: 16/10;
+  max-height: 70vh;
+}
+.game-stage canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  display: block; touch-action: none;
+}
+.hud {
+  position: absolute; top: 10px; left: 10px; right: 10px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  font-family: var(--font-display); color: var(--green-hud);
+  letter-spacing: 2px; z-index: 10;
+  text-shadow: 0 0 8px rgba(0,255,136,0.6);
+  pointer-events: none;
+}
+.hud .hud-block {
+  background: rgba(0,0,0,0.6); padding: 6px 10px; border-radius: 6px;
+  border: 1px solid var(--green-hud); font-size: 14px;
+}
+.hud .hud-block.gold { color: var(--gold); border-color: var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.6); }
+.hud .hud-block.red  { color: #ff6e6e; border-color: #ff6e6e; }
+
+.game-overlay {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  background: rgba(10,26,42,0.92); z-index: 20; padding: 20px;
+  text-align: center;
+}
+.game-overlay h2 {
+  font-family: var(--font-display); color: var(--gold);
+  letter-spacing: 3px; font-size: clamp(24px, 5vw, 38px);
+  text-shadow: 0 0 20px rgba(255,215,0,0.6);
+}
+.game-overlay p { color: white; max-width: 500px; line-height: 1.5; font-size: 14px; }
+.game-overlay.victory h2 { color: var(--green-hud); }
+.game-overlay.defeat h2 { color: #ff6e6e; }
+
+/* ============ STORY MISSIONS ============ */
+.story-scene {
+  background: linear-gradient(180deg, var(--navy-mid), var(--navy));
+  color: white; padding: 22px; border-radius: 14px; margin-bottom: 14px;
+  border: 3px solid var(--gold); position: relative; overflow: hidden;
+}
+.story-scene::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 14px, var(--navy) 14px, var(--navy) 28px);
+}
+.story-scene .scene-tag {
+  display: inline-block; background: var(--red-bright); color: white;
+  padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 900;
+  letter-spacing: 2px; margin-bottom: 10px;
+}
+.story-scene .scene-emoji { font-size: 80px; display: block; text-align: center; margin: 14px 0;
+  animation: float 3s ease-in-out infinite; filter: drop-shadow(0 6px 0 rgba(0,0,0,0.3)); }
+@keyframes float { 50% { transform: translateY(-8px); } }
+.story-scene .scene-text {
+  font-size: 16px; line-height: 1.6; background: rgba(0,0,0,0.3);
+  padding: 14px; border-radius: 10px; border-left: 4px solid var(--gold);
+}
+.story-choices { display: grid; gap: 8px; margin-top: 14px; }
+.choice-btn {
+  background: linear-gradient(180deg, var(--olive-light), var(--olive));
+  color: white; border: 3px solid var(--gold); border-radius: 10px;
+  padding: 14px; font-weight: 900; cursor: pointer; text-align: left;
+  font-size: 15px; line-height: 1.4; box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+}
+.choice-btn:hover { transform: translateX(6px); background: var(--olive-light); }
+.choice-btn:active { transform: translateX(0); }
+.choice-btn .choice-tag {
+  display: inline-block; background: var(--gold); color: var(--navy);
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; margin-right: 6px;
+  font-family: var(--font-display); letter-spacing: 1px;
+}
+
+/* ============ ACADEMY (LESSONS) ============ */
+.lesson-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.lesson-tabs .tab-btn {
+  background: var(--khaki); color: var(--navy); border: 3px solid var(--olive-dark);
+  padding: 8px 10px; border-radius: 10px; font-weight: 900; cursor: pointer;
+  font-size: 12px; letter-spacing: 0.5px; font-family: var(--font-display);
+  transition: transform 0.1s;
+}
+.lesson-tabs .tab-btn.active {
+  background: var(--gold); border-color: var(--red);
+  transform: translateY(-2px); box-shadow: var(--shadow-sm);
+}
+.lesson-tabs .tab-btn.done { background: #c8e6c9; border-color: #2e7d32; }
+.lesson-tabs .tab-btn:active { transform: translateY(2px); }
+.lesson-content {
+  background: white; border: 3px solid var(--olive); border-radius: 12px;
+  padding: 18px; line-height: 1.65;
+  animation: lessonIn 0.4s ease;
+}
+@keyframes lessonIn { from { opacity: 0; transform: translateY(10px); } }
+.lesson-content h3 {
+  font-family: var(--font-display); color: var(--olive-dark);
+  letter-spacing: 1px; margin: 14px 0 6px; font-size: 18px;
+}
+.lesson-content ul, .lesson-content ol { line-height: 1.8; }
+.lesson-content p { margin: 8px 0; }
+.lesson-content .why-box {
+  background: var(--khaki-light); border-left: 6px solid var(--red);
+  padding: 12px 14px; border-radius: 8px; margin: 12px 0;
+  font-size: 14px;
+}
+.lesson-content .why-box strong {
+  color: var(--red); display: block; margin-bottom: 4px;
+  font-family: var(--font-display); letter-spacing: 1px; font-size: 15px;
+}
+.branches-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px; margin: 12px 0;
+}
+.branch-tile {
+  background: var(--navy); color: white; border: 3px solid var(--gold);
+  border-radius: 10px; padding: 10px 6px; text-align: center;
+}
+.branch-tile .em { font-size: 28px; line-height: 1; }
+.branch-tile .nm { font-family: var(--font-display); letter-spacing: 1px; margin-top: 4px; font-size: 13px; }
+.branch-tile .mt { font-size: 9px; color: var(--khaki); margin-top: 2px; font-style: italic; }
+
+/* ============ MORSE ============ */
+.morse-keypad { display: flex; gap: 10px; justify-content: center; margin: 12px 0; flex-wrap: wrap; }
+.morse-btn {
+  width: 70px; height: 70px; border-radius: 50%; border: 4px solid var(--navy);
+  background: var(--gold); font-size: 36px; font-weight: 900; cursor: pointer;
+  box-shadow: var(--shadow-md); transition: transform 0.05s;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); color: var(--navy);
+}
+.morse-btn:active { transform: translateY(4px); box-shadow: none; }
+.morse-btn.lit { background: var(--green-hud); box-shadow: 0 0 30px var(--green-hud); }
+.morse-input {
+  background: black; color: var(--gold); padding: 14px; border-radius: 10px;
+  font-family: var(--font-mono); font-size: 24px; min-height: 50px; text-align: center;
+  border: 3px solid var(--olive); letter-spacing: 5px; box-shadow: inset 0 0 20px rgba(255,215,0,0.2);
+}
+.morse-output {
+  background: white; color: var(--navy); padding: 14px; border-radius: 10px;
+  font-size: 22px; font-weight: 900; min-height: 40px; text-align: center;
+  border: 3px solid var(--gold); letter-spacing: 4px; font-family: var(--font-display);
+}
+.morse-chart {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 4px; margin-top: 12px; max-height: 200px; overflow-y: auto;
+}
+.morse-chart div {
+  background: var(--navy); color: white; padding: 6px; border-radius: 6px;
+  text-align: center; font-family: var(--font-mono); border: 1px solid var(--gold); font-size: 11px;
+}
+.morse-chart div span { display: block; color: var(--gold); font-size: 14px; font-weight: 900; font-family: var(--font-display); }
+
+.mode-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.mode-tab {
+  background: var(--khaki); color: var(--navy); border: 3px solid var(--olive-dark);
+  padding: 8px 12px; border-radius: 10px; font-weight: 900; cursor: pointer;
+  font-size: 12px; letter-spacing: 1px; font-family: var(--font-display);
+}
+.mode-tab.active { background: var(--gold); border-color: var(--red); transform: translateY(-2px); }
+
+/* ============ FORMATION ============ */
+.formation-game { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 700px) { .formation-game { grid-template-columns: 1fr; } }
+.form-target, .form-builder {
+  background: white; border: 3px solid var(--olive-dark); border-radius: 12px;
+  padding: 12px;
+}
+.form-grid {
+  display: grid; gap: 4px;
+  background: var(--olive-dark); padding: 6px; border-radius: 8px;
+  aspect-ratio: 1;
+}
+.form-cell {
+  background: var(--khaki-light); border-radius: 4px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(16px, 3.5vw, 26px); transition: all 0.2s;
+  aspect-ratio: 1; position: relative;
+}
+.form-cell.filled {
+  background: var(--gold);
+  animation: drop 0.3s cubic-bezier(.5,1.7,.5,1);
+}
+@keyframes drop { from { transform: scale(0.3) translateY(-30px); opacity: 0; } }
+.form-cell.target { background: var(--red-bright); color: white; cursor: default; }
+.form-cell.hint { animation: hintPulse 1s ease infinite; }
+@keyframes hintPulse { 50% { background: var(--gold); } }
+.form-msg {
+  background: var(--navy); color: var(--gold); padding: 10px; border-radius: 8px;
+  margin-top: 8px; text-align: center; font-weight: 900; letter-spacing: 1px; font-size: 14px;
+}
+.form-timer {
+  background: var(--red); color: white; padding: 8px 14px; border-radius: 10px;
+  font-family: var(--font-display); font-size: 22px; letter-spacing: 2px;
+  text-align: center; margin: 0 0 10px; border: 3px solid white;
+}
+
+/* ============ MISSION PLANNER ============ */
+.plan-builder { display: grid; gap: 10px; }
+.plan-row label { display: block; font-weight: 900; color: var(--olive-dark); margin-bottom: 4px; letter-spacing: 1px; font-size: 13px; }
+.plan-row select {
+  width: 100%; padding: 10px; border-radius: 10px; border: 3px solid var(--olive);
+  font-size: 15px; font-weight: bold; background: white; color: var(--navy);
+}
+.mission-brief {
+  background: var(--navy); color: var(--gold);
+  padding: 18px; border-radius: 12px; margin-top: 12px; border: 3px solid var(--gold);
+  font-family: var(--font-mono); line-height: 1.7; font-size: 14px;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+  animation: briefIn 0.8s ease;
+}
+@keyframes briefIn { from { opacity: 0; transform: translateY(20px); } }
+.mission-brief h3 { font-family: var(--font-display); color: var(--red-bright); letter-spacing: 3px; margin-bottom: 8px; font-size: 18px; }
+.stamp {
+  display: inline-block; border: 3px solid var(--red-bright); color: var(--red-bright);
+  padding: 4px 12px; transform: rotate(-8deg); font-weight: 900; letter-spacing: 2px; margin-top: 8px;
+  font-family: var(--font-display);
+}
+
+/* ============ INTEL LIBRARY ============ */
+.library-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.library-grid {
+  display: grid; gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+.library-card {
+  background: white; border: 3px solid var(--olive-dark); border-radius: 10px;
+  padding: 12px; text-align: center; cursor: pointer;
+  transition: transform 0.1s; position: relative;
+}
+.library-card:hover { transform: translateY(-3px); }
+.library-card .em { font-size: 36px; display: block; line-height: 1; }
+.library-card .nm { font-family: var(--font-display); font-size: 12px; letter-spacing: 1px; color: var(--navy); margin-top: 4px; }
+.library-card.locked { opacity: 0.35; filter: grayscale(0.8); }
+.library-card.locked::after {
+  content: '🔒'; position: absolute; top: 4px; right: 4px;
+}
+.library-detail {
+  background: var(--khaki-light); border: 3px solid var(--olive-dark);
+  border-radius: 12px; padding: 14px; margin-top: 12px; line-height: 1.6;
+}
+.library-detail h3 { color: var(--red); font-family: var(--font-display); letter-spacing: 2px; }
+.library-detail .why-box {
+  background: var(--cream); border-left: 4px solid var(--red);
+  padding: 10px; border-radius: 8px; margin: 10px 0;
+}
+
+/* ============ BOOT CAMP ============ */
+.bc-stage {
+  background: linear-gradient(180deg, var(--olive), var(--olive-dark));
+  border: 4px solid var(--gold); border-radius: 14px; padding: 18px;
+  color: white; min-height: 320px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.bc-prompt {
+  font-family: var(--font-display); font-size: clamp(26px, 5vw, 40px);
+  text-align: center; letter-spacing: 3px; color: var(--gold);
+  text-shadow: 0 4px 0 rgba(0,0,0,0.3);
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.3); border-radius: 10px; padding: 20px;
+  animation: bcIn 0.3s ease;
+}
+@keyframes bcIn { from { transform: scale(0.8); opacity: 0; } }
+.bc-options {
+  display: grid; gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+}
+.bc-opt {
+  background: var(--cream); color: var(--navy); border: 3px solid var(--gold);
+  border-radius: 10px; padding: 14px; font-weight: 900; cursor: pointer;
+  font-size: 16px; font-family: var(--font-display); letter-spacing: 1.5px;
+  box-shadow: var(--shadow-sm); transition: transform 0.1s;
+}
+.bc-opt:active { transform: translateY(2px); box-shadow: none; }
+.bc-opt.correct { background: var(--green-radar); color: white; animation: shake 0.4s; }
+.bc-opt.wrong { background: var(--red-bright); color: white; animation: shake 0.4s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.bc-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--font-display); letter-spacing: 2px;
+}
+.bc-meta .timer { color: var(--gold); }
+.bc-meta .score { color: var(--green-hud); }
+
+/* ============ REWARDS & FX ============ */
+.reward-popup {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%) scale(0.5);
+  background: var(--gold); color: var(--navy); padding: 14px 22px;
+  border-radius: 12px; border: 4px solid var(--red); box-shadow: var(--shadow-lg);
+  font-family: var(--font-display); font-size: 20px; letter-spacing: 2px;
+  z-index: 1000; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.reward-popup.show {
+  opacity: 1; transform: translateX(-50%) scale(1);
+  animation: bounce 0.6s;
+}
+@keyframes bounce {
+  0%,100% { transform: translateX(-50%) translateY(0) scale(1); }
+  20% { transform: translateX(-50%) translateY(-15px) scale(1.1); }
+  40% { transform: translateX(-50%) translateY(0) scale(1); }
+  60% { transform: translateX(-50%) translateY(-8px) scale(1.05); }
+}
+
+#xpFly {
+  position: fixed; pointer-events: none; z-index: 999;
+  font-family: var(--font-display); color: var(--gold);
+  font-size: 24px; letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(255,215,0,0.8);
+}
+
+.badges-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.badge {
+  background: var(--gold); border: 3px solid var(--red);
+  border-radius: 50%; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; box-shadow: var(--shadow-sm);
+  cursor: help; position: relative;
+}
+.badge.locked { background: #777; border-color: #444; opacity: 0.4; }
+.badge.new::after {
+  content: 'NEW'; position: absolute; top: -8px; right: -8px;
+  background: var(--red-bright); color: white; font-size: 8px;
+  font-weight: 900; padding: 1px 4px; border-radius: 6px;
+}
+
+.hidden { display: none !important; }
+.glow { animation: glow 1s ease infinite alternate; }
+@keyframes glow { to { box-shadow: 0 0 20px var(--gold); } }
+
+/* Particle layer */
+#particleLayer { position: fixed; inset: 0; pointer-events: none; z-index: 998; }
+.particle { position: absolute; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- BOOT SEQUENCE -->
+<div id="bootScreen">
+  <div class="boot-logo">🪖 MISSION READY</div>
+  <div class="boot-lines">
+    <div class="boot-line" data-d="200">&gt; INITIALIZING COMMAND CENTER...</div>
+    <div class="boot-line" data-d="500">&gt; LOADING SATELLITE FEED... ✓</div>
+    <div class="boot-line" data-d="800">&gt; RADAR ONLINE... ✓</div>
+    <div class="boot-line" data-d="1100">&gt; AUTHENTICATING RECRUIT... ✓</div>
+    <div class="boot-line" data-d="1400">&gt; ALL SYSTEMS GO. STAND BY, COMMANDER.</div>
+  </div>
+</div>
+
+<div class="reward-popup" id="rewardPopup">+10 XP!</div>
+<div id="particleLayer"></div>
+
+<div class="wrap">
+  <header class="hq">
+    <div class="logo">
+      🪖 MISSION READY
+      <small>COMMAND CENTER</small>
+    </div>
+    <div class="recruit-badge">
+      <div class="rank-line">
+        <span class="rank-emoji" id="rankEmoji">🪖</span>
+        <div>
+          <div class="name" id="recruitName">RECRUIT</div>
+          <div class="rank" id="recruitRank">Recruit</div>
+        </div>
+      </div>
+      <div class="xp-bar">
+        <div class="xp-fill" id="xpFill"></div>
+        <div class="xp-text" id="xpText">0 / 50 XP</div>
+      </div>
+    </div>
+    <button class="hq-btn" onclick="goHome()">🏠 HQ</button>
+  </header>
+
+  <main id="mainContent"></main>
+</div>
+
+<script>
+/* ============================================================
+   STATE + STORAGE
+   ============================================================ */
+const RANKS = [
+  { name: 'Recruit',    xp: 0,    emoji: '🪖' },
+  { name: 'Private',    xp: 50,   emoji: '🎖️' },
+  { name: 'Corporal',   xp: 150,  emoji: '🏅' },
+  { name: 'Sergeant',   xp: 300,  emoji: '🎗️' },
+  { name: 'Lieutenant', xp: 500,  emoji: '🥉' },
+  { name: 'Captain',    xp: 800,  emoji: '🥈' },
+  { name: 'Major',      xp: 1200, emoji: '🥇' },
+  { name: 'Colonel',    xp: 1700, emoji: '⭐' },
+  { name: 'General',    xp: 2500, emoji: '🌟' }
+];
+const BADGES = {
+  firstFlight:   { e: '✈️', n: 'First Flight' },
+  ace:           { e: '🎯', n: 'Ace Pilot' },
+  morseExpert:   { e: '📡', n: 'Signal Master' },
+  tactician:     { e: '♟️', n: 'Tactician' },
+  hero:          { e: '🦸', n: 'Rescue Hero' },
+  intel:         { e: '🔍', n: 'Intel Officer' },
+  storyteller:   { e: '📖', n: 'Mission Veteran' },
+  drillSergeant: { e: '💪', n: 'Drill Sergeant' },
+  commander:     { e: '⭐', n: 'Commander' }
+};
+
+let state = {
+  name: 'Recruit',
+  xp: 0,
+  badges: [],
+  intel: { vehicles: [], ranks: [], branches: [], facts: [], history: [], animals: [], tech: [], jobs: [], units: [], traditions: [] },
+  lessonsRead: [],
+  bestRadar: 0,
+  bestSupply: 0,
+  bestBootcamp: 0,
+  formationsWon: 0,
+  morseWon: 0,
+  storiesPlayed: []
+};
+
+async function loadState() {
+  if (typeof window.storage !== 'undefined' && window.storage.get) {
+    try {
+      const r = await window.storage.get('mr_state');
+      if (r && r.value) state = Object.assign(state, JSON.parse(r.value));
+    } catch(e) {}
+  }
+  renderHeader();
+}
+async function saveState() {
+  if (typeof window.storage !== 'undefined' && window.storage.set) {
+    try { await window.storage.set('mr_state', JSON.stringify(state)); } catch(e){}
+  }
+}
+function getRank() {
+  let r = RANKS[0];
+  for (const rk of RANKS) if (state.xp >= rk.xp) r = rk;
+  return r;
+}
+function getNextRank() {
+  const i = RANKS.indexOf(getRank());
+  return i < RANKS.length - 1 ? RANKS[i+1] : null;
+}
+function renderHeader() {
+  const cur = getRank(), next = getNextRank();
+  document.getElementById('rankEmoji').textContent = cur.emoji;
+  document.getElementById('recruitName').textContent = (state.name || 'RECRUIT').toUpperCase();
+  document.getElementById('recruitRank').textContent = cur.name;
+  if (next) {
+    const pct = ((state.xp - cur.xp) / (next.xp - cur.xp)) * 100;
+    document.getElementById('xpFill').style.width = Math.min(100, pct) + '%';
+    document.getElementById('xpText').textContent = `${state.xp} / ${next.xp} XP`;
+  } else {
+    document.getElementById('xpFill').style.width = '100%';
+    document.getElementById('xpText').textContent = `${state.xp} XP — MAX!`;
+  }
+}
+function awardXP(amount, msg, x, y) {
+  const oldRank = getRank().name;
+  state.xp += amount;
+  const newRank = getRank().name;
+  if (x !== undefined && y !== undefined) flyXP(amount, x, y);
+  else showReward((msg || `+${amount} XP`) + ' ⚡');
+  if (oldRank !== newRank) {
+    setTimeout(() => {
+      showReward('🌟 PROMOTED: ' + newRank.toUpperCase() + '! 🌟', 2400);
+      bigParticles();
+    }, 700);
+  }
+  renderHeader();
+  saveState();
+  beep(880, 0.06);
+}
+function earnBadge(key) {
+  if (state.badges.includes(key)) return;
+  state.badges.push(key);
+  showReward('🏆 BADGE: ' + BADGES[key].n + '!', 2200);
+  bigParticles();
+  saveState();
+  beep(1320, 0.15);
+}
+function showReward(msg, dur = 1500) {
+  const el = document.getElementById('rewardPopup');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), dur);
+}
+function flyXP(amount, fromX, fromY) {
+  const el = document.createElement('div');
+  el.id = 'xpFly_' + Date.now();
+  el.style.cssText = `position:fixed; left:${fromX}px; top:${fromY}px; pointer-events:none; z-index:999;
+    font-family:Impact,sans-serif; color:#ffd700; font-size:28px; letter-spacing:2px;
+    text-shadow:0 0 10px rgba(255,215,0,0.8); transition:all 0.9s cubic-bezier(.5,-0.3,.5,1);`;
+  el.textContent = '+' + amount + ' XP';
+  document.body.appendChild(el);
+  // Header XP bar target
+  const target = document.querySelector('.xp-bar').getBoundingClientRect();
+  requestAnimationFrame(() => {
+    el.style.left = target.left + target.width/2 + 'px';
+    el.style.top = target.top + 'px';
+    el.style.fontSize = '12px';
+    el.style.opacity = '0.2';
+  });
+  setTimeout(() => el.remove(), 1000);
+}
+function bigParticles() {
+  const layer = document.getElementById('particleLayer');
+  const emojis = ['⭐','🎖️','✨','🏅','💥'];
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    p.style.cssText = `position:fixed; left:50%; top:30%; font-size:${20+Math.random()*20}px; pointer-events:none;
+      transition:all 1.2s cubic-bezier(.3,.8,.5,1); z-index:998;`;
+    layer.appendChild(p);
+    const ang = Math.random()*Math.PI*2, dist = 200+Math.random()*200;
+    requestAnimationFrame(() => {
+      p.style.left = `calc(50% + ${Math.cos(ang)*dist}px)`;
+      p.style.top  = `calc(30% + ${Math.sin(ang)*dist}px)`;
+      p.style.opacity = '0';
+      p.style.transform = `rotate(${(Math.random()-0.5)*720}deg)`;
+    });
+    setTimeout(() => p.remove(), 1300);
+  }
+}
+
+/* ============================================================
+   AUDIO ENGINE
+   ============================================================ */
+let audioCtx;
+function ensureAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function beep(freq = 600, dur = 0.1, type = 'sine', vol = 0.15) {
+  ensureAudio();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.start(); osc.stop(audioCtx.currentTime + dur);
+}
+function chord(freqs, dur = 0.3) {
+  freqs.forEach((f, i) => setTimeout(() => beep(f, dur, 'square', 0.1), i * 60));
+}
+function fanfare() { chord([523, 659, 784, 1047], 0.4); }
+function buzz() { beep(150, 0.25, 'sawtooth', 0.18); }
+
+/* Vibration on mobile */
+function vibe(p = 30) { try { navigator.vibrate && navigator.vibrate(p); } catch(e){} }
+
+/* ============================================================
+   ROUTING
+   ============================================================ */
+let currentGame = null;
+function goHome() {
+  if (currentGame && currentGame.stop) currentGame.stop();
+  currentGame = null;
+  renderHome();
+  beep(500, 0.05);
+}
+function showSection(fn) {
+  if (currentGame && currentGame.stop) currentGame.stop();
+  currentGame = null;
+  fn();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  beep(700, 0.05);
+}
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function renderHome() {
+  const main = document.getElementById('mainContent');
+  const missions = [
+    { id: 'academy',   em: '🎓', t: 'THE ACADEMY', d: 'Deep lessons! Branches, ranks, history, tech, animals, traditions & more.', s: `${state.lessonsRead ? state.lessonsRead.length : 0}/12 read`, new: !state.lessonsRead || state.lessonsRead.length === 0 },
+    { id: 'radar',     em: '🎯', t: 'AIR DEFENSE', d: 'Intercept enemy jets on the radar before they reach base. Arcade action!', s: `Best: ${state.bestRadar} pts`, new: state.bestRadar === 0 },
+    { id: 'supply',    em: '🚁', t: 'SUPPLY DROP', d: 'Fly a helicopter and drop aid to disaster zones. Precision counts!',     s: `Best: ${state.bestSupply} pts`, new: state.bestSupply === 0 },
+    { id: 'morse',     em: '📡', t: 'MORSE OPS',   d: 'Tap real Morse code. Decode SOS calls and rescue ships!',                 s: `Won: ${state.morseWon}` },
+    { id: 'formation', em: '♟️', t: 'FORMATION DRILL', d: 'Beat the timer. Build classic battle formations from memory.',         s: `Won: ${state.formationsWon}/5` },
+    { id: 'story',     em: '📖', t: 'STORY MISSIONS', d: 'Branching missions! Your choices change the ending. Be the commander.', s: `Played: ${state.storiesPlayed.length}/4`, new: state.storiesPlayed.length === 0 },
+    { id: 'planner',   em: '🗺️', t: 'MISSION PLANNER', d: 'Build your own custom mission. Get a top-secret briefing.',           s: 'Endless' },
+    { id: 'bootcamp',  em: '💪', t: 'BOOT CAMP',   d: '60-second drills. Phonetic, ranks, branches — speed test!',              s: `Best: ${state.bestBootcamp} pts` },
+    { id: 'library',   em: '📚', t: 'INTEL LIBRARY', d: 'Unlockable encyclopedia. 100+ entries across 10 categories.',           s: `${getIntelCount()} unlocked` }
+  ];
+  const badgesHtml = Object.keys(BADGES).map(k => {
+    const earned = state.badges.includes(k);
+    return `<div class="badge ${earned ? '' : 'locked'}" title="${BADGES[k].n}">${BADGES[k].e}</div>`;
+  }).join('');
+  main.innerHTML = `
+    <div class="welcome-card">
+      <h1>⚡ WELCOME, COMMANDER ⚡</h1>
+      <p>Nine active mission stations are ready, including the Academy with 12 deep lessons. Earn XP. Climb the ranks. Save the day.</p>
+      <div class="name-row">
+        <input id="nameInput" type="text" placeholder="CODENAME" value="${state.name === 'Recruit' ? '' : state.name}" maxlength="12">
+        <button onclick="setName()">SAVE</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-bottom:14px; padding:12px 16px;">
+      <h3 style="margin:0 0 6px;">🏆 BADGES (${state.badges.length}/${Object.keys(BADGES).length})</h3>
+      <div class="badges-row">${badgesHtml}</div>
+    </div>
+    <div class="mission-grid">
+      ${missions.map(m => `
+        <div class="mission-card" onclick="route_${m.id}()">
+          ${m.new ? '<div class="new-tag">NEW</div>' : ''}
+          <span class="emoji">${m.em}</span>
+          <h3>${m.t}</h3>
+          <p>${m.d}</p>
+          <div class="stat">⚡ ${m.s}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+function setName() {
+  const n = document.getElementById('nameInput').value.trim();
+  if (n) {
+    state.name = n; saveState(); renderHeader();
+    showReward('🎖️ CODENAME: ' + n.toUpperCase());
+  }
+}
+function getIntelCount() {
+  return Object.values(state.intel).reduce((sum, arr) => sum + arr.length, 0);
+}
+
+/* Route helpers — each calls showSection with its renderer */
+function route_academy()   { showSection(renderAcademy); }
+function route_radar()     { showSection(renderRadar); }
+function route_supply()    { showSection(renderSupply); }
+function route_morse()     { showSection(renderMorse); }
+function route_formation() { showSection(renderFormation); }
+function route_story()     { showSection(renderStoryHub); }
+function route_planner()   { showSection(renderPlanner); }
+function route_bootcamp()  { showSection(renderBootcamp); }
+function route_library()   { showSection(renderLibrary); }
+
+/* ============================================================
+   THE ACADEMY — 12 DEEP LESSONS
+   ============================================================ */
+const LESSONS = {
+  branches: {
+    em: '⚔️', title: 'The Six Branches',
+    summary: 'Why the military has six different branches, not just one.',
+    body: `
+      <p>The U.S. military has <strong>SIX BRANCHES</strong>. Each protects a different part of the world — land, sea, sky, and even space.</p>
+      <div class="branches-grid">
+        <div class="branch-tile"><div class="em">🪖</div><div class="nm">ARMY</div><div class="mt">Land power</div></div>
+        <div class="branch-tile"><div class="em">⚓</div><div class="nm">NAVY</div><div class="mt">Rules the sea</div></div>
+        <div class="branch-tile"><div class="em">✈️</div><div class="nm">AIR FORCE</div><div class="mt">Owns the sky</div></div>
+        <div class="branch-tile"><div class="em">🦅</div><div class="nm">MARINES</div><div class="mt">First to fight</div></div>
+        <div class="branch-tile"><div class="em">🚤</div><div class="nm">COAST GUARD</div><div class="mt">Saves lives at sea</div></div>
+        <div class="branch-tile"><div class="em">🚀</div><div class="nm">SPACE FORCE</div><div class="mt">Guards satellites</div></div>
+      </div>
+      <h3>How they split the work</h3>
+      <p>The <strong>Army</strong> is the biggest and oldest — they handle anything on land, from deserts to mountains.
+      The <strong>Navy</strong> rules all 5 oceans and even has airplanes that take off from giant ships.
+      The <strong>Marines</strong> are inside the Navy but separate — they're the elite force that can attack from the sea OR land.
+      The <strong>Air Force</strong> handles everything in the sky and outer atmosphere.
+      The <strong>Coast Guard</strong> protects America's coastlines and rescues people at sea — they actually answer to a different boss (Homeland Security) most of the time!
+      The <strong>Space Force</strong> is the newest (2019) and watches over satellites that run GPS, weather, TV, and the internet.</p>
+      <div class="why-box">
+        <strong>🧠 First-principles thinking</strong>
+        Why not one giant force? Because a tank can't fly, a jet can't swim, and a ship can't roll through the desert. The principle is <em>match the tool to the terrain</em>. Six branches = six teams of specialists. Together, they cover every place on Earth (and above it).
+      </div>
+      <p><strong>Cool fact:</strong> The Coast Guard is the smallest branch but rescues over 5,000 people every year. They might be the busiest of all.</p>
+    `
+  },
+  ranks: {
+    em: '🎖️', title: 'How Ranks Work',
+    summary: 'Why ranks exist and what each one means.',
+    body: `
+      <p>Every person in the military has a <strong>rank</strong> — a job title showing how much they've trained and how many people they lead. You start as a <strong>Recruit</strong> and earn your way up.</p>
+      <h3>From bottom to top</h3>
+      <ol style="line-height:1.9; padding-left:20px;">
+        <li>🪖 <strong>Recruit</strong> — Just joined. Learning everything.</li>
+        <li>🎖️ <strong>Private</strong> — Finished basic training (8-12 weeks of intense learning).</li>
+        <li>🏅 <strong>Corporal / Sergeant</strong> — Leads a small team (4-10 people). Called NCOs (non-commissioned officers).</li>
+        <li>🥉 <strong>Lieutenant / Captain</strong> — Officers. Leads a platoon (30) or company (100-200).</li>
+        <li>🥇 <strong>Major / Colonel</strong> — Senior officers. Leads hundreds to thousands.</li>
+        <li>⭐ <strong>General / Admiral</strong> — Top of the chain. Some lead entire wars.</li>
+      </ol>
+      <h3>Officers vs NCOs</h3>
+      <p>There are really TWO ladders. <strong>Enlisted</strong> soldiers start at Private and climb to Sergeant Major. <strong>Officers</strong> usually start at Lieutenant (often after college or a military academy like West Point). Each ladder leads itself differently — and good officers always listen to their experienced sergeants!</p>
+      <div class="why-box">
+        <strong>🧠 First Principle: Chain of Command</strong>
+        Imagine 10,000 people in a crisis with no leaders. Chaos! Ranks create a <em>tree</em> — orders flow down clearly, reports flow back up. No confusion about who decides. This single idea, called <strong>unity of command</strong>, is over 4,000 years old.
+      </div>
+      <p><strong>The Navy uses different words</strong> — instead of Sergeant, they say Petty Officer. Instead of General, they say Admiral. Same idea, different tradition.</p>
+    `
+  },
+  strategy: {
+    em: '♟️', title: 'Strategy Basics',
+    summary: 'How great commanders think before acting.',
+    body: `
+      <p>Strategy is just <strong>thinking ahead carefully</strong>. A great commander asks three questions before any move:</p>
+      <ol style="line-height:1.9; padding-left:20px;">
+        <li>🗺️ <strong>Where am I?</strong> (terrain, weather, time)</li>
+        <li>👥 <strong>What do I have?</strong> (people, tools, supplies)</li>
+        <li>🎯 <strong>What's my goal?</strong> (mission objective)</li>
+      </ol>
+      <h3>Five big ideas in strategy</h3>
+      <div class="why-box"><strong>🏔️ HIGH GROUND</strong> Being above your enemy means you see further and move down easier than they can climb up. That's why castles sit on hills.</div>
+      <div class="why-box"><strong>📡 COMMUNICATION</strong> The strongest army loses if they can't talk to each other. Radios, signals, and code are <em>weapons</em>.</div>
+      <div class="why-box"><strong>🥪 SUPPLY LINES</strong> Soldiers need food, water, ammo, fuel. Cut off the supplies and any army stops. Generals call this <strong>logistics</strong> — and it wins more wars than fighting.</div>
+      <div class="why-box"><strong>🎭 SURPRISE</strong> Doing something the enemy doesn't expect doubles your power. Sun Tzu wrote, "Appear weak when strong, strong when weak."</div>
+      <div class="why-box"><strong>🤝 ALLIANCES</strong> A friend is stronger than another weapon. Building friendships before you need them is itself a strategy.</div>
+      <h3>Sun Tzu's golden rule</h3>
+      <p>Over 2,500 years ago in China, Sun Tzu wrote <em>The Art of War</em>. People still read it today — even business people and sports coaches! His most famous idea: <strong>"Know yourself, know your enemy."</strong> If you know both, you'll never lose. If you only know one, you'll lose half the time. If you know neither — disaster!</p>
+    `
+  },
+  vehicles: {
+    em: '🚁', title: 'Amazing Vehicles',
+    summary: 'The COOLEST machines ever built — and what each one is for.',
+    body: `
+      <h3>🛩️ In the sky</h3>
+      <ul style="line-height:1.9; padding-left:20px;">
+        <li><strong>F-22 Raptor</strong> — Stealth fighter, almost invisible to radar.</li>
+        <li><strong>F-35 Lightning II</strong> — Newer than F-22, used by Army, Navy, Marines AND allies. Some versions land like helicopters!</li>
+        <li><strong>B-2 Spirit</strong> — Bomber shaped like a flying boomerang. Costs $2 BILLION each.</li>
+        <li><strong>CH-47 Chinook</strong> — Giant helicopter with TWO rotors. Can lift other helicopters.</li>
+        <li><strong>C-5 Galaxy / C-17 Globemaster</strong> — Massive cargo planes. Can carry TANKS inside.</li>
+        <li><strong>SR-71 Blackbird</strong> (retired) — Flew so fast (Mach 3.3) that no missile ever caught one!</li>
+        <li><strong>V-22 Osprey</strong> — Tilts its rotors. Takes off like a helicopter, flies like a plane.</li>
+      </ul>
+      <h3>🚢 On the sea</h3>
+      <ul style="line-height:1.9; padding-left:20px;">
+        <li><strong>Aircraft Carrier</strong> — Floating airport. USS Gerald R. Ford is longer than the Empire State Building is tall.</li>
+        <li><strong>Submarine</strong> — Some stay underwater 90+ days. The Ohio-class subs are nearly 2 football fields long.</li>
+        <li><strong>Destroyer (Arleigh Burke class)</strong> — Fast, missile-equipped, protects carriers.</li>
+        <li><strong>Littoral Combat Ship</strong> — Designed for shallow water (close to shore).</li>
+        <li><strong>Coast Guard Cutter</strong> — Search-and-rescue + law enforcement.</li>
+      </ul>
+      <h3>🚜 On land</h3>
+      <ul style="line-height:1.9; padding-left:20px;">
+        <li><strong>M1 Abrams Tank</strong> — 70 tons but hits 45 mph. Armor stronger than most fortresses.</li>
+        <li><strong>Stryker</strong> — 8-wheeled armored vehicle. Faster than tanks.</li>
+        <li><strong>Humvee</strong> — Tough 4x4 that goes anywhere.</li>
+        <li><strong>MRAP</strong> — V-shaped hull deflects bombs. Lifesaver in conflict zones.</li>
+        <li><strong>JLTV</strong> — Joint Light Tactical Vehicle. The Humvee's replacement.</li>
+      </ul>
+      <div class="why-box">
+        <strong>🧠 Why so many?</strong>
+        Each vehicle is the <em>best tool for one specific job</em>. A tank is heavy and slow but tough. A jet is fast but can't carry much. Choosing the right vehicle for the mission is part of strategy. Trying to use one vehicle for everything would mean doing every job poorly!
+      </div>
+    `
+  },
+  comms: {
+    em: '📡', title: 'How They Talk',
+    summary: 'Communication in the noise of battle.',
+    body: `
+      <p>In the chaos of a mission, soldiers MUST talk fast and clearly. Mistakes kill missions. Here's how they do it:</p>
+      <h3>NATO Phonetic Alphabet</h3>
+      <p>If you said "B" over a radio, it might sound like "D" or "P." So instead they say <strong>Bravo</strong>. Each letter has its own word that's hard to confuse:</p>
+      <p style="background:var(--khaki-light); padding:12px; border-radius:8px; line-height:1.9; font-family:monospace;">
+        Alpha · Bravo · Charlie · Delta · Echo · Foxtrot · Golf · Hotel · India · Juliet · Kilo · Lima · Mike · November · Oscar · Papa · Quebec · Romeo · Sierra · Tango · Uniform · Victor · Whiskey · X-ray · Yankee · Zulu
+      </p>
+      <h3>Morse Code</h3>
+      <p>Before radios existed, people sent messages as <strong>dots (•) and dashes (—)</strong>. Morse code can travel by light, by sound, by tapping on metal — even by blinking your eyes! SOS — the universal call for help — is:</p>
+      <p style="font-size:30px; text-align:center; background:black; color:var(--gold); padding:14px; border-radius:8px; letter-spacing:6px;">••• ——— •••</p>
+      <h3>Hand Signals</h3>
+      <p>When silence matters, soldiers use <strong>hand signals</strong>: a closed fist means "STOP," a flat hand means "GET DOWN," two fingers pointing at the eyes means "LOOK," a finger pointing at the ear means "LISTEN."</p>
+      <h3>Brevity Codes</h3>
+      <p>Pilots and soldiers also use short code words to save time. "Bingo" means "low on fuel, going home." "Splash" means a target is destroyed. "Eyes on" means "I can see them." A pilot might say 20 words in 2 seconds.</p>
+      <div class="why-box">
+        <strong>🧠 First Principle</strong>
+        The simpler the signal, the harder it is to misunderstand. Military words are SHORT and CLEAR for the same reason emergency signs say STOP, not "please consider halting your forward motion." Clarity saves lives.
+      </div>
+    `
+  },
+  helpers: {
+    em: '🤝', title: 'Military as Helpers',
+    summary: 'The other 95% of what the military actually does.',
+    body: `
+      <p>The military isn't just for fighting. MOST of the time, they help people. Here's how:</p>
+      <h3>🌪️ Disaster Response</h3>
+      <p>When hurricanes, earthquakes, wildfires, or floods hit, the military arrives with helicopters, boats, and trucks. They <strong>rescue families, deliver food and water, restore power, and rebuild homes</strong>. After Hurricane Katrina (2005), 70,000 National Guard troops helped New Orleans.</p>
+      <h3>🚑 Medical Missions</h3>
+      <p>The Navy operates two giant hospital ships — <strong>USNS Comfort</strong> and <strong>USNS Mercy</strong> — that sail to countries in need and give free surgeries, vaccines, and care. Each ship has 1,000 hospital beds!</p>
+      <h3>🛟 Search & Rescue</h3>
+      <p>The Coast Guard rescues thousands of swimmers, sailors, hikers, and pilots EVERY year. Their motto is <em>Semper Paratus</em> — "Always Ready." On average they save someone every 34 minutes.</p>
+      <h3>🌲 Fire Fighting</h3>
+      <p>Military planes called <strong>Modular Airborne Fire Fighting Systems</strong> (MAFFS) drop 3,000 gallons of water on huge wildfires in seconds. Soldiers also dig firebreaks by hand.</p>
+      <h3>🌍 Humanitarian Aid</h3>
+      <p>After the 2011 Japan tsunami, the U.S. military launched <strong>Operation Tomodachi</strong> ("Friend" in Japanese) — delivering 280 tons of relief supplies in days.</p>
+      <h3>🛤️ Building things</h3>
+      <p>Military engineers (called the <strong>Army Corps of Engineers</strong>) build dams, bridges, and even fix levees. They built much of the Panama Canal back in 1914!</p>
+      <div class="why-box">
+        <strong>🧠 The Real Mission</strong>
+        Strong militaries train to <strong>defend</strong> and <strong>protect</strong>. The best ones rarely have to fight — they keep peace by being prepared. Sometimes the deepest idea is: preparation IS the mission.
+      </div>
+    `
+  },
+  history: {
+    em: '📜', title: 'Through History',
+    summary: 'Five moments that changed the world (with helmets on).',
+    body: `
+      <h3>🌅 D-Day, June 6, 1944</h3>
+      <p>The biggest sea-to-land invasion in history. 156,000 Allied soldiers (American, British, Canadian, French) crossed the English Channel and landed on the beaches of Normandy, France — to help free Europe. It took 5,000 ships and 13,000 aircraft. General Eisenhower (later U.S. President) planned it for over a YEAR. Without D-Day, history would look very different.</p>
+      <h3>🌙 Moon Landing, July 20, 1969</h3>
+      <p>Neil Armstrong and Buzz Aldrin walked on the Moon. Both were <strong>military pilots first</strong> — Armstrong flew jets in the Navy, Aldrin flew in the Air Force. Their training in discipline, calm under pressure, and engineering made it possible. The Apollo program employed 400,000 people!</p>
+      <h3>📡 Navajo Code Talkers, 1942-1945</h3>
+      <p>During World War II, the Marines recruited Navajo Native Americans because their language was so unique that NO enemy could decode it. They invented a special Navajo code — and the enemy NEVER broke it. They helped win the Battle of Iwo Jima. The Code Talkers got Congressional Gold Medals in 2001.</p>
+      <h3>✈️ The Tuskegee Airmen, 1941-1946</h3>
+      <p>The first Black military pilots in U.S. history. They escorted bombers during WWII and rarely lost one — earning the nickname "Red Tails." They fought TWO battles: against the enemy abroad AND against unfair rules at home. Their excellence helped change American military rules forever.</p>
+      <h3>🍞 Berlin Airlift, 1948-1949</h3>
+      <p>When West Berlin (a city in Germany) was cut off, U.S. and British planes <strong>FED an entire city by air</strong> for 11 months. They landed every 30 seconds, day and night, delivering 2 million tons of food, coal, and supplies. No fighting — just an amazing feat of logistics that saved 2 million people.</p>
+      <div class="why-box">
+        <strong>🧠 The pattern</strong>
+        Notice something? Each of these moments combined <em>courage + teamwork + smart planning</em>. The biggest victories often involve people who refused to give up, plus very careful preparation. That's a lesson for ANY challenge, not just military ones.
+      </div>
+    `
+  },
+  strategists: {
+    em: '🧠', title: 'Great Strategists',
+    summary: 'Five thinkers whose ideas still rule today.',
+    body: `
+      <h3>Sun Tzu (China, ~500 BC)</h3>
+      <p>Wrote <em>The Art of War</em> — the most famous strategy book ever. He believed the <strong>best general wins WITHOUT fighting</strong>. His tricks: be unpredictable, know your enemy, choose your battles, never fight when you're tired. Modern CEOs, sports coaches, and even kids' card-game players read his book!</p>
+      <h3>George Washington (USA, 1732-1799)</h3>
+      <p>Before he was the first U.S. President, he was a general. Outnumbered and outgunned by the British Army, he chose to FIGHT SMALL — quick raids, sudden retreats, surviving until winning conditions appeared. His genius: knowing when NOT to fight. He famously crossed the icy Delaware River on Christmas Night to surprise enemy forces.</p>
+      <h3>Dwight D. Eisenhower (USA, 1890-1969)</h3>
+      <p>Planned D-Day. Later became the 34th U.S. President. Famous for saying <strong>"Plans are nothing; planning is everything."</strong> Meaning: the plan itself will change once you start, but the PROCESS of planning teaches you everything you need.</p>
+      <h3>Hannibal Barca (Carthage, 247-183 BC)</h3>
+      <p>Famously marched ELEPHANTS over the Alps mountains to surprise the Romans. He won battle after battle by making enemies fight where THEY didn't want to fight. His ideas about ambush and clever positioning are still studied today.</p>
+      <h3>Joan of Arc (France, 1412-1431)</h3>
+      <p>A teenage girl who led the French army to victory at age 17! She brought hope and a clear sense of mission to her troops. Lesson: leadership isn't about age or muscle — it's about clarity, courage, and conviction.</p>
+      <div class="why-box">
+        <strong>🧠 Common thread</strong>
+        None of these people won by being the biggest or strongest. They won by <em>thinking differently</em>. Strategy is for everyone — students, athletes, builders, artists. Your brain is your most powerful weapon.
+      </div>
+    `
+  },
+  tech: {
+    em: '🔬', title: 'Military Tech & Inventions',
+    summary: 'The military invented half the stuff in your house.',
+    body: `
+      <p>Did you know? A LOT of everyday technology was invented by or for the military, then spread to civilians. Here are the big ones:</p>
+      <h3>🛰️ GPS</h3>
+      <p>The Global Positioning System uses 31 satellites built by the U.S. military. Your phone, car, plane — every map app — uses GPS. Originally for guiding missiles, now used for pizza delivery!</p>
+      <h3>🌐 The Internet</h3>
+      <p>It started as <strong>ARPANET</strong>, a military research project in 1969 to share computer information between scientists. That tiny network grew into... the Internet. Every email, video, and game online traces back to that.</p>
+      <h3>📡 Radar</h3>
+      <p>Invented in the 1930s to detect approaching airplanes. It works by bouncing radio waves off objects. Today: weather radar, air traffic control, baseball speed guns.</p>
+      <h3>🔊 Sonar</h3>
+      <p>Like radar but underwater, using sound instead of radio. Submarines use it to "see" without windows. Today: fish finders on boats, medical ultrasound.</p>
+      <h3>🌡️ Microwave Oven</h3>
+      <p>A scientist working on radar in 1945 noticed a chocolate bar in his pocket melted near the radar tube. That accident → microwave ovens in every kitchen!</p>
+      <h3>🧥 Duct Tape</h3>
+      <p>Invented in WWII to seal ammunition cans (keep them dry). Today: fixes everything in your house.</p>
+      <h3>👃 Stealth</h3>
+      <p>Special shapes + radar-absorbing paint = aircraft that look smaller than a bird on radar. The F-117 Nighthawk (1981) was the first true stealth jet.</p>
+      <h3>🥫 Canned food</h3>
+      <p>Napoleon Bonaparte offered a prize in 1795 for anyone who could invent food that wouldn't spoil for soldiers. Canned food was the answer.</p>
+      <h3>👀 Night Vision</h3>
+      <p>Sees infrared (heat). Lets soldiers see in total darkness. Now used by hunters, security cameras, and wildlife photographers.</p>
+      <h3>🧣 Synthetic Fabrics</h3>
+      <p>Nylon was developed for parachutes in WWII. Today: backpacks, jackets, ropes, fishing line.</p>
+      <div class="why-box">
+        <strong>🧠 The lesson</strong>
+        When you solve a hard problem for one purpose, the solution often helps in surprising other ways. That's called <em>spillover</em>. The military invests in solving really hard problems — and the world benefits even when there's no war.
+      </div>
+    `
+  },
+  animals: {
+    em: '🐕', title: 'Animals in Service',
+    summary: 'Dogs, dolphins, horses, pigeons — and a few surprises.',
+    body: `
+      <p>Animals have served alongside soldiers for thousands of years. Many were heroes. Here are the most famous:</p>
+      <h3>🐕 Military Working Dogs</h3>
+      <p>About 2,500 dogs serve in the U.S. military today. They sniff out bombs, find hidden enemies, and even parachute with their handlers. Most are German Shepherds, Belgian Malinois, or Labradors. <strong>Cool rule: they outrank their human handler</strong> — so the handler treats them with extra respect. They get their own dog tags!</p>
+      <h3>🐬 Navy Dolphins & Sea Lions</h3>
+      <p>The Navy Marine Mammal Program in San Diego trains real dolphins and sea lions. Dolphins find underwater mines using natural sonar (way better than any machine!). Sea lions retrieve lost equipment with attached clamps. They're treated like sailors — with names, training, and excellent care.</p>
+      <h3>🐎 Horses</h3>
+      <p>Horses were the main military vehicle for thousands of years. Today, U.S. Special Forces in mountainous places like Afghanistan still ride horses — because horses go where trucks can't. The Old Guard (3rd U.S. Infantry) keeps horses for ceremonial duty at Arlington National Cemetery.</p>
+      <h3>🕊️ Pigeons</h3>
+      <p>Before radios, soldiers used homing pigeons to carry messages — and they were AMAZING. <strong>Cher Ami</strong>, a WWI pigeon, flew through gunfire with a wounded leg to deliver a message that saved 200 American soldiers! She got a medal and is now in the Smithsonian Museum.</p>
+      <h3>🐈 Ship Cats</h3>
+      <p>Navies kept cats on ships for centuries — to catch rats that ate the food and chewed ropes. Famous: <strong>Simon the cat</strong>, who served on HMS Amethyst and got a medal for catching rats during a 1949 standoff in China.</p>
+      <h3>🐘 Hannibal's Elephants</h3>
+      <p>In 218 BC, Carthaginian general Hannibal led 37 WAR ELEPHANTS over the Alps to attack Rome. The elephants terrified Roman horses. (Most elephants didn't survive the cold mountain crossing — historians still find tusks today!)</p>
+      <h3>🐀 Mine-detecting Rats</h3>
+      <p>Modern: African giant pouched rats are trained to sniff out landmines. They're too light to set the mines off, and they LOVE the work because they get fed banana every time they find one!</p>
+      <div class="why-box">
+        <strong>🧠 Animal wisdom</strong>
+        Each animal does ONE thing better than any human or machine: dogs smell better, dolphins echolocate better, pigeons navigate without GPS. The military principle: <em>use the best tool, even if it has fur or feathers.</em>
+      </div>
+    `
+  },
+  daily: {
+    em: '☀️', title: 'A Day in Uniform',
+    summary: 'What does a soldier actually do all day?',
+    body: `
+      <p>Most days in the military are NOT battles. Most days are training, learning, exercising, fixing things, and eating in big cafeterias. Here's a typical day on base:</p>
+      <h3>🎺 5:00 AM — Reveille</h3>
+      <p>A bugle song called <strong>"Reveille"</strong> plays from speakers across the base. Everyone wakes up — even officers. This tradition is over 200 years old. The word comes from French "réveillez" = "wake up!"</p>
+      <h3>🏃 5:30 AM — PT (Physical Training)</h3>
+      <p>Push-ups, sit-ups, running, and stretching. Military people stay in TOP shape. The Army has fitness tests every six months.</p>
+      <h3>🍳 7:00 AM — Chow Hall</h3>
+      <p>Breakfast in a giant cafeteria called the "mess hall" or "chow hall." Eggs, oatmeal, pancakes — and unlimited coffee. Officers and enlisted may eat in different rooms (tradition).</p>
+      <h3>📚 8:00 AM — Training & Duties</h3>
+      <p>Could be ANYTHING: classroom training, vehicle maintenance, weapons practice, computer work, language lessons, first aid, or just paperwork. The military has 150+ different job specialties.</p>
+      <h3>🍽️ 12:00 PM — Lunch</h3>
+      <p>Quick meal back at chow hall. Then back to work.</p>
+      <h3>🛠️ 1:00 PM — More training or "field exercises"</h3>
+      <p>Often soldiers go out and practice scenarios — like a play rehearsal, but for real-life situations. Sometimes for days!</p>
+      <h3>🍝 6:00 PM — Dinner, then personal time</h3>
+      <p>Family time, gym, reading, calling home, watching shows. Bases have movie theaters, gyms, libraries, and even bowling alleys.</p>
+      <h3>🌙 10:00 PM — Taps</h3>
+      <p>Another bugle song — <strong>"Taps"</strong> — plays. Lights out. Same tune is also played at military funerals as a sign of respect.</p>
+      <h3>Special things you'd see</h3>
+      <ul style="padding-left:20px; line-height:1.8;">
+        <li><strong>The salute</strong> — Right hand up to forehead. Shows respect to officers. (Officers salute officers of higher rank too!)</li>
+        <li><strong>Dog tags</strong> — Two metal IDs worn around the neck. They have name, blood type, religion. One stays with the body, one comes home, if the worst happens.</li>
+        <li><strong>Challenge coins</strong> — Special coins given for special achievements. Soldiers collect them like trading cards.</li>
+      </ul>
+      <div class="why-box">
+        <strong>🧠 Why the schedule?</strong>
+        Discipline + routine = readiness. If you do your basics every day, you don't have to think about them in an emergency — you just DO them. That's why athletes train daily even on rest days. It's also why your parents make you brush your teeth every morning!
+      </div>
+    `
+  },
+  units: {
+    em: '⭐', title: 'Famous Units',
+    summary: 'The elite teams you\'ve heard about — what they actually do.',
+    body: `
+      <h3>🦅 Navy SEALs</h3>
+      <p>SEAL = SEa, Air, Land. Elite Navy special forces. They can drop from planes, swim miles in cold water, then fight on land. Training (called BUD/S) is so hard that 75% of trainees QUIT. Their motto: <em>"The only easy day was yesterday."</em></p>
+      <h3>🪂 Army Rangers</h3>
+      <p>Elite light infantry. Famous for being FIRST into difficult situations. They train for 61 days in mountains, swamps, deserts, and forests — sometimes without much sleep. Motto: <em>"Rangers Lead the Way!"</em></p>
+      <h3>🎩 Green Berets (Army Special Forces)</h3>
+      <p>Different from Rangers — Green Berets specialize in <strong>training</strong> other countries' soldiers. They speak multiple languages and live with locals for months. They're more like teachers + warriors. Created in 1952.</p>
+      <h3>🌟 Delta Force</h3>
+      <p>Top-secret Army special operations. Most missions are classified — the public learns about them years later. They're chosen from Rangers and Green Berets.</p>
+      <h3>✈️ 101st Airborne (Screaming Eagles)</h3>
+      <p>Famous paratroopers. They jumped into Normandy on D-Day. Today they use helicopters more than parachutes — but they keep the nickname.</p>
+      <h3>🪂 82nd Airborne (All American)</h3>
+      <p>Another famous paratrooper unit. Ready to deploy ANYWHERE in the world within 18 hours. Their motto: <em>"All The Way!"</em></p>
+      <h3>🛩️ Blue Angels (Navy)</h3>
+      <p>The Navy's flight demonstration team. SIX blue-and-yellow F/A-18 Super Hornets that fly air shows. They fly with wingtips only 18 INCHES apart at 700 mph!</p>
+      <h3>🛩️ Thunderbirds (Air Force)</h3>
+      <p>Air Force version of the Blue Angels. Red-white-and-blue F-16s. Also do incredible air shows. Both teams help recruit new pilots and thrill millions of kids each year.</p>
+      <h3>🐎 The Old Guard (3rd U.S. Infantry)</h3>
+      <p>The oldest active-duty unit in the U.S. Army (founded 1784). They guard the Tomb of the Unknown Soldier at Arlington National Cemetery — 24 hours a day, every day, in every kind of weather. NEVER takes a break.</p>
+      <h3>🛟 Coast Guard Rescue Swimmers</h3>
+      <p>Real-life superheroes. They jump from helicopters into stormy oceans to save drowning people. Their motto: <em>"So Others May Live."</em></p>
+      <div class="why-box">
+        <strong>🧠 What makes elite units elite?</strong>
+        It's not just strength or weapons — it's <em>training depth</em>. They practice the same skill 10,000 times. They eat together, fail together, and trust each other completely. The lesson: real expertise comes from repetition + teamwork, in ANY field.
+      </div>
+    `
+  }
+};
+
+function renderAcademy() {
+  const main = document.getElementById('mainContent');
+  const keys = Object.keys(LESSONS);
+  if (!state.lessonsRead) state.lessonsRead = [];
+  main.innerHTML = `
+    <div class="panel">
+      <h2>🎓 THE ACADEMY</h2>
+      <p>Twelve deep lessons on EVERYTHING military — branches, ranks, strategy, vehicles, history, tech, animals, daily life, famous units and more. Read at your own pace. Each one ends with a "Think Like a Strategist" idea — that's first-principles thinking!</p>
+      <div class="lesson-tabs" id="lessonTabs" style="margin-top:14px;">
+        ${keys.map(k => `
+          <button class="tab-btn ${state.lessonsRead.includes(k) ? 'done' : ''}" onclick="openLesson('${k}')">
+            ${LESSONS[k].em} ${LESSONS[k].title}${state.lessonsRead.includes(k) ? ' ✓' : ''}
+          </button>
+        `).join('')}
+      </div>
+      <div id="lessonView" style="margin-top:14px;"></div>
+    </div>
+  `;
+  // Show first unread, or first overall
+  const unread = keys.find(k => !state.lessonsRead.includes(k));
+  openLesson(unread || keys[0]);
+}
+function openLesson(k) {
+  const lesson = LESSONS[k];
+  document.querySelectorAll('#lessonTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  // Find and highlight active
+  document.querySelectorAll('#lessonTabs .tab-btn').forEach(b => {
+    if (b.textContent.includes(lesson.title)) b.classList.add('active');
+  });
+  document.getElementById('lessonView').innerHTML = `
+    <div class="lesson-content">
+      <h2 style="font-family:Impact; color:var(--red); letter-spacing:2px; font-size:26px; border:none; padding:0; margin-bottom:6px;">
+        ${lesson.em} ${lesson.title}
+      </h2>
+      <p style="font-style:italic; color:#555; margin-bottom:12px;">${lesson.summary}</p>
+      ${lesson.body}
+      <div style="margin-top:14px; text-align:center;">
+        ${state.lessonsRead.includes(k)
+          ? '<button class="btn navy" disabled>✓ COMPLETED</button>'
+          : '<button class="btn gold big" onclick="completeLesson(\'' + k + '\')">✅ MARK COMPLETE (+25 XP)</button>'}
+      </div>
+    </div>
+  `;
+  beep(700, 0.05);
+}
+function completeLesson(k) {
+  if (state.lessonsRead.includes(k)) return;
+  state.lessonsRead.push(k);
+  awardXP(25, '📚 +25 XP LESSON COMPLETE');
+  // Unlock related intel based on lesson
+  const unlockMap = {
+    branches:    [['branches','army'],['branches','navy'],['branches','af'],['branches','marines'],['branches','cg'],['branches','sf']],
+    ranks:       [['ranks','pvt'],['ranks','cpl'],['ranks','sgt'],['ranks','lt'],['ranks','cpt'],['ranks','col'],['ranks','gen']],
+    vehicles:    [['vehicles','f22'],['vehicles','chinook'],['vehicles','carrier'],['vehicles','sub'],['vehicles','abrams'],['vehicles','b2']],
+    history:     [['history','dday'],['history','moon'],['history','codeTalkers'],['history','tuskegee'],['history','airlift']],
+    animals:     [['animals','workingDog'],['animals','navyDolphin'],['animals','horses'],['animals','cherAmi'],['animals','shipCat']],
+    tech:        [['tech','gps'],['tech','internet'],['tech','radar'],['tech','sonar'],['tech','microwave'],['tech','stealth']],
+    units:       [['units','seals'],['units','rangers'],['units','greenBerets'],['units','blueAngels'],['units','thunderbirds'],['units','oldGuard']],
+    daily:       [['traditions','reveille'],['traditions','taps'],['traditions','salute'],['traditions','dogTags'],['traditions','challengeCoin']]
+  };
+  if (unlockMap[k]) {
+    unlockMap[k].forEach(([cat, id]) => unlockIntel(cat, id));
+  }
+  if (state.lessonsRead.length >= 6) earnBadge('intel');
+  if (state.lessonsRead.length >= 12) earnBadge('commander');
+  saveState();
+  // Re-render to refresh state
+  setTimeout(renderAcademy, 200);
+  fanfare();
+}
+
+/* ============================================================
+   GAME 1: AIR DEFENSE (Canvas)
+   Intercept hostile aircraft on the radar before they hit base.
+   Tap blue dots to ESCORT (bonus), red dots to INTERCEPT.
+   Yellow = scan first to identify.
+   ============================================================ */
+function renderRadar() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel" style="background:transparent; border:none; padding:0;">
+      <div class="game-stage" id="stage">
+        <canvas id="cv"></canvas>
+        <div class="hud">
+          <div class="hud-block">⚡ SCORE: <span id="hudScore">0</span></div>
+          <div class="hud-block gold">⏱ <span id="hudTime">60</span>s</div>
+          <div class="hud-block red">❤️ <span id="hudLives">3</span></div>
+        </div>
+        <div class="game-overlay" id="overlay">
+          <h2>🎯 AIR DEFENSE</h2>
+          <p>Hostile aircraft are approaching! <strong style="color:var(--green-hud)">Tap RED jets to intercept.</strong>
+          <strong style="color:#69f0ff">Blue = friendly</strong> (let them through — bonus!).
+          <strong style="color:var(--gold)">Yellow = unknown</strong> (tap to scan).
+          You have 3 lives. Don't let enemies hit base!</p>
+          <button class="btn gold big" onclick="radarStart()">▶️ START MISSION</button>
+          <button class="btn navy" onclick="goHome()">🏠 BACK</button>
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:12px; color:#ddd; font-size:13px;">
+        💡 <em>Strategy tip: Don't tap everything! Friendly aircraft give bonus XP if you let them land safely.</em>
+      </p>
+    </div>
+  `;
+  setTimeout(radarSetup, 50);
+}
+
+let radar = null;
+function radarSetup() {
+  const cv = document.getElementById('cv');
+  const stage = document.getElementById('stage');
+  const ctx = cv.getContext('2d');
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    cv.width = r.width; cv.height = r.height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  radar = { cv, ctx, running: false, contacts: [], score: 0, lives: 3, time: 60, sweep: 0, spawnT: 0, raf: null };
+  cv.addEventListener('pointerdown', radarTap);
+}
+function radarStart() {
+  document.getElementById('overlay').classList.add('hidden');
+  radar.running = true; radar.score = 0; radar.lives = 3; radar.time = 60; radar.contacts = [];
+  ensureAudio();
+  radar.startTime = performance.now();
+  radar.lastT = performance.now();
+  radarLoop();
+  radar.timerInt = setInterval(() => {
+    radar.time--;
+    document.getElementById('hudTime').textContent = radar.time;
+    if (radar.time <= 0) radarEnd(false);
+  }, 1000);
+}
+function radarLoop() {
+  if (!radar || !radar.running) return;
+  const now = performance.now();
+  const dt = (now - radar.lastT) / 1000;
+  radar.lastT = now;
+  // Spawn
+  radar.spawnT -= dt;
+  if (radar.spawnT <= 0) {
+    spawnContact();
+    radar.spawnT = Math.max(0.6, 1.6 - (60 - radar.time) * 0.02);
+  }
+  radar.sweep += dt * 1.2;
+  // Update contacts
+  for (const c of radar.contacts) {
+    if (c.dead) continue;
+    c.dist -= c.speed * dt;
+    if (c.dist <= 18) {
+      c.dead = true;
+      if (c.type === 'enemy') { radar.lives--; vibe(80); buzz(); document.getElementById('hudLives').textContent = radar.lives; if (radar.lives <= 0) radarEnd(false); }
+      else if (c.type === 'friend') { radar.score += 15; beep(900, 0.1); flyXP(15, radar.cv.getBoundingClientRect().left + radar.cv.width/2, radar.cv.getBoundingClientRect().top + radar.cv.height/2); document.getElementById('hudScore').textContent = radar.score; }
+    }
+  }
+  radar.contacts = radar.contacts.filter(c => !c.dead || (now - (c.deadAt||0) < 500));
+  radarDraw();
+  radar.raf = requestAnimationFrame(radarLoop);
+}
+function spawnContact() {
+  const types = ['enemy', 'enemy', 'enemy', 'friend', 'unknown', 'unknown'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  const angle = Math.random() * Math.PI * 2;
+  const maxR = Math.min(radar.cv.width, radar.cv.height) / 2 - 10;
+  radar.contacts.push({
+    angle, dist: maxR, type,
+    revealed: type !== 'unknown',
+    speed: 18 + Math.random() * 20,
+    spawnedAt: performance.now()
+  });
+}
+function radarDraw() {
+  const { ctx, cv, sweep, contacts } = radar;
+  const cx = cv.width / 2, cy = cv.height / 2;
+  const R = Math.min(cv.width, cv.height) / 2 - 10;
+  // bg
+  ctx.fillStyle = '#0a1a14';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  // grid
+  ctx.strokeStyle = 'rgba(0,255,136,0.15)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i <= 4; i++) {
+    ctx.beginPath(); ctx.arc(cx, cy, (R/4)*i, 0, Math.PI*2); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(cx-R, cy); ctx.lineTo(cx+R, cy); ctx.moveTo(cx, cy-R); ctx.lineTo(cx, cy+R); ctx.stroke();
+  // Sweep line
+  const sw = sweep % (Math.PI * 2);
+  const grad = ctx.createLinearGradient(cx, cy, cx + Math.cos(sw)*R, cy + Math.sin(sw)*R);
+  grad.addColorStop(0, 'rgba(0,255,136,0.7)');
+  grad.addColorStop(1, 'rgba(0,255,136,0)');
+  ctx.strokeStyle = grad; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(sw)*R, cy + Math.sin(sw)*R); ctx.stroke();
+  // base
+  ctx.fillStyle = '#ffd700'; ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#0e2238'; ctx.font = '700 16px Impact'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('★', cx, cy);
+  // contacts
+  for (const c of contacts) {
+    const x = cx + Math.cos(c.angle) * c.dist;
+    const y = cy + Math.sin(c.angle) * c.dist;
+    c.x = x; c.y = y;
+    let color = '#ffb300';
+    if (c.revealed) color = c.type === 'enemy' ? '#ff5252' : c.type === 'friend' ? '#69f0ff' : '#ffb300';
+    if (c.dead) color = '#fff';
+    // jet shape
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(c.angle + Math.PI);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, -8); ctx.lineTo(-7, 6); ctx.lineTo(0, 3); ctx.lineTo(7, 6); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // pulse ring
+    const age = (performance.now() - c.spawnedAt) / 1000;
+    ctx.strokeStyle = color + (c.dead ? '' : 'aa');
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(x, y, 12 + (age % 1) * 8, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+function radarTap(e) {
+  if (!radar.running) return;
+  const r = radar.cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * (radar.cv.width / r.width);
+  const y = (e.clientY - r.top) * (radar.cv.height / r.height);
+  for (const c of radar.contacts) {
+    if (c.dead) continue;
+    const d = Math.hypot(c.x - x, c.y - y);
+    if (d < 22) {
+      if (!c.revealed) {
+        // scan
+        c.revealed = true;
+        radar.score += 5;
+        beep(700, 0.05);
+      } else if (c.type === 'enemy') {
+        c.dead = true; c.deadAt = performance.now();
+        radar.score += 20; beep(440, 0.15, 'square'); vibe(20);
+        flyXP(20, e.clientX, e.clientY);
+        explode(c.x + r.left, c.y + r.top);
+      } else if (c.type === 'friend') {
+        // penalty
+        c.dead = true; c.deadAt = performance.now();
+        radar.score = Math.max(0, radar.score - 10);
+        buzz(); vibe(80);
+      }
+      document.getElementById('hudScore').textContent = radar.score;
+      return;
+    }
+  }
+}
+function explode(x, y) {
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.textContent = '💥';
+    p.style.cssText = `position:fixed; left:${x}px; top:${y}px; font-size:24px; pointer-events:none; z-index:998; transition:all 0.6s;`;
+    document.body.appendChild(p);
+    const a = Math.random() * Math.PI * 2;
+    requestAnimationFrame(() => {
+      p.style.left = (x + Math.cos(a)*60) + 'px';
+      p.style.top  = (y + Math.sin(a)*60) + 'px';
+      p.style.opacity = '0';
+    });
+    setTimeout(() => p.remove(), 700);
+  }
+}
+function radarEnd(won) {
+  radar.running = false;
+  cancelAnimationFrame(radar.raf);
+  clearInterval(radar.timerInt);
+  const ov = document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  ov.classList.add(radar.score >= 100 ? 'victory' : 'defeat');
+  const best = state.bestRadar < radar.score;
+  if (best) state.bestRadar = radar.score;
+  if (radar.score >= 200) earnBadge('ace');
+  if (radar.score > 0) earnBadge('firstFlight');
+  awardXP(Math.floor(radar.score / 2), `MISSION END: ${radar.score} pts`);
+  ov.innerHTML = `
+    <h2>${radar.score >= 100 ? '🏆 MISSION SUCCESS' : '✈️ MISSION END'}</h2>
+    <p>Final Score: <strong style="font-size:28px; color:var(--gold);">${radar.score}</strong> ${best ? '<br>🌟 NEW BEST!' : ''}</p>
+    <p>Earned <strong style="color:var(--gold);">+${Math.floor(radar.score/2)} XP</strong></p>
+    <button class="btn gold big" onclick="radarStart()">🔁 PLAY AGAIN</button>
+    <button class="btn navy" onclick="goHome()">🏠 HQ</button>
+  `;
+  if (radar.score >= 100) fanfare();
+}
+
+/* ============================================================
+   GAME 2: SUPPLY DROP (Canvas)
+   Fly a helicopter, drop supply crates onto rescue zones below.
+   ============================================================ */
+function renderSupply() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel" style="background:transparent; border:none; padding:0;">
+      <div class="game-stage" id="stage">
+        <canvas id="cv"></canvas>
+        <div class="hud">
+          <div class="hud-block">⚡ <span id="hudScore">0</span></div>
+          <div class="hud-block gold">📦 <span id="hudDrops">10</span></div>
+          <div class="hud-block red">🎯 <span id="hudCombo">x1</span></div>
+        </div>
+        <div class="game-overlay" id="overlay">
+          <h2>🚁 SUPPLY DROP</h2>
+          <p>Disaster has struck! Survivors are waiting in flood zones below.<br>
+          <strong style="color:var(--gold)">TAP/CLICK</strong> anywhere to release a supply crate.<br>
+          Crates fall straight down — time your drops to hit the moving rescue zones!</p>
+          <button class="btn gold big" onclick="supplyStart()">▶️ START</button>
+          <button class="btn navy" onclick="goHome()">🏠 BACK</button>
+        </div>
+      </div>
+      <p style="text-align:center; margin-top:12px; color:#ddd; font-size:13px;">
+        💡 <em>The military runs missions like this for real — delivering food and medicine after hurricanes and earthquakes.</em>
+      </p>
+    </div>
+  `;
+  setTimeout(supplySetup, 50);
+}
+let supply = null;
+function supplySetup() {
+  const cv = document.getElementById('cv');
+  const stage = document.getElementById('stage');
+  const ctx = cv.getContext('2d');
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    cv.width = r.width; cv.height = r.height;
+  }
+  resize(); window.addEventListener('resize', resize);
+  supply = { cv, ctx, running: false, heli: { x: 100, y: 60, dir: 1 }, crates: [], zones: [],
+             score: 0, drops: 10, combo: 1, raf: null, lastT: 0, zoneT: 0 };
+  cv.addEventListener('pointerdown', supplyDrop);
+}
+function supplyStart() {
+  document.getElementById('overlay').classList.add('hidden');
+  supply.running = true; supply.score = 0; supply.drops = 10; supply.combo = 1;
+  supply.crates = []; supply.zones = [];
+  ensureAudio();
+  supply.lastT = performance.now();
+  supplyLoop();
+}
+function supplyLoop() {
+  if (!supply || !supply.running) return;
+  const now = performance.now();
+  const dt = (now - supply.lastT) / 1000;
+  supply.lastT = now;
+  const cv = supply.cv;
+  // Heli movement
+  supply.heli.x += supply.heli.dir * 140 * dt;
+  if (supply.heli.x > cv.width - 50) { supply.heli.dir = -1; }
+  if (supply.heli.x < 50) { supply.heli.dir = 1; }
+  supply.heli.y = 60 + Math.sin(now * 0.003) * 6;
+  // Spawn zones
+  supply.zoneT -= dt;
+  if (supply.zoneT <= 0 && supply.zones.length < 4) {
+    supply.zones.push({ x: Math.random() * (cv.width - 100) + 50, y: cv.height - 50, w: 70, vx: (Math.random() - 0.5) * 80, type: Math.floor(Math.random()*3) });
+    supply.zoneT = 1.5;
+  }
+  // Update zones
+  for (const z of supply.zones) {
+    z.x += z.vx * dt;
+    if (z.x < 50 || z.x > cv.width - 50) z.vx *= -1;
+  }
+  // Update crates
+  for (const c of supply.crates) {
+    c.vy += 600 * dt;
+    c.y += c.vy * dt;
+    if (c.y > cv.height && !c.checked) {
+      c.checked = true;
+      // miss
+      supply.combo = 1;
+      document.getElementById('hudCombo').textContent = 'x' + supply.combo;
+    }
+    if (!c.checked) {
+      for (const z of supply.zones) {
+        if (c.y >= z.y - 12 && c.x >= z.x - z.w/2 && c.x <= z.x + z.w/2) {
+          c.checked = true;
+          c.hit = true;
+          const pts = 10 * supply.combo;
+          supply.score += pts;
+          supply.combo = Math.min(5, supply.combo + 1);
+          document.getElementById('hudScore').textContent = supply.score;
+          document.getElementById('hudCombo').textContent = 'x' + supply.combo;
+          beep(700 + supply.combo*100, 0.1);
+          // Remove zone (rescued!)
+          z.rescued = true;
+          z.rescueT = 0.6;
+          flyXP(pts, supply.cv.getBoundingClientRect().left + c.x, supply.cv.getBoundingClientRect().top + c.y);
+          break;
+        }
+      }
+    }
+  }
+  // Cleanup
+  supply.crates = supply.crates.filter(c => c.y < cv.height + 50);
+  supply.zones = supply.zones.filter(z => {
+    if (z.rescued) { z.rescueT -= dt; return z.rescueT > 0; }
+    return true;
+  });
+  supplyDraw();
+  // End condition
+  if (supply.drops <= 0 && supply.crates.length === 0) {
+    supplyEnd();
+    return;
+  }
+  supply.raf = requestAnimationFrame(supplyLoop);
+}
+function supplyDraw() {
+  const { ctx, cv, heli, crates, zones } = supply;
+  // sky
+  const sky = ctx.createLinearGradient(0, 0, 0, cv.height);
+  sky.addColorStop(0, '#4ba0d8'); sky.addColorStop(0.7, '#a8c8e0'); sky.addColorStop(1, '#5a8050');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, cv.width, cv.height);
+  // clouds
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  for (let i = 0; i < 4; i++) {
+    const t = (performance.now() * 0.00002 + i * 0.3) % 1.2 - 0.1;
+    ctx.beginPath();
+    ctx.ellipse(t * cv.width, 100 + i*25, 50, 12, 0, 0, Math.PI*2); ctx.fill();
+  }
+  // ground
+  ctx.fillStyle = '#3a5a2a';
+  ctx.fillRect(0, cv.height - 30, cv.width, 30);
+  // zones (rescue targets)
+  for (const z of zones) {
+    if (z.rescued) {
+      ctx.fillStyle = '#4caf50';
+      ctx.font = '30px Impact'; ctx.textAlign = 'center';
+      ctx.fillText('🎉', z.x, z.y - 10);
+      continue;
+    }
+    // ground target circle
+    const colors = ['#e63946', '#ffb300', '#69a8e0'];
+    ctx.fillStyle = colors[z.type];
+    ctx.beginPath(); ctx.ellipse(z.x, z.y, z.w/2, 8, 0, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+    // little people
+    ctx.font = '18px Impact'; ctx.textAlign = 'center';
+    ctx.fillText('🧍🧍', z.x, z.y - 5);
+  }
+  // crates
+  ctx.font = '24px Impact'; ctx.textAlign = 'center';
+  for (const c of crates) {
+    if (c.hit) continue;
+    ctx.fillText('📦', c.x, c.y);
+  }
+  // helicopter
+  ctx.save();
+  ctx.translate(heli.x, heli.y);
+  if (heli.dir < 0) ctx.scale(-1, 1);
+  ctx.font = '40px Impact'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🚁', 0, 0);
+  ctx.restore();
+  // Drop hint line (faint)
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2;
+  ctx.setLineDash([4, 6]);
+  ctx.beginPath(); ctx.moveTo(heli.x, heli.y + 20); ctx.lineTo(heli.x, cv.height - 30); ctx.stroke();
+  ctx.setLineDash([]);
+}
+function supplyDrop(e) {
+  if (!supply.running || supply.drops <= 0) return;
+  supply.drops--;
+  document.getElementById('hudDrops').textContent = supply.drops;
+  supply.crates.push({ x: supply.heli.x, y: supply.heli.y + 20, vy: 50 });
+  beep(400, 0.06);
+}
+function supplyEnd() {
+  supply.running = false;
+  cancelAnimationFrame(supply.raf);
+  const ov = document.getElementById('overlay');
+  ov.classList.remove('hidden');
+  const best = state.bestSupply < supply.score;
+  if (best) state.bestSupply = supply.score;
+  if (supply.score >= 100) earnBadge('hero');
+  awardXP(Math.floor(supply.score / 2), `RESCUE END: ${supply.score} pts`);
+  ov.innerHTML = `
+    <h2>${supply.score >= 80 ? '🏆 LIVES SAVED' : '🚁 MISSION END'}</h2>
+    <p>Score: <strong style="font-size:28px; color:var(--gold);">${supply.score}</strong> ${best ? '<br>🌟 NEW BEST!' : ''}</p>
+    <p>${supply.score >= 100 ? 'Outstanding work! Many families are safe tonight.' : 'Good effort! Try chaining drops for combo bonus.'}</p>
+    <button class="btn gold big" onclick="supplyStart()">🔁 AGAIN</button>
+    <button class="btn navy" onclick="goHome()">🏠 HQ</button>
+  `;
+  if (supply.score >= 100) fanfare();
+}
+
+/* ============================================================
+   GAME 3: MORSE OPS (3 modes)
+   - PRACTICE: free tapping with live decode
+   - LISTEN & TAP: hear pattern, tap it back (rhythm)
+   - DECODE SOS: incoming message, decode it
+   ============================================================ */
+const MORSE = {
+  A:'•—',B:'—•••',C:'—•—•',D:'—••',E:'•',F:'••—•',G:'——•',H:'••••',I:'••',J:'•———',K:'—•—',L:'•—••',
+  M:'——',N:'—•',O:'———',P:'•——•',Q:'——•—',R:'•—•',S:'•••',T:'—',U:'••—',V:'•••—',W:'•——',X:'—••—',Y:'—•——',Z:'——••'
+};
+const SOS_MESSAGES = [
+  { code: 'SOS', meaning: 'help signal' },
+  { code: 'HI',  meaning: 'a friendly hello' },
+  { code: 'YES', meaning: 'an affirmative' },
+  { code: 'TEAM', meaning: 'about teamwork' },
+  { code: 'WIN', meaning: 'about victory' }
+];
+let morseMode = 'practice';
+let morseInput = '';
+let listenTarget = '';
+let decodeTarget = null;
+
+function renderMorse() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel">
+      <h2>📡 MORSE OPS</h2>
+      <div class="mode-tabs">
+        <button class="mode-tab ${morseMode==='practice'?'active':''}" onclick="setMorseMode('practice')">🎛 PRACTICE</button>
+        <button class="mode-tab ${morseMode==='listen'?'active':''}" onclick="setMorseMode('listen')">👂 LISTEN &amp; TAP</button>
+        <button class="mode-tab ${morseMode==='decode'?'active':''}" onclick="setMorseMode('decode')">🆘 DECODE SOS</button>
+      </div>
+      <div id="morseArea"></div>
+    </div>
+  `;
+  setMorseMode(morseMode);
+}
+function setMorseMode(m) {
+  morseMode = m; morseInput = '';
+  document.querySelectorAll('.mode-tab').forEach((t,i) => t.classList.toggle('active', ['practice','listen','decode'][i] === m));
+  if (m === 'practice') renderMorsePractice();
+  if (m === 'listen')   renderMorseListen();
+  if (m === 'decode')   renderMorseDecode();
+}
+function renderMorsePractice() {
+  document.getElementById('morseArea').innerHTML = `
+    <p>Tap • and — to spell letters. Tap SPACE between letters. Watch it decode live!</p>
+    <div class="morse-keypad" style="margin-top:14px;">
+      <button class="morse-btn" onpointerdown="mTap('•')">•</button>
+      <button class="morse-btn" onpointerdown="mTap('—')">—</button>
+      <button class="morse-btn" style="background:var(--khaki);" onpointerdown="mSpace()">␣</button>
+      <button class="morse-btn" style="background:var(--red-bright); color:white;" onpointerdown="mClear()">⌫</button>
+    </div>
+    <h3>📨 SIGNAL</h3>
+    <div class="morse-input" id="mIn">— tap to start —</div>
+    <h3>🔤 DECODED</h3>
+    <div class="morse-output" id="mOut">—</div>
+    <h3>📋 CHART</h3>
+    <div class="morse-chart">
+      ${Object.entries(MORSE).map(([l,m]) => `<div><span>${l}</span>${m}</div>`).join('')}
+    </div>
+  `;
+  updateMorseDisplay();
+  unlockIntel('facts', 'morseInvented');
+}
+function mTap(s) { morseInput += s; beep(s === '•' ? 700 : 500, s === '•' ? 0.08 : 0.18); updateMorseDisplay(); }
+function mSpace() { morseInput += ' '; updateMorseDisplay(); }
+function mClear() { morseInput = morseInput.slice(0,-1); updateMorseDisplay(); }
+function updateMorseDisplay() {
+  if (!document.getElementById('mIn')) return;
+  document.getElementById('mIn').textContent = morseInput || '— tap to start —';
+  const codes = morseInput.split(' ').filter(x => x);
+  let out = '';
+  for (const c of codes) {
+    let f = '?';
+    for (const [k, v] of Object.entries(MORSE)) if (v === c) f = k;
+    out += f;
+  }
+  document.getElementById('mOut').textContent = out || '—';
+}
+function renderMorseListen() {
+  document.getElementById('morseArea').innerHTML = `
+    <p>I'll play a Morse code letter. Listen carefully — then tap the same dots and dashes!</p>
+    <div style="text-align:center; margin:20px 0;">
+      <button class="btn red big" onclick="playListen()">▶️ PLAY SIGNAL</button>
+    </div>
+    <div class="morse-input" id="mIn" style="min-height:60px;">Press PLAY to start</div>
+    <div class="morse-keypad" style="margin-top:10px;">
+      <button class="morse-btn" onpointerdown="mTap('•')">•</button>
+      <button class="morse-btn" onpointerdown="mTap('—')">—</button>
+      <button class="morse-btn" style="background:var(--red-bright); color:white;" onpointerdown="mClear()">⌫</button>
+    </div>
+    <div style="text-align:center; margin-top:12px;">
+      <button class="btn gold" onclick="checkListen()">✅ CHECK ANSWER (+25 XP)</button>
+    </div>
+    <div id="listenFeedback" style="text-align:center; margin-top:12px; font-weight:900; font-size:18px;"></div>
+  `;
+  morseInput = '';
+  listenTarget = '';
+  updateMorseDisplay();
+}
+function playListen() {
+  const letters = 'AEIMNSTOU'.split('');
+  listenTarget = letters[Math.floor(Math.random()*letters.length)];
+  const code = MORSE[listenTarget];
+  morseInput = '';
+  updateMorseDisplay();
+  document.getElementById('listenFeedback').innerHTML = '👂 listening...';
+  // play with dots/dashes
+  for (let i = 0; i < code.length; i++) {
+    const ch = code[i];
+    setTimeout(() => {
+      beep(ch === '•' ? 700 : 500, ch === '•' ? 0.1 : 0.25);
+      const inp = document.getElementById('mIn');
+      inp.textContent = '🔊 ' + '?'.repeat(code.length);
+    }, i * 350);
+  }
+  setTimeout(() => {
+    document.getElementById('mIn').textContent = '🔊 (signal complete — now tap it!)';
+    document.getElementById('listenFeedback').innerHTML = '👇 Tap what you heard...';
+  }, code.length * 350 + 200);
+}
+function checkListen() {
+  if (!listenTarget) { document.getElementById('listenFeedback').innerHTML = '⚠️ Press PLAY first!'; return; }
+  if (morseInput.replace(/\s/g,'') === MORSE[listenTarget]) {
+    document.getElementById('listenFeedback').innerHTML = `✅ CORRECT! That was <strong>${listenTarget}</strong>!`;
+    awardXP(25, '+25 XP SIGNAL DECODED');
+    state.morseWon++;
+    saveState();
+    if (state.morseWon >= 3) earnBadge('morseExpert');
+    fanfare();
+  } else {
+    document.getElementById('listenFeedback').innerHTML = `❌ Not quite — that was <strong>${listenTarget}</strong> (${MORSE[listenTarget]}). Try again!`;
+    buzz();
+  }
+}
+function renderMorseDecode() {
+  document.getElementById('morseArea').innerHTML = `
+    <p>📨 An incoming Morse signal! Read the code below and type what it spells.</p>
+    <div style="text-align:center; margin:14px 0;">
+      <button class="btn red" onclick="newDecode()">🎲 NEW MESSAGE</button>
+    </div>
+    <div class="morse-input" id="decodeCode" style="font-size:28px;">—</div>
+    <p style="text-align:center; margin-top:14px;">Your answer:</p>
+    <input id="decodeAns" type="text" maxlength="6" style="width:100%; padding:14px; font-size:24px; text-align:center; font-family:Impact; letter-spacing:6px; border:3px solid var(--olive); border-radius:10px; text-transform:uppercase;">
+    <div style="text-align:center; margin-top:14px;">
+      <button class="btn gold big" onclick="checkDecode()">📡 SUBMIT (+30 XP)</button>
+    </div>
+    <div id="decodeFeedback" style="text-align:center; margin-top:12px; font-weight:900; font-size:18px;"></div>
+    <h3 style="margin-top:18px;">🔤 NEED HELP? MORSE CHART:</h3>
+    <div class="morse-chart">
+      ${Object.entries(MORSE).map(([l,m]) => `<div><span>${l}</span>${m}</div>`).join('')}
+    </div>
+  `;
+  newDecode();
+}
+function newDecode() {
+  decodeTarget = SOS_MESSAGES[Math.floor(Math.random()*SOS_MESSAGES.length)];
+  const code = decodeTarget.code.split('').map(c => MORSE[c]).join('   ');
+  document.getElementById('decodeCode').textContent = code;
+  document.getElementById('decodeAns').value = '';
+  document.getElementById('decodeFeedback').innerHTML = '';
+  // play it audibly
+  let i = 0; let t = 0;
+  for (const ch of decodeTarget.code) {
+    for (const sig of MORSE[ch]) {
+      setTimeout(() => beep(sig === '•' ? 700 : 500, sig === '•' ? 0.08 : 0.2), t);
+      t += sig === '•' ? 200 : 350;
+    }
+    t += 300;
+  }
+}
+function checkDecode() {
+  const ans = document.getElementById('decodeAns').value.trim().toUpperCase();
+  if (ans === decodeTarget.code) {
+    document.getElementById('decodeFeedback').innerHTML = `✅ DECODED! "${ans}" — ${decodeTarget.meaning}!`;
+    awardXP(30, '+30 XP DECODED');
+    state.morseWon++;
+    if (state.morseWon >= 3) earnBadge('morseExpert');
+    saveState();
+    fanfare();
+  } else {
+    document.getElementById('decodeFeedback').innerHTML = `❌ Not yet. The answer was <strong>${decodeTarget.code}</strong>. Try a new one!`;
+    buzz();
+  }
+}
+
+/* ============================================================
+   GAME 4: FORMATION DRILL — timer + animations
+   ============================================================ */
+const FORMATIONS = [
+  { name: 'LINE FORMATION', size: 5, time: 25, why: 'Used to cover lots of ground side-by-side.',
+    grid: [[0,0,0,0,0],[0,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]] },
+  { name: 'WEDGE (V)', size: 5, time: 25, why: 'Like flying geese! Strong forward push.',
+    grid: [[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,0,0,0,0],[0,0,0,0,0]] },
+  { name: 'COLUMN', size: 5, time: 20, why: 'Single file. Good for narrow places.',
+    grid: [[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]] },
+  { name: 'DIAMOND', size: 5, time: 30, why: 'Protects from all sides.',
+    grid: [[0,0,1,0,0],[0,1,0,1,0],[0,0,0,0,0],[0,1,0,1,0],[0,0,1,0,0]] },
+  { name: 'BOX (Roman Square)', size: 5, time: 30, why: 'Roman armies used this! All-around defense.',
+    grid: [[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1]] }
+];
+let formState = null;
+function renderFormation() {
+  formState = { idx: 0, picks: [], timer: 0, timerInt: null };
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `<div class="panel">
+    <h2>♟️ FORMATION DRILL</h2>
+    <p>Soldiers move in formations — patterns that protect the team. Watch the target. Tap the empty grid to match it before time runs out!</p>
+    <div id="formArea"></div>
+  </div>`;
+  showFormation();
+}
+function showFormation() {
+  if (formState.idx >= FORMATIONS.length) {
+    document.getElementById('formArea').innerHTML = `
+      <div style="text-align:center; padding:20px;">
+        <h2 style="font-family:Impact; font-size:36px; color:var(--red); letter-spacing:3px;">🏆 ALL FORMATIONS MASTERED!</h2>
+        <p style="margin:12px 0;">You learned 5 real military formations used by generals throughout history!</p>
+        <button class="btn gold big" onclick="renderFormation()">🔁 PLAY AGAIN</button>
+        <button class="btn navy" onclick="goHome()">🏠 HQ</button>
+      </div>
+    `;
+    bigParticles(); fanfare();
+    return;
+  }
+  const f = FORMATIONS[formState.idx];
+  formState.picks = Array(f.size * f.size).fill(0);
+  formState.timer = f.time;
+  document.getElementById('formArea').innerHTML = `
+    <div class="form-timer" id="formTimer">⏱ ${formState.timer}s</div>
+    <h3 style="text-align:center; font-family:Impact; color:var(--red); letter-spacing:2px; font-size:22px;">${f.name}</h3>
+    <p style="text-align:center; margin-bottom:10px; font-style:italic; color:#555;">${f.why}</p>
+    <div class="formation-game">
+      <div class="form-target">
+        <h3 style="text-align:center; margin:0 0 6px;">🎯 TARGET</h3>
+        <div class="form-grid" style="grid-template-columns: repeat(${f.size}, 1fr);">
+          ${f.grid.flat().map(c => `<div class="form-cell ${c?'target':''}">${c?'🪖':''}</div>`).join('')}
+        </div>
+      </div>
+      <div class="form-builder">
+        <h3 style="text-align:center; margin:0 0 6px;">✏️ COPY IT</h3>
+        <div class="form-grid" id="userGrid" style="grid-template-columns: repeat(${f.size}, 1fr);">
+          ${formState.picks.map((_,i) => `<div class="form-cell" data-i="${i}" onclick="togglePick(${i})"></div>`).join('')}
+        </div>
+        <div class="form-msg" id="formMsg">Tap cells to match. Beat the timer!</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <button class="btn gold" style="flex:1;" onclick="checkFormation()">✅ CHECK</button>
+          <button class="btn red" onclick="skipFormation()">⏭️</button>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:12px; font-family:Impact; color:var(--olive-dark); letter-spacing:2px;">
+      FORMATION ${formState.idx + 1} / ${FORMATIONS.length}
+    </div>
+  `;
+  if (formState.timerInt) clearInterval(formState.timerInt);
+  formState.timerInt = setInterval(() => {
+    formState.timer--;
+    document.getElementById('formTimer').textContent = '⏱ ' + formState.timer + 's';
+    if (formState.timer === 5) document.getElementById('formTimer').style.animation = 'pulse 0.5s infinite';
+    if (formState.timer <= 0) {
+      clearInterval(formState.timerInt);
+      const msg = document.getElementById('formMsg');
+      msg.textContent = '⏰ TIME UP! Moving on...';
+      msg.style.background = 'var(--red)';
+      setTimeout(() => { formState.idx++; showFormation(); }, 1200);
+    }
+  }, 1000);
+}
+function togglePick(i) {
+  formState.picks[i] = formState.picks[i] ? 0 : 1;
+  const cells = document.querySelectorAll('#userGrid .form-cell');
+  cells[i].classList.toggle('filled');
+  cells[i].textContent = formState.picks[i] ? '🪖' : '';
+  beep(formState.picks[i] ? 600 : 300, 0.04);
+  vibe(15);
+}
+function checkFormation() {
+  const target = FORMATIONS[formState.idx].grid.flat();
+  const ok = target.every((v,i) => v === formState.picks[i]);
+  const msg = document.getElementById('formMsg');
+  if (ok) {
+    clearInterval(formState.timerInt);
+    msg.textContent = '🎖️ PERFECT! Formation locked in.';
+    msg.style.background = '#2e7d32';
+    const xp = 20 + formState.timer * 2;
+    awardXP(xp, `+${xp} XP FORMATION`);
+    state.formationsWon = Math.max(state.formationsWon, formState.idx + 1);
+    saveState();
+    if (state.formationsWon >= 3) earnBadge('tactician');
+    fanfare();
+    setTimeout(() => { formState.idx++; showFormation(); }, 1400);
+  } else {
+    const placed = formState.picks.filter(x=>x).length;
+    const needed = target.filter(x=>x).length;
+    msg.textContent = `${placed}/${needed} placed. Look closely at the target!`;
+    msg.style.background = 'var(--red)';
+    buzz();
+  }
+}
+function skipFormation() {
+  clearInterval(formState.timerInt);
+  formState.idx++; showFormation();
+}
+
+/* ============================================================
+   GAME 5: STORY MISSIONS
+   ============================================================ */
+const STORIES = {
+  hurricane: {
+    title: 'Hurricane Rescue',
+    emoji: '🌪️',
+    intro: "Hurricane Marigold just hit a coastal town. Hundreds of families are trapped. You're the Coast Guard mission commander. What's your call?",
+    start: 'h1',
+    scenes: {
+      h1: { emoji: '🚁', text: "Your team is ready. The storm is still strong. What vehicle do you send first?",
+        choices: [
+          { t: 'Helicopter — fast, can hover over rooftops', go: 'h2a', tag: 'FAST' },
+          { t: 'Rescue boat — slower but holds 30 people', go: 'h2b', tag: 'CAPACITY' }
+        ]},
+      h2a: { emoji: '🌧️', text: "The chopper reaches a flooded neighborhood. You see two groups: 12 people on a rooftop, and 8 people clinging to a tree downstream. The helicopter can only do ONE trip before refueling.",
+        choices: [
+          { t: 'Rescue the rooftop — bigger group, more saved', go: 'h3', tag: 'NUMBERS' },
+          { t: 'Rescue the tree — they\'re in colder water, more urgent', go: 'h3b', tag: 'URGENCY' }
+        ]},
+      h2b: { emoji: '⛵', text: "The boat plows through floodwater. Suddenly the radio crackles — a family is trapped in their attic, water rising fast. Detouring will cost 30 minutes. Other families wait further on.",
+        choices: [
+          { t: 'Detour to the family — every minute matters', go: 'h3', tag: 'HEART' },
+          { t: 'Continue — save more people overall', go: 'h3b', tag: 'STRATEGY' }
+        ]},
+      h3: { emoji: '🌅', text: "Morning comes. Your team made the rescue. Everyone\'s exhausted. The mayor calls — there's ONE more report of a missing person. Your team is tired. Do you go?",
+        choices: [
+          { t: 'Send the team for one more sweep', go: 'h4a', tag: 'NEVER QUIT' },
+          { t: 'Rest the team — call in fresh rescuers', go: 'h4b', tag: 'WISE' }
+        ]},
+      h3b: { emoji: '⚓', text: "Tough choice, but you trusted strategy. You saved many more people overall. The team is shaken but proud. Now: do you brief the press or check on your team first?",
+        choices: [
+          { t: 'Check on the team first — they need you', go: 'h4b', tag: 'LEADERSHIP' },
+          { t: 'Brief the press — the public needs the story', go: 'h4a', tag: 'PUBLIC' }
+        ]},
+      h4a: { end: true, emoji: '🏆', text: "Outcome: 47 people rescued. Your team is tired but proud. The town remembers you forever.",
+        lesson: "🧠 Strategy lesson: Doing 'one more' sometimes saves the day — but only if you can keep your team safe. Real commanders balance courage with caution."},
+      h4b: { end: true, emoji: '🎖️', text: "Outcome: 52 people rescued in total. A fresh team finds the last person safely. The mayor calls you 'the calmest commander we've ever had.'",
+        lesson: "🧠 Strategy lesson: Good leaders take care of their team. Tired soldiers make mistakes. Rest IS a strategy."},
+    }
+  },
+  wildfire: {
+    title: 'Wildfire Operation',
+    emoji: '🔥',
+    intro: "A huge wildfire is spreading through California forests. The National Guard has called you in. Towns are in danger. What's your first move?",
+    start: 'w1',
+    scenes: {
+      w1: { emoji: '🌲', text: "The fire is 3 miles from a small town. Wind is pushing it closer. What do you do first?",
+        choices: [
+          { t: 'Drop water from planes on the fire front', go: 'w2a', tag: 'ATTACK' },
+          { t: 'Dig a firebreak — clear a strip of trees as a barrier', go: 'w2b', tag: 'DEFEND' }
+        ]},
+      w2a: { emoji: '🛩️', text: "Planes drop water — but the fire is too big to stop with water alone. The wind is shifting. You realize you also need ground crews. What now?",
+        choices: [
+          { t: 'Call in bulldozers to dig firebreaks NOW', go: 'w3', tag: 'ADAPT' },
+          { t: 'Evacuate the town immediately', go: 'w3b', tag: 'SAFETY' }
+        ]},
+      w2b: { emoji: '🚜', text: "Bulldozers carve a wide firebreak. But the fire is faster than expected. You need air support too.",
+        choices: [
+          { t: 'Add water-bombing planes to slow the fire', go: 'w3', tag: 'COMBINED' },
+          { t: 'Evacuate the town as backup', go: 'w3b', tag: 'BACKUP' }
+        ]},
+      w3: { end: true, emoji: '🏆', text: "Outcome: The firebreak + water drops stop the fire 200 yards from town. Zero homes lost!",
+        lesson: "🧠 Strategy lesson: Combining tools (air + ground) almost always beats using just one. This is called COMBINED ARMS — generals have known this for 2,000 years."},
+      w3b: { end: true, emoji: '🎖️', text: "Outcome: Town evacuated safely. Some houses burn, but every person is alive.",
+        lesson: "🧠 Strategy lesson: Sometimes the bravest decision is to RETREAT and save lives. Buildings can be rebuilt — people can't."}
+    }
+  },
+  satellite: {
+    title: 'Satellite Crisis',
+    emoji: '🛰️',
+    intro: "Space Force calls: a weather satellite is failing. Without it, hurricane warnings stop working. Hundreds of thousands of people depend on this. What's the plan?",
+    start: 's1',
+    scenes: {
+      s1: { emoji: '🚀', text: "You have two options to get a fix going:",
+        choices: [
+          { t: 'Send a repair mission (takes 3 days)', go: 's2a', tag: 'FIX' },
+          { t: 'Launch a backup satellite (takes 1 day, costs more)', go: 's2b', tag: 'REPLACE' }
+        ]},
+      s2a: { emoji: '👨‍🚀', text: "The repair team prepares. But mid-mission, the broken satellite drifts — making repair MUCH harder. Do you push on, or switch plans?",
+        choices: [
+          { t: 'Push on — astronauts adapt', go: 's3', tag: 'GRIT' },
+          { t: 'Abort and launch the backup', go: 's3b', tag: 'PIVOT' }
+        ]},
+      s2b: { emoji: '🛰️', text: "The backup launches successfully! It takes a day to come online. During that day, what do you do?",
+        choices: [
+          { t: 'Use ground radars to fill the gap', go: 's3', tag: 'BACKUP' },
+          { t: 'Ask allies to share their satellite data', go: 's3b', tag: 'TEAMWORK' }
+        ]},
+      s3: { end: true, emoji: '🏆', text: "Outcome: Service restored. Hurricane warnings working again. You saved untold lives by acting fast.",
+        lesson: "🧠 Strategy lesson: When systems fail, GRIT and clear thinking matter more than perfect plans. Improvise!"},
+      s3b: { end: true, emoji: '🌍', text: "Outcome: Working with allies saved the day. You discovered a new partnership.",
+        lesson: "🧠 Strategy lesson: STRONG ALLIANCES are a strategic weapon. The best generals build friendships before they need them."}
+    }
+  },
+  arctic: {
+    title: 'Arctic Lost Team',
+    emoji: '🧊',
+    intro: "A small research team is missing in the Arctic. Temperature: -40°F. You have 24 hours before survival becomes unlikely. How do you find them?",
+    start: 'a1',
+    scenes: {
+      a1: { emoji: '❄️', text: "What's your first move?",
+        choices: [
+          { t: 'Send rescue helicopters with thermal cameras', go: 'a2a', tag: 'TECH' },
+          { t: 'Send sled dogs and trained scouts on the ground', go: 'a2b', tag: 'TRADITION' }
+        ]},
+      a2a: { emoji: '🚁', text: "Thermal cameras spot a faint heat signature — but the helicopter can't land safely there. What now?",
+        choices: [
+          { t: 'Drop supplies and a beacon to mark the spot', go: 'a3', tag: 'SUPPORT' },
+          { t: 'Find a landing spot 1 mile away — send ground team', go: 'a3b', tag: 'HYBRID' }
+        ]},
+      a2b: { emoji: '🐕', text: "Sled dogs pick up a trail in the snow. They lead you to fresh tracks. But a storm is coming. Risk it?",
+        choices: [
+          { t: 'Follow the tracks NOW before the storm hides them', go: 'a3', tag: 'BOLD' },
+          { t: 'Set up camp, wait out the storm, follow tomorrow', go: 'a3b', tag: 'PATIENT' }
+        ]},
+      a3: { end: true, emoji: '🏆', text: "Outcome: Team found! All four researchers are cold but alive. They'll be fine after warm food and rest.",
+        lesson: "🧠 Strategy lesson: In emergencies, ACT FAST with the tools you have. Speed beats perfection."},
+      a3b: { end: true, emoji: '🎖️', text: "Outcome: You found them after the storm cleared. Everyone safe. Slower, but every team member home unharmed.",
+        lesson: "🧠 Strategy lesson: PATIENCE in extreme weather saves lives. Smart commanders know when to wait — even when waiting feels wrong."}
+    }
+  }
+};
+let storyState = null;
+function renderStoryHub() {
+  const main = document.getElementById('mainContent');
+  const cards = Object.entries(STORIES).map(([id, s]) => `
+    <div class="mission-card" onclick="startStory('${id}')">
+      ${state.storiesPlayed.includes(id) ? '<div class="ribbon">DONE</div>' : ''}
+      <span class="emoji">${s.emoji}</span>
+      <h3>${s.title}</h3>
+      <p>${s.intro.substring(0, 90)}...</p>
+      <div class="stat">⚡ Branching choices</div>
+    </div>
+  `).join('');
+  main.innerHTML = `
+    <div class="panel">
+      <h2>📖 STORY MISSIONS</h2>
+      <p>You're the commander. Every choice matters — and changes the ending. Each mission teaches a real strategy lesson.</p>
+      <div class="mission-grid" style="margin-top:14px;">${cards}</div>
+    </div>
+  `;
+}
+function startStory(id) {
+  const story = STORIES[id];
+  storyState = { id, story, scene: story.start, choicesMade: 0 };
+  renderStoryScene();
+}
+function renderStoryScene() {
+  const main = document.getElementById('mainContent');
+  const sc = storyState.story.scenes[storyState.scene];
+  if (sc.end) {
+    main.innerHTML = `
+      <div class="story-scene" style="border-color:var(--green-radar);">
+        <div class="scene-tag" style="background:var(--green-radar);">🎖️ MISSION COMPLETE</div>
+        <div class="scene-emoji">${sc.emoji}</div>
+        <div class="scene-text">${sc.text}</div>
+        <div class="story-scene" style="background:var(--gold); color:var(--navy); border-color:var(--red); margin-top:14px; margin-bottom:0;">
+          <strong style="font-family:Impact; letter-spacing:2px; font-size:18px;">${sc.lesson}</strong>
+        </div>
+        <div style="margin-top:14px; text-align:center;">
+          <button class="btn gold big" onclick="goHome()">🏠 RETURN TO HQ</button>
+          <button class="btn navy" onclick="startStory('${storyState.id}')">🔁 REPLAY (try different choices)</button>
+        </div>
+      </div>
+    `;
+    if (!state.storiesPlayed.includes(storyState.id)) {
+      state.storiesPlayed.push(storyState.id);
+      awardXP(40 + storyState.choicesMade * 5, `+${40 + storyState.choicesMade * 5} XP MISSION END`);
+    } else {
+      awardXP(15, '+15 XP (replay)');
+    }
+    if (state.storiesPlayed.length >= 2) earnBadge('storyteller');
+    saveState();
+    fanfare();
+    return;
+  }
+  main.innerHTML = `
+    <div class="story-scene">
+      <div class="scene-tag">📡 ${storyState.story.title.toUpperCase()}</div>
+      <div class="scene-emoji">${sc.emoji}</div>
+      <div class="scene-text">${sc.text}</div>
+      <div class="story-choices">
+        ${sc.choices.map(c => `
+          <button class="choice-btn" onclick="makeChoice('${c.go}')">
+            <span class="choice-tag">${c.tag}</span>${c.t}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:10px;">
+      <button class="btn navy" onclick="goHome()">↩ BACK TO HQ</button>
+    </div>
+  `;
+}
+function makeChoice(nextScene) {
+  storyState.scene = nextScene;
+  storyState.choicesMade++;
+  beep(750, 0.08);
+  renderStoryScene();
+}
+
+/* ============================================================
+   GAME 6: MISSION PLANNER (kept from v1, polished)
+   ============================================================ */
+const PLAN_OPTS = {
+  branch:  ['🪖 Army', '⚓ Navy', '✈️ Air Force', '🦅 Marines', '🚤 Coast Guard', '🚀 Space Force'],
+  vehicle: ['🚁 Helicopter', '🛩️ Stealth Jet', '🚢 Destroyer', '🛶 Submarine', '🚜 Tank', '🛻 Humvee', '🚀 Rocket'],
+  goal:    ['🌪️ Hurricane rescue', '🚑 Deliver medicine', '🛰️ Repair a satellite', '🏝️ Find lost sailors', '🌲 Stop a wildfire', '🛡️ Train allies', '🗺️ Map unknown area'],
+  team:    ['Alpha Squad (4 elite operators)', 'Bravo Platoon (30 soldiers)', 'Lone Recon Scout', 'Joint Task Force (multi-branch)', 'Search & Rescue Crew'],
+  terrain: ['🏔️ Mountains', '🏜️ Desert', '🌊 Open ocean', '🌧️ Jungle', '🧊 Arctic', '🏙️ City', '🌌 Space'],
+  callsign:['Thunder','Phoenix','Eagle','Hammer','Storm','Ranger','Falcon','Bear','Wolf','Tiger','Cobra','Saber']
+};
+function renderPlanner() {
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel">
+      <h2>🗺️ MISSION PLANNER</h2>
+      <p>Plan your own custom mission. Pick each piece — then receive your top-secret briefing!</p>
+      <div class="plan-builder">
+        ${Object.entries(PLAN_OPTS).map(([k, arr]) => `
+          <div class="plan-row">
+            <label>${k.toUpperCase()}</label>
+            <select id="opt_${k}">${arr.map(o => `<option>${o}</option>`).join('')}</select>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:14px; text-align:center;">
+        <button class="btn red big" onclick="randomPlan()">🎲 RANDOMIZE</button>
+        <button class="btn gold big" onclick="generateBrief()">📋 GENERATE</button>
+      </div>
+      <div id="briefArea"></div>
+    </div>
+  `;
+}
+function randomPlan() {
+  for (const k of Object.keys(PLAN_OPTS)) {
+    const sel = document.getElementById('opt_' + k);
+    sel.selectedIndex = Math.floor(Math.random() * sel.options.length);
+  }
+  beep(600, 0.1);
+}
+function generateBrief() {
+  const branch = document.getElementById('opt_branch').value;
+  const vehicle = document.getElementById('opt_vehicle').value;
+  const team = document.getElementById('opt_team').value;
+  const terrain = document.getElementById('opt_terrain').value;
+  const goal = document.getElementById('opt_goal').value;
+  const cs = document.getElementById('opt_callsign').value;
+  const recruit = (state.name || 'Recruit').toUpperCase();
+  const ts = new Date().toLocaleString();
+  const checks = [];
+  if (terrain.includes('ocean') && !vehicle.includes('Submarine') && !vehicle.includes('Destroyer'))
+    checks.push('⚠️ Vehicle mismatch — for ocean ops, send a Submarine or Destroyer.');
+  if (terrain.includes('Space') && !vehicle.includes('Rocket'))
+    checks.push('⚠️ Only a Rocket can reach Space!');
+  if (terrain.includes('Mountains') && vehicle.includes('Destroyer'))
+    checks.push('⚠️ Ships don\'t climb mountains. Try Helicopter or Humvee.');
+  if (terrain.includes('Arctic') && !vehicle.includes('Helicopter') && !vehicle.includes('Humvee'))
+    checks.push('💡 Arctic ops usually use Helicopters or special Humvees.');
+  if (checks.length === 0) checks.push('✅ Strategic check: vehicle, terrain, and team are a smart match!');
+  document.getElementById('briefArea').innerHTML = `
+    <div class="mission-brief">
+      <h3>★ TOP SECRET — OPERATION ${cs.toUpperCase()} ★</h3>
+      <div>DATE: ${ts}</div>
+      <div>COMMANDER: ${recruit}</div>
+      <div>CALL SIGN: ${cs.toUpperCase()}</div>
+      <br>
+      <div>📋 MISSION ORDERS:</div>
+      <div>━━━━━━━━━━━━━━━━━━━━━</div>
+      <div>Branch: ${branch}</div>
+      <div>Vehicle: ${vehicle}</div>
+      <div>Team: ${team}</div>
+      <div>Terrain: ${terrain}</div>
+      <div>Objective: ${goal}</div>
+      <br>
+      <div>🧠 STRATEGIC ASSESSMENT:</div>
+      ${checks.map(c => `<div>${c}</div>`).join('')}
+      <br>
+      <div>Good luck, ${recruit}.</div>
+      <div class="stamp">CLASSIFIED</div>
+    </div>
+  `;
+  awardXP(15, '+15 XP BRIEFING');
+  fanfare();
+}
+
+/* ============================================================
+   GAME 7: BOOT CAMP — 60s reflex drill, 4 question types
+   ============================================================ */
+const PHONETIC = {A:'Alpha',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliet',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
+const BRANCH_QA = [
+  { e: '🚁', a: 'Army' }, { e: '⚓', a: 'Navy' }, { e: '✈️', a: 'Air Force' },
+  { e: '🦅', a: 'Marines' }, { e: '🚤', a: 'Coast Guard' }, { e: '🛰️', a: 'Space Force' }
+];
+const RANK_QA = [
+  { e: '🪖', a: 'Private' }, { e: '🎖️', a: 'Corporal' }, { e: '🥉', a: 'Lieutenant' },
+  { e: '🥈', a: 'Captain' }, { e: '⭐', a: 'Colonel' }, { e: '🌟', a: 'General' }
+];
+const TRIVIA_QA = [
+  { q: 'How many branches?', a: '6', wrong: ['4','5','7'] },
+  { q: 'SOS = ?', a: 'Help signal', wrong: ['Stop','Speed up','Salute'] },
+  { q: 'Marines\' motto?', a: 'Always Faithful', wrong: ['Always Hungry','Always Loud','Always Asleep'] },
+  { q: 'Newest branch?', a: 'Space Force', wrong: ['Army','Navy','Cyber Force'] },
+  { q: 'Aircraft carrier is a ...', a: 'Floating airport', wrong: ['Big truck','Submarine','Train'] }
+];
+let bc = null;
+function renderBootcamp() {
+  bc = { score: 0, streak: 0, time: 60, q: null, timerInt: null, answered: false };
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel">
+      <h2>💪 BOOT CAMP</h2>
+      <p>60-second speed drill. Phonetic alphabet, ranks, branches, trivia — all mixed!</p>
+      <div class="bc-stage">
+        <div class="bc-meta">
+          <span class="timer">⏱ <span id="bcTime">60</span>s</span>
+          <span class="score">⚡ <span id="bcScore">0</span></span>
+          <span style="color:#fff;">🔥 <span id="bcStreak">0</span></span>
+        </div>
+        <div class="bc-prompt" id="bcPrompt">Get ready...</div>
+        <div class="bc-options" id="bcOpts"></div>
+      </div>
+      <div id="bcEnd" style="text-align:center; margin-top:14px;"></div>
+    </div>
+  `;
+  setTimeout(bcStart, 500);
+}
+function bcStart() {
+  ensureAudio();
+  bc.timerInt = setInterval(() => {
+    bc.time--;
+    document.getElementById('bcTime').textContent = bc.time;
+    if (bc.time <= 0) bcEnd();
+  }, 1000);
+  bcNext();
+}
+function bcNext() {
+  bc.answered = false;
+  const types = ['phonetic_letter_to_word', 'phonetic_word_to_letter', 'branch', 'rank', 'trivia'];
+  const t = types[Math.floor(Math.random()*types.length)];
+  let q, opts, correctIdx;
+  if (t === 'phonetic_letter_to_word') {
+    const letter = String.fromCharCode(65 + Math.floor(Math.random()*26));
+    q = letter;
+    opts = [PHONETIC[letter]];
+    while (opts.length < 4) {
+      const r = String.fromCharCode(65 + Math.floor(Math.random()*26));
+      if (!opts.includes(PHONETIC[r])) opts.push(PHONETIC[r]);
+    }
+    opts = shuffle(opts);
+    correctIdx = opts.indexOf(PHONETIC[letter]);
+    bc.q = { prompt: `Letter ${letter} = ?`, opts, correctIdx };
+  } else if (t === 'phonetic_word_to_letter') {
+    const letters = Object.keys(PHONETIC);
+    const letter = letters[Math.floor(Math.random()*letters.length)];
+    const word = PHONETIC[letter];
+    opts = [letter];
+    while (opts.length < 4) {
+      const r = letters[Math.floor(Math.random()*letters.length)];
+      if (!opts.includes(r)) opts.push(r);
+    }
+    opts = shuffle(opts);
+    correctIdx = opts.indexOf(letter);
+    bc.q = { prompt: `"${word}" = ?`, opts, correctIdx };
+  } else if (t === 'branch') {
+    const pick = BRANCH_QA[Math.floor(Math.random()*BRANCH_QA.length)];
+    opts = [pick.a];
+    while (opts.length < 4) {
+      const r = BRANCH_QA[Math.floor(Math.random()*BRANCH_QA.length)].a;
+      if (!opts.includes(r)) opts.push(r);
+    }
+    opts = shuffle(opts);
+    correctIdx = opts.indexOf(pick.a);
+    bc.q = { prompt: pick.e, opts, correctIdx };
+  } else if (t === 'rank') {
+    const pick = RANK_QA[Math.floor(Math.random()*RANK_QA.length)];
+    opts = [pick.a];
+    while (opts.length < 4) {
+      const r = RANK_QA[Math.floor(Math.random()*RANK_QA.length)].a;
+      if (!opts.includes(r)) opts.push(r);
+    }
+    opts = shuffle(opts);
+    correctIdx = opts.indexOf(pick.a);
+    bc.q = { prompt: pick.e, opts, correctIdx };
+  } else { // trivia
+    const pick = TRIVIA_QA[Math.floor(Math.random()*TRIVIA_QA.length)];
+    opts = shuffle([pick.a, ...pick.wrong]);
+    correctIdx = opts.indexOf(pick.a);
+    bc.q = { prompt: pick.q, opts, correctIdx };
+  }
+  document.getElementById('bcPrompt').textContent = bc.q.prompt;
+  document.getElementById('bcOpts').innerHTML = bc.q.opts.map((o, i) =>
+    `<button class="bc-opt" data-i="${i}" onclick="bcAnswer(${i})">${o}</button>`
+  ).join('');
+}
+function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+function bcAnswer(i) {
+  if (bc.answered) return;
+  bc.answered = true;
+  const opts = document.querySelectorAll('.bc-opt');
+  opts.forEach(o => o.disabled = true);
+  opts[bc.q.correctIdx].classList.add('correct');
+  if (i === bc.q.correctIdx) {
+    bc.score += 10 + bc.streak * 2;
+    bc.streak++;
+    beep(700 + bc.streak*50, 0.1);
+    vibe(20);
+  } else {
+    opts[i].classList.add('wrong');
+    bc.streak = 0;
+    buzz(); vibe(50);
+  }
+  document.getElementById('bcScore').textContent = bc.score;
+  document.getElementById('bcStreak').textContent = bc.streak;
+  setTimeout(bcNext, 500);
+}
+function bcEnd() {
+  clearInterval(bc.timerInt);
+  if (bc.score > state.bestBootcamp) state.bestBootcamp = bc.score;
+  if (bc.score >= 200) earnBadge('drillSergeant');
+  awardXP(Math.floor(bc.score / 3), `+${Math.floor(bc.score/3)} XP DRILL DONE`);
+  document.getElementById('bcPrompt').textContent = '⏰ TIME!';
+  document.getElementById('bcOpts').innerHTML = '';
+  document.getElementById('bcEnd').innerHTML = `
+    <h2 style="font-family:Impact; color:var(--gold); letter-spacing:2px;">🏆 DRILL COMPLETE</h2>
+    <p>Score: <strong style="font-size:24px; color:var(--gold);">${bc.score}</strong></p>
+    <button class="btn gold big" onclick="renderBootcamp()">🔁 GO AGAIN</button>
+    <button class="btn navy" onclick="goHome()">🏠 HQ</button>
+  `;
+  if (bc.score >= 100) fanfare();
+}
+
+/* ============================================================
+   INTEL LIBRARY — Unlockable encyclopedia
+   ============================================================ */
+const INTEL = {
+  vehicles: [
+    { id: 'f22', em: '🛩️', n: 'F-22 RAPTOR', sub: 'Stealth Fighter', info: 'Nearly invisible to radar. Top speed: over 1,500 mph. Can fly higher than 65,000 feet.', why: 'Stealth changes everything: if your enemy can\'t see you, they can\'t fight you.' },
+    { id: 'f35', em: '🛩️', n: 'F-35 LIGHTNING II', sub: 'Multi-role Stealth', info: 'Newest U.S. jet — used by Army, Navy, Marines AND allies. One version (F-35B) lands like a helicopter!', why: 'Versatile tools are worth their weight in gold — one jet doing many jobs saves money and training.' },
+    { id: 'chinook', em: '🚁', n: 'CH-47 CHINOOK', sub: 'Heavy Helicopter', info: 'Twin-rotor giant. Can lift cars, mini-tanks, even OTHER helicopters!', why: 'Two rotors = double the lift. Smart engineering = more rescue capacity.' },
+    { id: 'osprey', em: '🚁', n: 'V-22 OSPREY', sub: 'Tilt-rotor', info: 'Takes off like a helicopter, then tilts its rotors and flies like a plane. Best of both worlds!', why: 'When the rules say "pick one," sometimes the answer is: invent a new option.' },
+    { id: 'apache', em: '🚁', n: 'AH-64 APACHE', sub: 'Attack Helicopter', info: 'Fast, armored, flies low to scout for danger. Used by armies all over the world.', why: 'Sometimes the best position isn\'t the highest — it\'s low and unexpected.' },
+    { id: 'carrier', em: '🛥️', n: 'AIRCRAFT CARRIER', sub: 'Floating Airport', info: 'The USS Gerald R. Ford carries 75 aircraft and 5,000 people. It even has its own ZIP code!', why: 'Carriers project power anywhere on Earth. Wherever there\'s ocean, the Navy can reach.' },
+    { id: 'destroyer', em: '🚢', n: 'DESTROYER', sub: 'Fast Warship', info: 'Arleigh Burke-class destroyers are fast and packed with missiles. They protect aircraft carriers.', why: 'Even the king needs guards. Carriers can\'t fight alone.' },
+    { id: 'sub', em: '🛶', n: 'SUBMARINE', sub: 'Silent Hunter', info: 'Some stay underwater 90+ DAYS. Ohio-class subs are almost 2 football fields long.', why: 'Stealth + endurance = the ultimate watchful guardian.' },
+    { id: 'cutter', em: '🚤', n: 'COAST GUARD CUTTER', sub: 'Patrol Ship', info: 'Any Coast Guard ship over 65 feet long. They patrol coasts, rescue people, and stop smugglers.', why: 'You don\'t need to be the biggest to do important work.' },
+    { id: 'abrams', em: '🚜', n: 'M1 ABRAMS TANK', sub: 'Battle Tank', info: 'Weighs 70 tons (12 elephants!) but hits 45 mph. Armor strong enough to bounce most bullets.', why: 'Sometimes the strategy is: BE the wall.' },
+    { id: 'stryker', em: '🛻', n: 'STRYKER', sub: '8-wheeled APC', info: 'Armored vehicle on 8 huge wheels. Faster than tanks but still tough.', why: 'Choose speed over armor when you need to move fast.' },
+    { id: 'b2', em: '🛸', n: 'B-2 SPIRIT', sub: 'Stealth Bomber', info: 'Flying boomerang. Can circle the globe without stopping. Costs about $2 BILLION each.', why: 'Some tools cost a lot because nothing else does the job.' },
+    { id: 'b52', em: '🛩️', n: 'B-52 STRATOFORTRESS', sub: 'Heavy Bomber', info: 'First flew in 1952. Still flying today! Some grandsons fly the same planes their grandfathers did.', why: 'Great engineering can last 70+ years if built right.' },
+    { id: 'c5', em: '✈️', n: 'C-5 GALAXY', sub: 'Cargo Giant', info: 'So huge it can fit TANKS inside. One of the largest planes ever built.', why: 'Logistics wins wars. Moving stuff fast = winning.' },
+    { id: 'c17', em: '✈️', n: 'C-17 GLOBEMASTER', sub: 'Cargo Workhorse', info: 'Smaller than C-5 but lands on shorter runways. Used in disaster relief constantly.', why: 'Sometimes "good enough and faster" beats "perfect but slow."' },
+    { id: 'humvee', em: '🛻', n: 'HUMVEE', sub: 'Off-Road Truck', info: 'Drives through mud, sand, snow, and rivers. The military\'s do-anything 4x4.', why: 'Flexibility > specialization. Sometimes you need ONE thing that does it all.' },
+    { id: 'jltv', em: '🛻', n: 'JLTV', sub: 'Joint Light Tactical Vehicle', info: 'The Humvee\'s replacement. Better armor, smarter electronics.', why: 'Every tool eventually needs an upgrade. Stay current.' },
+    { id: 'mrap', em: '🚛', n: 'MRAP', sub: 'Bomb-resistant', info: 'V-shaped hull deflects explosions. Has saved thousands of soldiers\' lives.', why: 'A simple shape (the V) can save lives. Smart design = lives saved.' },
+    { id: 'drone', em: '🛩️', n: 'PREDATOR DRONE', sub: 'Unmanned Aircraft', info: 'Flies missions without a human pilot — controlled from thousands of miles away.', why: 'Remove human risk from the riskiest jobs.' },
+    { id: 'sr71', em: '🛩️', n: 'SR-71 BLACKBIRD', sub: 'Spy Plane (retired)', info: 'Could fly Mach 3.3 (over 2,500 mph). Made of titanium because steel would melt.', why: 'Some problems are solved by being too fast to catch.' }
+  ],
+  ranks: [
+    { id: 'pvt', em: '🪖', n: 'PRIVATE', sub: 'E-1 / E-2', info: 'Just finished basic training. Learning the ropes.', why: 'Everyone starts at the bottom. The journey matters.' },
+    { id: 'cpl', em: '🎖️', n: 'CORPORAL', sub: 'E-4', info: 'First leader. Runs a "fire team" of 4 soldiers.', why: 'Leadership starts small — leading 4 people well is harder than it sounds.' },
+    { id: 'sgt', em: '🏅', n: 'SERGEANT', sub: 'E-5+', info: 'The "backbone" of the Army. Trains and leads squads of 10.', why: 'NCOs (non-commissioned officers) actually run things day-to-day.' },
+    { id: 'msgt', em: '🎗️', n: 'MASTER SERGEANT', sub: 'E-8', info: 'Senior NCO. Decades of experience. Often the wisest people on base.', why: 'Experience is gold. Listen to the people who\'ve been there before.' },
+    { id: 'lt', em: '🥉', n: 'LIEUTENANT', sub: 'O-1 / O-2', info: 'New officer. Leads a platoon (~30 soldiers). Often fresh out of training.', why: 'Smart officers listen to their experienced sergeants.' },
+    { id: 'cpt', em: '🥈', n: 'CAPTAIN', sub: 'O-3', info: 'Leads a company — 100-200 soldiers.', why: 'Real responsibility starts here.' },
+    { id: 'maj', em: '🏆', n: 'MAJOR', sub: 'O-4', info: 'Plans operations. Right hand to colonels.', why: 'Behind every great commander is a planning team.' },
+    { id: 'col', em: '⭐', n: 'COLONEL', sub: 'O-6', info: 'Leads a regiment — thousands of soldiers and lots of gear.', why: 'Strategy at this level affects whole regions.' },
+    { id: 'gen', em: '🌟', n: 'GENERAL', sub: 'O-7 to O-10', info: 'Top of the chain. Can lead entire armies. Five-star generals are extra rare.', why: 'Generals think in years, not minutes.' },
+    { id: 'admiral', em: '⚓', n: 'ADMIRAL', sub: 'Navy version of General', info: 'In the Navy, you\'re not a General — you\'re an Admiral. Same level, different word.', why: 'Different traditions for different cultures. Same idea underneath.' }
+  ],
+  branches: [
+    { id: 'army', em: '🪖', n: 'ARMY', sub: 'This We\'ll Defend', info: 'Biggest and oldest branch (1775). Fights on land with tanks, soldiers, and helicopters.', why: 'Most of Earth is land. The Army handles that.' },
+    { id: 'navy', em: '⚓', n: 'NAVY', sub: 'Honor, Courage, Commitment', info: 'Rules the oceans with ships, submarines, and carriers. Older than the U.S. itself (1775).', why: 'Most of Earth is ocean. The Navy handles that.' },
+    { id: 'af', em: '✈️', n: 'AIR FORCE', sub: 'Aim High... Fly-Fight-Win', info: 'Created in 1947 (separated from the Army). Owns the skies with jets, bombers, satellites.', why: 'Whoever controls the sky usually controls what happens below.' },
+    { id: 'marines', em: '🦅', n: 'MARINES', sub: 'Semper Fidelis (Always Faithful)', info: 'Elite force inside the Navy. Can fight on land OR from the sea. "First in, last out."', why: 'When you need versatility, send Marines.' },
+    { id: 'cg', em: '🚤', n: 'COAST GUARD', sub: 'Semper Paratus (Always Ready)', info: 'Rescues people, stops smugglers, protects our coasts. Often works for Homeland Security.', why: 'Defense at home means helping people every day.' },
+    { id: 'sf', em: '🚀', n: 'SPACE FORCE', sub: 'Semper Supra (Always Above)', info: 'Newest branch (2019). Protects satellites and watches what happens above us.', why: 'GPS, weather, internet — all run through space now.' },
+    { id: 'natguard', em: '🛡️', n: 'NATIONAL GUARD', sub: 'Citizen-Soldiers', info: 'Part-time soldiers who train one weekend a month. First responders to disasters in their state.', why: 'Strong defense doesn\'t always mean full-time. Ready beats present.' },
+    { id: 'reserve', em: '📚', n: 'THE RESERVES', sub: 'Backup Forces', info: 'People with regular jobs who train part-time. Activated when needed.', why: 'Depth of bench wins long games.' }
+  ],
+  history: [
+    { id: 'dday', em: '🌅', n: 'D-DAY', sub: 'June 6, 1944', info: '156,000 soldiers landed on the beaches of Normandy, France to help free Europe. 5,000 ships, 13,000 aircraft.', why: 'The biggest plan in human history — proof that careful preparation can change the world.' },
+    { id: 'moon', em: '🌙', n: 'MOON LANDING', sub: 'July 20, 1969', info: 'Armstrong and Aldrin walked on the Moon. Both were military pilots first. Apollo employed 400,000 people.', why: 'Discipline + dreams + teamwork = the impossible.' },
+    { id: 'codeTalkers', em: '📡', n: 'NAVAJO CODE TALKERS', sub: '1942-1945', info: 'Marines used the Navajo language as an unbreakable WWII code. Enemy never decoded it.', why: 'Sometimes the best solution was hiding in plain sight all along.' },
+    { id: 'tuskegee', em: '✈️', n: 'TUSKEGEE AIRMEN', sub: 'First Black U.S. pilots', info: 'WWII pilots called "Red Tails." Rarely lost a bomber they escorted. They fought TWO battles — abroad AND for fair treatment at home.', why: 'Excellence opens doors that nothing else can.' },
+    { id: 'airlift', em: '🍞', n: 'BERLIN AIRLIFT', sub: '1948-1949', info: 'When West Berlin was cut off, planes fed 2 million people for 11 months. Landed every 30 seconds.', why: 'Logistics + persistence = a victory without fighting.' },
+    { id: 'minutemen', em: '🇺🇸', n: 'THE MINUTEMEN', sub: '1775', info: 'American militiamen who could be ready to fight in 60 seconds. They started the Revolutionary War at Lexington and Concord.', why: 'Speed of response is its own strength.' },
+    { id: 'lewisclark', em: '🗺️', n: 'LEWIS & CLARK', sub: '1804-1806', info: 'Two Army officers led the first U.S. expedition across America to the Pacific Ocean. 8,000 miles round trip.', why: 'Exploration requires courage AND meticulous planning.' },
+    { id: 'panama', em: '🚢', n: 'PANAMA CANAL', sub: '1904-1914', info: 'The Army Corps of Engineers built the canal that connects the Atlantic and Pacific oceans. Saved ships 8,000 miles!', why: 'Engineering can reshape the world.' },
+    { id: 'doolittle', em: '🛩️', n: 'DOOLITTLE\'S TRAINING', sub: 'WWII', info: 'Pilots trained to take bombers off short aircraft carrier decks — something no one thought possible. Pure ingenuity.', why: 'Impossible just means "no one has tried it correctly yet."' },
+    { id: 'cubaMissile', em: '🌐', n: 'CUBAN MISSILE CRISIS', sub: '1962', info: '13 tense days where the U.S. and Soviet Union almost went to war. Cool heads chose talking over fighting.', why: 'The bravest leaders sometimes choose calm over force.' }
+  ],
+  animals: [
+    { id: 'workingDog', em: '🐕', n: 'MILITARY DOGS', info: '2,500 dogs serve today. They sniff out bombs, find people, even parachute. They outrank their handlers!', why: 'A great team values every member — fur and all.' },
+    { id: 'navyDolphin', em: '🐬', n: 'NAVY DOLPHINS', info: 'Dolphins find underwater mines using natural sonar — better than any machine. Trained at a San Diego base.', why: 'Sometimes nature designed the perfect tool already.' },
+    { id: 'seaLion', em: '🦭', n: 'NAVY SEA LIONS', info: 'Retrieve lost equipment from the seafloor. Cheaper and safer than human divers.', why: 'Pick the right tool — even when it has whiskers.' },
+    { id: 'horses', em: '🐎', n: 'WAR HORSES', info: 'Today, U.S. Special Forces still ride horses in mountains where trucks can\'t go. Old tools, new problems.', why: 'The newest tools don\'t always beat the oldest ones.' },
+    { id: 'cherAmi', em: '🕊️', n: 'CHER AMI THE PIGEON', info: 'WWI hero pigeon. Flew through gunfire with a wounded leg to deliver a message that saved 200 American soldiers!', why: 'Heroes come in surprising packages.' },
+    { id: 'shipCat', em: '🐈', n: 'SIMON THE CAT', info: 'A cat who served on the British ship HMS Amethyst. Got a medal for catching rats during a 1949 China standoff.', why: 'Big jobs sometimes need small fighters.' },
+    { id: 'hannibalElephant', em: '🐘', n: 'HANNIBAL\'S ELEPHANTS', info: 'In 218 BC, the Carthaginian general led 37 war elephants OVER the Alps mountains to attack Rome.', why: 'Surprise + bold thinking = legend.' },
+    { id: 'mineRats', em: '🐀', n: 'MINE-DETECTING RATS', info: 'African giant pouched rats are trained to find buried landmines. Too light to set them off — and they LOVE bananas as rewards!', why: 'The right size for the job isn\'t always "bigger."' }
+  ],
+  tech: [
+    { id: 'gps', em: '🛰️', n: 'GPS', info: 'The Global Positioning System uses 31 military satellites. Every map app on Earth uses GPS.', why: 'Solve one problem, the solution often helps everyone.' },
+    { id: 'internet', em: '🌐', n: 'THE INTERNET', info: 'Started as ARPANET, a military research network in 1969. Now connects the world.', why: 'Big ideas often start tiny.' },
+    { id: 'radar', em: '📡', n: 'RADAR', info: 'Invented in the 1930s to spot incoming planes. Today: weather forecasts, baseball speed guns, ship navigation.', why: 'Bouncing things off objects to detect them = brilliant simplicity.' },
+    { id: 'sonar', em: '🌊', n: 'SONAR', info: 'Like radar but underwater with sound. Submarines "see" the ocean using sonar.', why: 'When one tool can\'t go everywhere, invent its cousin.' },
+    { id: 'stealth', em: '👻', n: 'STEALTH TECH', info: 'Special shapes + radar-absorbing paint = aircraft that look smaller than birds on radar.', why: 'The best defense can be being invisible.' },
+    { id: 'microwave', em: '🍿', n: 'MICROWAVE OVEN', info: 'A radar engineer noticed a chocolate bar melted in his pocket near a radar tube in 1945. Boom — microwave oven!', why: 'Be curious about weird things. Big inventions often start as accidents.' },
+    { id: 'ductTape', em: '🧰', n: 'DUCT TAPE', info: 'Invented in WWII to keep ammo cans dry. Today, fixes EVERYTHING. The most useful tape ever.', why: 'Simple solutions can outlast complicated ones.' },
+    { id: 'nightVision', em: '👁️', n: 'NIGHT VISION', info: 'Sees infrared (heat) so soldiers can see in total darkness. Now used by hunters and security cameras.', why: 'Extend your senses, extend your options.' },
+    { id: 'kevlar', em: '🛡️', n: 'KEVLAR', info: 'A super-strong fabric in body armor — 5 times stronger than steel by weight. Saves countless lives.', why: 'Sometimes "lighter and softer" beats "heavier and harder."' },
+    { id: 'cannedFood', em: '🥫', n: 'CANNED FOOD', info: 'Napoleon offered a prize in 1795 for food that wouldn\'t spoil. Canning was the winner — and revolutionized eating.', why: 'Set a clear problem, watch genius show up.' },
+    { id: 'nylon', em: '🪂', n: 'NYLON', info: 'Invented for WWII parachutes. Today: backpacks, jackets, ropes, fishing line, hair brushes.', why: 'Materials for war became materials for everything.' },
+    { id: 'jeep', em: '🚙', n: 'THE JEEP', info: 'Designed for WWII soldiers. The U.S. built 600,000 of them! Most car SUVs trace their roots here.', why: 'A great design echoes for generations.' }
+  ],
+  jobs: [
+    { id: 'pilot', em: '✈️', n: 'PILOT', info: 'Flies fighter jets, transport planes, or helicopters. Years of training. The most popular childhood dream job.', why: 'Some jobs require both brain and reflex — and ice-cold calm under pressure.' },
+    { id: 'medic', em: '🚑', n: 'COMBAT MEDIC', info: 'Saves lives on the front lines. Carries 60+ pounds of medical gear. Trained in trauma, surgery basics, lifesaving.', why: 'The most heroic job: running TOWARD danger to save others.' },
+    { id: 'sniper', em: '🎯', n: 'SCOUT / OBSERVER', info: 'Trained in extreme patience and precision. Can stay completely still for DAYS while watching an area. Sees everything.', why: 'Patience is a superpower. Most people can\'t do this.' },
+    { id: 'engineer', em: '🔧', n: 'COMBAT ENGINEER', info: 'Builds bridges, clears obstacles, sometimes blows things up. The Army Corps of Engineers also builds dams and dikes.', why: 'Make a way where there is no way.' },
+    { id: 'mechanic', em: '🔩', n: 'MECHANIC', info: 'Keeps every vehicle running. From Humvees to fighter jets. Without mechanics, the military can\'t move.', why: 'Heroes are sometimes the people fixing things in the garage.' },
+    { id: 'cook', em: '👨‍🍳', n: 'MILITARY CHEF', info: 'Feeds thousands of soldiers every day. An army really does march on its stomach — chefs are mission-critical.', why: 'A hungry team can\'t win. Food = morale.' },
+    { id: 'diver', em: '🤿', n: 'NAVY DIVER', info: 'Searches underwater for mines, repairs ships, salvages wrecks. Sometimes dives 300+ feet deep.', why: 'The deep ocean is its own world — and someone has to work there.' },
+    { id: 'intel', em: '🕵️', n: 'INTEL ANALYST', info: 'Studies maps, photos, and radio signals to figure out what the enemy is doing. The detective of the military.', why: 'Information beats firepower. Always.' },
+    { id: 'paratrooper', em: '🪂', n: 'PARATROOPER', info: 'Jumps from planes at 1,250 feet. Often behind enemy lines. The 82nd and 101st Airborne are famous units.', why: 'Sometimes the only way down is dropping from the sky.' },
+    { id: 'cyber', em: '💻', n: 'CYBER WARRIOR', info: 'Fights with a keyboard. Protects banks, power grids, and government data from hackers. A new kind of soldier.', why: 'Every era invents its own battlefield. Brain over brawn.' },
+    { id: 'chaplain', em: '⛪', n: 'CHAPLAIN', info: 'A religious leader (priest, rabbi, imam, etc.) in uniform. Supports soldiers spiritually. Never fights.', why: 'Strong armies care for hearts and minds, not just bodies.' },
+    { id: 'vet', em: '🐾', n: 'MILITARY VETERINARIAN', info: 'Cares for working dogs, dolphins, horses, and other animals. Even checks food safety!', why: 'A team is only as strong as its weakest member — animal or human.' }
+  ],
+  units: [
+    { id: 'seals', em: '🦅', n: 'NAVY SEALS', info: 'SEa, Air, Land. Elite Navy commandos. 75% of trainees quit. Motto: "The only easy day was yesterday."', why: 'Extreme training creates extreme capability.' },
+    { id: 'rangers', em: '🌟', n: 'ARMY RANGERS', info: '61-day training in mountains, swamps, deserts. Often first in. Motto: "Rangers Lead the Way!"', why: 'Specialized teams move faster than big armies.' },
+    { id: 'greenBerets', em: '🎩', n: 'GREEN BERETS', info: 'Army Special Forces. They TRAIN other countries\' soldiers. Speak multiple languages.', why: 'Sometimes the best fighters are also the best teachers.' },
+    { id: 'delta', em: '🌟', n: 'DELTA FORCE', info: 'Top-secret Army special operations. Most missions classified. Chosen from Rangers and Green Berets.', why: 'The best work isn\'t always seen — and that\'s the point.' },
+    { id: '101st', em: '🪂', n: '101ST AIRBORNE', info: 'Famous paratroopers, nicknamed "Screaming Eagles." Jumped into Normandy on D-Day.', why: 'Some units carry legendary reputations forward decades.' },
+    { id: '82nd', em: '🪂', n: '82ND AIRBORNE', info: 'Ready to deploy ANYWHERE in the world within 18 hours. Motto: "All The Way!"', why: 'Readiness IS power.' },
+    { id: 'blueAngels', em: '🛩️', n: 'BLUE ANGELS', info: 'Navy\'s flight demonstration team. Six F/A-18s flying with wingtips only 18 inches apart at 700 mph.', why: 'Perfect coordination is its own art form.' },
+    { id: 'thunderbirds', em: '🛩️', n: 'THUNDERBIRDS', info: 'Air Force\'s flight demo team. Red, white, and blue F-16s. Thrills millions of kids each year.', why: 'Inspiration is a recruiting tool.' },
+    { id: 'oldGuard', em: '🐎', n: 'THE OLD GUARD', info: 'Oldest active Army unit (1784). Guards the Tomb of the Unknown Soldier 24/7 in any weather. NEVER takes a break.', why: 'Some duties are eternal.' },
+    { id: 'cgRescue', em: '🛟', n: 'CG RESCUE SWIMMERS', info: 'Jump from helicopters into stormy oceans to save drowning people. Motto: "So Others May Live."', why: 'The biggest superheroes are real and humble.' }
+  ],
+  traditions: [
+    { id: 'reveille', em: '🎺', n: 'REVEILLE', info: 'A bugle song played at sunrise on every base. Wakes everyone up. The tradition is over 200 years old.', why: 'Shared rituals build shared identity.' },
+    { id: 'taps', em: '🎺', n: 'TAPS', info: 'Bugle song at sundown. Also played at military funerals as a sign of respect. Composed in 1862.', why: 'A simple tune can carry deep meaning.' },
+    { id: 'salute', em: '🫡', n: 'THE SALUTE', info: 'Right hand to forehead. Shows respect to officers. Possibly started in Roman times — soldiers raised their hand to show they held no weapon.', why: 'Old gestures carry ancient meaning.' },
+    { id: 'dogTags', em: '🏷️', n: 'DOG TAGS', info: 'Two metal IDs around the neck. Show name, blood type, religion. Why TWO? One stays with the body, one comes home if the worst happens.', why: 'Plan for the worst — even small details matter.' },
+    { id: 'challengeCoin', em: '🥇', n: 'CHALLENGE COINS', info: 'Special coins given for achievement. Soldiers collect them like trading cards. Sometimes generals hand them out personally.', why: 'Small symbols can mean a lot.' },
+    { id: 'flag13folds', em: '🇺🇸', n: 'FLAG FOLDING', info: 'When the U.S. flag is folded, it\'s done EXACTLY 13 times — each fold has its own meaning (life, eternity, honor, etc).', why: 'Ceremony makes everyday actions sacred.' },
+    { id: 'colorGuard', em: '🚩', n: 'COLOR GUARD', info: 'A team that carries the national flag and unit flags in ceremonies. Walk in perfect step.', why: 'Symbols of identity deserve careful keepers.' },
+    { id: 'pinning', em: '📌', n: 'PINNING CEREMONY', info: 'When someone is promoted, their new rank insignia is "pinned" on by family or fellow soldiers. Often emotional.', why: 'Big moments deserve marking.' },
+    { id: 'mottos', em: '📜', n: 'BRANCH MOTTOS', info: 'Each branch has a Latin motto. Marines: Semper Fidelis. Coast Guard: Semper Paratus. Space Force: Semper Supra. ("Always faithful/ready/above")', why: 'A motto is a promise in 2-3 words.' },
+    { id: 'parade', em: '🥁', n: 'THE PARADE', info: 'Soldiers marching in formation with bands. Originally a way to count and inspect troops. Now mostly ceremonial.', why: 'Discipline is also beautiful.' }
+  ],
+  facts: [
+    { id: 'carrierZip', em: '🛬', n: 'CARRIER ZIP CODE', info: 'Aircraft carriers are so big they get their own ZIP codes — like small floating cities!', why: 'Size matters when you need to project power anywhere on Earth.' },
+    { id: 'sub90', em: '🌊', n: 'SUB ENDURANCE', info: 'Some submarines can stay underwater 90 DAYS straight. No sunlight for 3 months.', why: 'Mental toughness is its own weapon.' },
+    { id: 'devil', em: '🦅', n: 'DEVIL DOGS', info: 'Marines are nicknamed "Devil Dogs" — a name given by German soldiers in WWI who said they fought like wild dogs.', why: 'Reputation can be a force multiplier.' },
+    { id: 'b2cost', em: '💰', n: 'B-2 BILLIONS', info: 'A B-2 Stealth Bomber costs $2 BILLION — more than its weight in solid gold.', why: 'Some tools are expensive because nothing else does the job.' },
+    { id: 'cg34min', em: '🛟', n: 'CG RESCUES', info: 'The Coast Guard rescues someone every 34 MINUTES on average. Always ready.', why: 'Constant readiness saves lives.' },
+    { id: 'pentagon', em: '🏢', n: 'THE PENTAGON', info: '17.5 miles of hallways — but you can walk anywhere in 7 minutes. Smart design!', why: 'Architecture is strategy too.' },
+    { id: 'mre', em: '🍕', n: 'MRE MAGIC', info: 'MREs (Meals Ready to Eat) come sealed and don\'t spoil for 3+ years. Pizza, beef stew, even cheesecake!', why: 'Logistics: even lunch is engineered.' },
+    { id: 'morseInvented', em: '📡', n: 'MORSE CODE', info: 'Morse code was invented in 1838 — long before phones existed. Still used today as a backup!', why: 'Old tools that work never really go away.' },
+    { id: 'cherokeeBoats', em: '🚣', n: 'NAVY LIFEBOATS', info: 'Modern Navy lifeboats can right themselves if flipped — they\'re unsinkable like little floating tanks.', why: 'Design for the worst case.' },
+    { id: 'fighterG', em: '🤢', n: 'PILOT G-FORCES', info: 'Fighter pilots feel up to 9 Gs — like a 1,500-pound person sitting on their chest. They wear special suits to stay conscious!', why: 'Some jobs require redesigning the human body, almost.' },
+    { id: 'jetFuel', em: '⛽', n: 'JET FUEL BURN', info: 'An F-22 burns 16,000 pounds of fuel an HOUR. That\'s 2 swimming pools full!', why: 'Power has a price tag.' },
+    { id: 'tankSlow', em: '🐌', n: 'TANK OVER ROCKET', info: 'A modern tank can shoot a 5-pound shell that travels 1 MILE in 2 seconds. That\'s faster than most rifle bullets.', why: 'Heavy doesn\'t always mean slow.' },
+    { id: 'westPoint', em: '🏛️', n: 'WEST POINT', info: 'The U.S. Military Academy at West Point, NY trains future officers. Founded 1802. Among graduates: 2 presidents, 1 astronaut, lots of CEOs.', why: 'Elite training builds elite leaders.' },
+    { id: 'flagDay', em: '🇺🇸', n: 'FLAG DAY', info: 'June 14 — the day the U.S. flag was officially adopted (1777). Also the Army\'s birthday!', why: 'Symbols and history share birthdays.' },
+    { id: 'mash', em: '🏥', n: 'MASH UNITS', info: 'Mobile Army Surgical Hospitals. Could be set up in tents on the battlefield. They invented modern emergency medicine!', why: 'Hard problems pull out our best ideas.' },
+    { id: 'chocolate', em: '🍫', n: 'D-RATION CHOCOLATE', info: 'WWII emergency chocolate bars were designed to "taste a little better than a boiled potato" — so soldiers wouldn\'t eat them too fast!', why: 'Even small design choices matter.' },
+    { id: 'sealAcademy', em: '🌊', n: 'SEAL TRAINING', info: 'Navy SEAL "Hell Week" is 5.5 days with only 4 hours of sleep TOTAL. Most quit. Those who finish are legends.', why: 'Limits exist mostly in your head.' },
+    { id: 'flyboy', em: '👨‍✈️', n: 'YOUNGEST PILOT', info: 'The youngest U.S. fighter pilot in history was 14 — Calvin Graham, who lied about his age in WWII!', why: 'Don\'t copy this. But know that motivation is powerful.' },
+    { id: 'tomb', em: '⚱️', n: 'TOMB OF THE UNKNOWN', info: 'Guarded 24/7/365 since 1937. Even hurricanes. The guards take 21 steps, pause 21 seconds. "21" honors the highest military salute.', why: 'Some promises never end.' },
+    { id: 'westPointFamous', em: '🌟', n: 'FAMOUS GRADS', info: 'West Point graduates include 2 U.S. Presidents (Grant, Eisenhower), astronauts, and Robert E. Lee.', why: 'Training shapes leaders for many fields.' }
+  ]
+};
+
+function unlockIntel(category, id) {
+  if (!state.intel[category]) state.intel[category] = [];
+  if (!state.intel[category].includes(id)) {
+    state.intel[category].push(id);
+    saveState();
+  }
+}
+function renderLibrary() {
+  // Auto-unlock starter entries
+  ['army','navy','af','marines','cg','sf'].forEach(b => unlockIntel('branches', b));
+  unlockIntel('vehicles', 'humvee');
+  unlockIntel('ranks', 'pvt');
+  unlockIntel('facts', 'carrierZip');
+  unlockIntel('history', 'moon');
+  unlockIntel('animals', 'workingDog');
+  unlockIntel('tech', 'gps');
+  unlockIntel('jobs', 'pilot');
+  unlockIntel('units', 'seals');
+  unlockIntel('traditions', 'salute');
+  const total = Object.values(INTEL).flat().length;
+  const unlocked = getIntelCount();
+  if (unlocked >= total * 0.6) earnBadge('intel');
+  if (unlocked === total) earnBadge('commander');
+
+  const LIB_CATS = [
+    { k: 'vehicles',   em: '🚁', n: 'Vehicles' },
+    { k: 'ranks',      em: '🎖️', n: 'Ranks' },
+    { k: 'branches',   em: '⚔️', n: 'Branches' },
+    { k: 'history',    em: '📜', n: 'History' },
+    { k: 'animals',    em: '🐕', n: 'Animals' },
+    { k: 'tech',       em: '🔬', n: 'Tech' },
+    { k: 'jobs',       em: '💼', n: 'Jobs' },
+    { k: 'units',      em: '⭐', n: 'Units' },
+    { k: 'traditions', em: '🎺', n: 'Traditions' },
+    { k: 'facts',      em: '💡', n: 'Facts' }
+  ];
+
+  const main = document.getElementById('mainContent');
+  main.innerHTML = `
+    <div class="panel">
+      <h2>📚 INTEL LIBRARY <span style="float:right; font-size:14px; color:var(--olive); font-family:'Trebuchet MS';">${unlocked}/${total}</span></h2>
+      <p>Your encyclopedia of military knowledge — 10 categories, 100+ entries. Play more missions to unlock more!</p>
+      <div class="library-tabs" id="libTabs">
+        ${LIB_CATS.map((c, i) => `
+          <button class="mode-tab ${i===0?'active':''}" onclick="libTab('${c.k}')">${c.em} ${c.n}
+            <span style="font-size:10px; opacity:0.6; margin-left:4px;">(${state.intel[c.k] ? state.intel[c.k].length : 0}/${INTEL[c.k].length})</span>
+          </button>
+        `).join('')}
+      </div>
+      <div id="libGrid"></div>
+      <div id="libDetail"></div>
+    </div>
+  `;
+  libTab('vehicles');
+}
+function libTab(cat) {
+  document.querySelectorAll('#libTabs .mode-tab').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'" + cat + "'"));
+  });
+  if (!state.intel[cat]) state.intel[cat] = [];
+  document.getElementById('libGrid').innerHTML = `<div class="library-grid">
+    ${INTEL[cat].map(item => {
+      const u = state.intel[cat].includes(item.id);
+      return `<div class="library-card ${u?'':'locked'}" onclick="${u?`libShow('${cat}','${item.id}')`:''}">
+        <span class="em">${item.em}</span>
+        <span class="nm">${u ? item.n : '???'}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('libDetail').innerHTML = '';
+}
+function libShow(cat, id) {
+  const item = INTEL[cat].find(x => x.id === id);
+  if (!item) return;
+  document.getElementById('libDetail').innerHTML = `
+    <div class="library-detail">
+      <h3>${item.em} ${item.n}</h3>
+      ${item.sub ? `<p style="color:var(--olive); font-style:italic; margin-bottom:6px;">${item.sub}</p>` : ''}
+      <p>${item.info}</p>
+      <div class="why-box"><strong>🧠 Why it matters:</strong> ${item.why}</div>
+    </div>
+  `;
+  awardXP(5, '+5 XP STUDIED');
+  beep(700, 0.05);
+}
+
+/* Hook into games to randomly unlock intel as he plays */
+function maybeUnlock() {
+  const cats = Object.keys(INTEL);
+  for (let i = 0; i < 2; i++) {
+    const c = cats[Math.floor(Math.random()*cats.length)];
+    const item = INTEL[c][Math.floor(Math.random()*INTEL[c].length)];
+    unlockIntel(c, item.id);
+  }
+}
+
+// Patch awardXP to occasionally unlock
+const _awardXP = awardXP;
+awardXP = function(amount, msg, x, y) {
+  _awardXP(amount, msg, x, y);
+  if (Math.random() < 0.3) maybeUnlock();
+};
+
+/* ============================================================
+   BOOT SEQUENCE
+   ============================================================ */
+function runBoot() {
+  const lines = document.querySelectorAll('#bootScreen .boot-line');
+  lines.forEach(l => {
+    setTimeout(() => l.classList.add('show'), parseInt(l.dataset.d, 10));
+  });
+  setTimeout(() => {
+    document.getElementById('bootScreen').classList.add('fade-out');
+    setTimeout(() => document.getElementById('bootScreen').remove(), 700);
+  }, 2200);
+}
+
+/* ============================================================
+   START
+   ============================================================ */
+loadState().then(() => {
+  renderHome();
+  runBoot();
+  // Resume audio on first interaction (mobile policy)
+  document.addEventListener('pointerdown', ensureAudio, { once: true });
+});
+</script>
+</body>
+</html>

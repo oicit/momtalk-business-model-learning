@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Marsh Quest — an AI Quests technical replica</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden;
+    height: 100%; width: 100%;
+    background: #1a1f2e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f4ecdc;
+    user-select: none;
+  }
+  canvas { display: block; }
+
+  /* ===== Dialogue overlay ===== */
+  #ui {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    padding: 20px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #dialog {
+    max-width: 760px;
+    margin: 0 auto;
+    background: rgba(20, 30, 40, 0.86);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(244, 236, 220, 0.18);
+    border-radius: 14px;
+    padding: 18px 22px;
+    pointer-events: auto;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    transition: opacity 0.35s ease;
+  }
+  #dialog.hidden { opacity: 0; pointer-events: none; }
+  #speaker {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    color: #c9a0dc;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  #text {
+    font-size: 17px;
+    line-height: 1.55;
+    color: #f4ecdc;
+    margin-bottom: 14px;
+    min-height: 50px;
+  }
+  #choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    background: rgba(244, 236, 220, 0.07);
+    border: 1px solid rgba(244, 236, 220, 0.25);
+    color: #f4ecdc;
+    padding: 11px 16px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 15px;
+    text-align: left;
+    transition: background 0.18s, border-color 0.18s, transform 0.18s;
+    font-family: inherit;
+  }
+  .choice:hover {
+    background: rgba(201, 160, 220, 0.18);
+    border-color: rgba(201, 160, 220, 0.65);
+    transform: translateX(3px);
+  }
+
+  /* ===== Start screen ===== */
+  #start-screen {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #2a3a4a 0%, #0e1620 100%);
+    text-align: center;
+  }
+  #start-screen h1 {
+    font-size: 48px;
+    margin: 0 0 8px 0;
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(120deg, #c9a0dc, #f4d08c, #5ba0a0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  #start-screen p {
+    font-size: 15px;
+    color: #a8b8c8;
+    max-width: 440px;
+    margin: 0 0 28px 0;
+    line-height: 1.6;
+  }
+  #start-btn {
+    background: linear-gradient(120deg, #c9a0dc, #9577b8);
+    border: none;
+    color: white;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+  }
+  #start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(201,160,220,0.4);
+  }
+  #tech-note {
+    position: absolute;
+    bottom: 18px;
+    font-size: 11px;
+    color: #5a6a7a;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== Data training overlay ===== */
+  #training {
+    position: fixed; inset: 0; z-index: 15;
+    background: rgba(10, 18, 28, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  #training.show { display: flex; }
+  #training h2 {
+    margin: 0 0 4px 0;
+    font-size: 22px;
+    color: #c9a0dc;
+  }
+  #training-status {
+    color: #a8b8c8;
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  #accuracy {
+    font-size: 64px;
+    font-weight: 700;
+    color: #5ba0a0;
+    font-variant-numeric: tabular-nums;
+    margin: 8px 0;
+  }
+  #training-canvas {
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="three-canvas"></canvas>
+
+<div id="start-screen">
+  <h1>Marsh Quest</h1>
+  <p>A technical proof-of-concept replicating the rendering pipeline used in Google's <em>AI Quests</em>: Three.js + WebGL, instanced geometry, vertex-color toon shading, and layered procedural ambient.</p>
+  <button id="start-btn">Begin Quest</button>
+  <div id="tech-note">Click to enable audio · Use mouse to look around</div>
+</div>
+
+<div id="ui">
+  <div id="dialog" class="hidden">
+    <div id="speaker">Professor Skye</div>
+    <div id="text"></div>
+    <div id="choices"></div>
+  </div>
+</div>
+
+<div id="training">
+  <h2>Training the model…</h2>
+  <div id="training-status">Feeding your dataset to the AI</div>
+  <canvas id="training-canvas" width="420" height="240"></canvas>
+  <div id="accuracy">0%</div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   AI QUESTS TECHNICAL REPLICA — "Marsh Quest"
+   ------------------------------------------------------------
+   Demonstrates the rendering techniques described by Phantom
+   Studios' AI Quests case study:
+
+   1. WebGL via Three.js — browser-native 3D, no engine export
+   2. Stylized low-poly geometry built from primitives
+   3. Custom toon shader pulling color from vertex `color`
+      attribute (no textures — keeps file size tiny)
+   4. InstancedMesh for the reed field — one GPU call for ~600
+      reeds instead of 600 draw calls
+   5. Layered procedural ambient via Web Audio API
+   6. Branching scripted dialogue driving a precomputed
+      narrative — no live AI inference in the runtime
+   ============================================================ */
+
+/* ---------- Renderer & Scene ---------- */
+
+const canvas = document.getElementById('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x2e3b48);
+scene.fog = new THREE.Fog(0x4a5a6a, 18, 55);
+
+const camera = new THREE.PerspectiveCamera(
+  55, window.innerWidth / window.innerHeight, 0.1, 200
+);
+camera.position.set(0, 2.4, 8);
+camera.lookAt(0, 1.2, 0);
+
+/* ---------- Custom Toon Shader ----------
+   Phantom's case study: "Each model was brought to life with
+   our custom toon shader in WebGL pulling colour directly from
+   the vertex and colour attribute data."
+
+   The shader:
+   - Reads per-vertex `color` attribute (no textures)
+   - Computes Lambertian light against a directional light
+   - Quantizes the result into 3 hard bands for the toon look
+   - Adds a subtle fresnel rim for separation against the fog
+*/
+const toonVS = /* glsl */ `
+  attribute vec3 color;
+  varying vec3 vColor;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+  varying float vDepth;
+  void main() {
+    vColor = color;
+
+    // Three.js auto-defines USE_INSTANCING and declares
+    // 'attribute mat4 instanceMatrix' when this material is
+    // used on an InstancedMesh. We just have to USE it.
+    #ifdef USE_INSTANCING
+      mat4 worldM = modelMatrix * instanceMatrix;
+      vec3 transformedNormal = mat3(instanceMatrix) * normal;
+    #else
+      mat4 worldM = modelMatrix;
+      vec3 transformedNormal = normal;
+    #endif
+
+    vec4 worldPos = worldM * vec4(position, 1.0);
+    vec4 viewPos = viewMatrix * worldPos;
+    vNormal = normalize(normalMatrix * transformedNormal);
+    vViewDir = normalize(-viewPos.xyz);
+    vDepth = -viewPos.z;
+    gl_Position = projectionMatrix * viewPos;
+  }
+`;
+
+const toonFS = /* glsl */ `
+  precision highp float;
+  varying vec3 vColor;
+  varying vec3 vNormal;
+  varying vec3 vViewDir;
+  varying float vDepth;
+  uniform vec3 uLightDir;
+  uniform vec3 uAmbient;
+  uniform vec3 uFogColor;
+  uniform float uFogNear;
+  uniform float uFogFar;
+
+  void main() {
+    vec3 N = normalize(vNormal);
+    vec3 L = normalize(uLightDir);
+    float NdotL = dot(N, L);
+
+    // Quantize lighting into hard toon bands
+    float band;
+    if (NdotL > 0.55)      band = 1.00;
+    else if (NdotL > 0.05) band = 0.78;
+    else if (NdotL > -0.3) band = 0.55;
+    else                   band = 0.40;
+
+    // Subtle rim for silhouette
+    float rim = 1.0 - max(dot(N, normalize(vViewDir)), 0.0);
+    rim = smoothstep(0.55, 1.0, rim) * 0.25;
+
+    vec3 col = vColor * (uAmbient + vec3(band));
+    col += rim * vec3(0.9, 0.85, 1.0);
+
+    // Manual atmospheric fog
+    float fogFactor = smoothstep(uFogNear, uFogFar, vDepth);
+    col = mix(col, uFogColor, fogFactor);
+
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
+
+const toonUniforms = {
+  uLightDir: { value: new THREE.Vector3(0.5, 0.85, 0.4).normalize() },
+  uAmbient:  { value: new THREE.Vector3(0.22, 0.20, 0.28) },
+  uFogColor: { value: new THREE.Color(0x6b8e9b) },
+  uFogNear:  { value: 16 },
+  uFogFar:   { value: 55 }
+};
+
+function makeToonMaterial(extra = {}) {
+  return new THREE.ShaderMaterial({
+    vertexShader: toonVS,
+    fragmentShader: toonFS,
+    uniforms: toonUniforms,
+    ...extra
+  });
+}
+
+const toonMat = makeToonMaterial();
+
+/* ---------- Helpers to paint vertex colors ---------- */
+
+// Assigns a per-vertex color attribute to any BufferGeometry.
+// `colorFn(x, y, z, i)` returns a THREE.Color for each vertex.
+function paintVertices(geom, colorFn) {
+  const pos = geom.attributes.position;
+  const colors = new Float32Array(pos.count * 3);
+  const tmp = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    colorFn(pos.getX(i), pos.getY(i), pos.getZ(i), i, tmp);
+    colors[i*3]   = tmp.r;
+    colors[i*3+1] = tmp.g;
+    colors[i*3+2] = tmp.b;
+  }
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  return geom;
+}
+
+/* ---------- Ground (the marsh water) ----------
+   A subdivided plane painted with depth-based teal gradient
+   plus per-vertex noise to break up the surface. */
+
+{
+  const g = new THREE.PlaneGeometry(120, 120, 60, 60);
+  g.rotateX(-Math.PI / 2);
+
+  // Gentle wavy displacement so the "water" isn't dead flat
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i);
+    const h = Math.sin(x * 0.25) * 0.08 + Math.cos(z * 0.3) * 0.06;
+    pos.setY(i, h);
+  }
+  pos.needsUpdate = true;
+  g.computeVertexNormals();
+
+  // Teal water palette
+  paintVertices(g, (x, y, z, i, c) => {
+    const d = Math.sqrt(x*x + z*z) / 60;
+    const base = new THREE.Color(0x2e5c5c).lerp(new THREE.Color(0x5ba0a0), 1 - d);
+    const flicker = Math.sin(x * 0.6 + z * 0.8) * 0.04;
+    c.copy(base).offsetHSL(0, 0, flicker);
+  });
+
+  const ground = new THREE.Mesh(g, toonMat);
+  ground.receiveShadow = false;
+  scene.add(ground);
+}
+
+/* ---------- Reed (cone) geometry with vertex-color gradient ----------
+   A tall thin cone: golden at the tip, mossy green at the base.
+   This single geometry is shared across ~600 InstancedMesh instances. */
+
+const reedGeom = new THREE.ConeGeometry(0.08, 1.4, 5, 1);
+reedGeom.translate(0, 0.7, 0); // pivot at base
+paintVertices(reedGeom, (x, y, z, i, c) => {
+  // y goes from 0 (base) to 1.4 (tip)
+  const t = THREE.MathUtils.clamp(y / 1.4, 0, 1);
+  const base = new THREE.Color(0x4f7a5f);   // mossy green
+  const tip  = new THREE.Color(0xd4a574);   // golden
+  c.copy(base).lerp(tip, t);
+});
+
+/* ---------- The big instancing trick ----------
+   Phantom: "By instancing key objects across the scenes, we
+   kept the performance high and the file size low."
+   ~600 reeds drawn in a single draw call. */
+
+const REED_COUNT = 600;
+const reeds = new THREE.InstancedMesh(reedGeom, toonMat, REED_COUNT);
+const dummy = new THREE.Object3D();
+for (let i = 0; i < REED_COUNT; i++) {
+  // Distribute in a ring around the player, avoiding the center
+  const r = 3 + Math.random() * 30;
+  const theta = Math.random() * Math.PI * 2;
+  dummy.position.set(Math.cos(theta) * r, 0, Math.sin(theta) * r);
+  dummy.rotation.y = Math.random() * Math.PI * 2;
+  const s = 0.6 + Math.random() * 0.9;
+  dummy.scale.set(s, s * (0.8 + Math.random() * 0.5), s);
+  dummy.updateMatrix();
+  reeds.setMatrixAt(i, dummy.matrix);
+}
+scene.add(reeds);
+
+/* ---------- Stones (instanced low-poly icosahedra) ---------- */
+
+const stoneGeom = new THREE.IcosahedronGeometry(0.5, 0);
+paintVertices(stoneGeom, (x, y, z, i, c) => {
+  const base = new THREE.Color(0x6d5c7a);
+  const offs = (Math.sin(i * 1.7) * 0.5 + 0.5) * 0.15;
+  c.copy(base).offsetHSL(0, 0, -offs);
+});
+const STONE_COUNT = 35;
+const stones = new THREE.InstancedMesh(stoneGeom, toonMat, STONE_COUNT);
+for (let i = 0; i < STONE_COUNT; i++) {
+  const r = 4 + Math.random() * 25;
+  const theta = Math.random() * Math.PI * 2;
+  dummy.position.set(Math.cos(theta) * r, -0.1 + Math.random() * 0.1, Math.sin(theta) * r);
+  dummy.rotation.set(Math.random(), Math.random() * 6.28, Math.random());
+  const s = 0.4 + Math.random() * 1.2;
+  dummy.scale.set(s, s * 0.5, s);
+  dummy.updateMatrix();
+  stones.setMatrixAt(i, dummy.matrix);
+}
+scene.add(stones);
+
+/* ---------- Distant mountains (instanced cones) ---------- */
+
+const mountainGeom = new THREE.ConeGeometry(4, 6, 6, 1);
+paintVertices(mountainGeom, (x, y, z, i, c) => {
+  const t = (y + 3) / 6;
+  const base = new THREE.Color(0x3a4858);
+  const top  = new THREE.Color(0x7c8fa8);
+  c.copy(base).lerp(top, t);
+});
+const MTN_COUNT = 12;
+const mountains = new THREE.InstancedMesh(mountainGeom, toonMat, MTN_COUNT);
+for (let i = 0; i < MTN_COUNT; i++) {
+  const theta = (i / MTN_COUNT) * Math.PI * 2 + Math.random() * 0.3;
+  const r = 45 + Math.random() * 8;
+  dummy.position.set(Math.cos(theta) * r, 1 + Math.random() * 2, Math.sin(theta) * r);
+  dummy.rotation.y = Math.random() * Math.PI * 2;
+  const s = 1 + Math.random() * 1.4;
+  dummy.scale.set(s, s * (1 + Math.random() * 0.6), s);
+  dummy.updateMatrix();
+  mountains.setMatrixAt(i, dummy.matrix);
+}
+scene.add(mountains);
+
+/* ---------- Professor Skye (the mentor) ----------
+   Built from primitives in the style of AI Quests'
+   "weird and wonderful creatures." Lavender amphibious moss-spirit. */
+
+const skye = new THREE.Group();
+{
+  // Body (rounded blob)
+  const bodyGeom = new THREE.SphereGeometry(0.55, 16, 12);
+  paintVertices(bodyGeom, (x, y, z, i, c) => {
+    const top = new THREE.Color(0xc9a0dc);
+    const bot = new THREE.Color(0x8a6ca8);
+    c.copy(bot).lerp(top, (y + 0.55) / 1.1);
+  });
+  const body = new THREE.Mesh(bodyGeom, toonMat);
+  body.position.y = 0.6;
+  skye.add(body);
+
+  // Head
+  const headGeom = new THREE.SphereGeometry(0.42, 16, 12);
+  paintVertices(headGeom, (x, y, z, i, c) => {
+    c.set(0xddb8e8);
+  });
+  const head = new THREE.Mesh(headGeom, toonMat);
+  head.position.y = 1.45;
+  skye.add(head);
+
+  // Eyes
+  const eyeGeom = new THREE.SphereGeometry(0.08, 8, 6);
+  paintVertices(eyeGeom, (x, y, z, i, c) => c.set(0x1a1020));
+  const eyeL = new THREE.Mesh(eyeGeom, toonMat);
+  eyeL.position.set(-0.16, 1.52, 0.36);
+  const eyeR = eyeL.clone();
+  eyeR.position.x = 0.16;
+  skye.add(eyeL, eyeR);
+
+  // Hat (a little scholar's cap — yellow accent)
+  const hatGeom = new THREE.ConeGeometry(0.34, 0.55, 8);
+  paintVertices(hatGeom, (x, y, z, i, c) => c.set(0xf4d08c));
+  const hat = new THREE.Mesh(hatGeom, toonMat);
+  hat.position.y = 2.0;
+  skye.add(hat);
+
+  // Hat brim
+  const brimGeom = new THREE.TorusGeometry(0.36, 0.07, 6, 16);
+  paintVertices(brimGeom, (x, y, z, i, c) => c.set(0xe8b466));
+  const brim = new THREE.Mesh(brimGeom, toonMat);
+  brim.position.y = 1.78;
+  brim.rotation.x = Math.PI / 2;
+  skye.add(brim);
+
+  // Arms (little orbs floating beside body)
+  const armGeom = new THREE.SphereGeometry(0.16, 8, 6);
+  paintVertices(armGeom, (x, y, z, i, c) => c.set(0xc9a0dc));
+  const armL = new THREE.Mesh(armGeom, toonMat);
+  armL.position.set(-0.72, 0.7, 0);
+  const armR = armL.clone();
+  armR.position.x = 0.72;
+  skye.add(armL, armR);
+
+  // Expose named handles for the animation loop
+  skye.userData.armL = armL;
+  skye.userData.armR = armR;
+
+  skye.position.set(0, 0, 2);
+  scene.add(skye);
+}
+
+/* ---------- Data-point particles (decorative, around Skye) ----------
+   Drawn with Points + per-vertex colors. Represents the abstract
+   "data" Skye is teaching the player about. */
+
+const dataPoints = (() => {
+  const N = 40;
+  const g = new THREE.BufferGeometry();
+  const positions = new Float32Array(N * 3);
+  const colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    positions[i*3]   = (Math.random() - 0.5) * 4;
+    positions[i*3+1] = 1 + Math.random() * 2.5;
+    positions[i*3+2] = 1 + (Math.random() - 0.5) * 3;
+    const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.2, 0.8, 0.7);
+    colors[i*3] = c.r; colors[i*3+1] = c.g; colors[i*3+2] = c.b;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const m = new THREE.PointsMaterial({ size: 0.12, vertexColors: true, transparent: true, opacity: 0.85 });
+  const p = new THREE.Points(g, m);
+  scene.add(p);
+  return p;
+})();
+
+/* ---------- Hemisphere sky-fill via a large back-faced dome ----------
+   Cheap atmospheric gradient — no skybox texture needed. */
+{
+  const g = new THREE.SphereGeometry(80, 24, 16);
+  paintVertices(g, (x, y, z, i, c) => {
+    const t = THREE.MathUtils.clamp(y / 80, -0.2, 1);
+    const horizon = new THREE.Color(0xe8b59c);
+    const top     = new THREE.Color(0x6b8e9b);
+    c.copy(horizon).lerp(top, Math.max(t, 0));
+  });
+  const dome = new THREE.Mesh(g, new THREE.ShaderMaterial({
+    vertexShader: `
+      attribute vec3 color;
+      varying vec3 vColor;
+      void main() {
+        vColor = color;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      varying vec3 vColor;
+      void main() { gl_FragColor = vec4(vColor, 1.0); }
+    `,
+    side: THREE.BackSide,
+    depthWrite: false
+  }));
+  scene.add(dome);
+}
+
+/* ============================================================
+   AUDIO — layered procedural ambient
+   ------------------------------------------------------------
+   Mirrors Phantom's note: "carefully crafted and layered both
+   ambient sound and soundtracks ... adding spot sounds to offer
+   extra guidance and feedback."
+
+   - Drone bed: two detuned triangle oscillators, low-passed
+   - Slow LFO on the filter cutoff gives breathing motion
+   - Spot sounds: high triangle chirps at random intervals
+   ============================================================ */
+
+let audioCtx, masterGain;
+let droneNodes = [];
+
+function startAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.18;
+  masterGain.connect(audioCtx.destination);
+
+  // ---- Drone bed ----
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 600;
+  filter.Q.value = 1.5;
+  filter.connect(masterGain);
+
+  // LFO sweeping the filter cutoff (the "breathing")
+  const lfo = audioCtx.createOscillator();
+  lfo.frequency.value = 0.06;
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 220;
+  lfo.connect(lfoGain).connect(filter.frequency);
+  lfo.start();
+
+  // Two detuned triangle waves an octave apart for body
+  const baseFreq = 110;        // A2
+  const detunes = [-7, +5, -3, +11];
+  detunes.forEach((cents, i) => {
+    const osc = audioCtx.createOscillator();
+    osc.type = 'triangle';
+    osc.frequency.value = baseFreq * (i < 2 ? 1 : 1.5);
+    osc.detune.value = cents;
+    const g = audioCtx.createGain();
+    g.gain.value = 0.35;
+    osc.connect(g).connect(filter);
+    osc.start();
+    droneNodes.push(osc);
+  });
+
+  // ---- Spot sounds: random "marsh creatures" ----
+  function chirp() {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    o.type = 'triangle';
+    const freq = 800 + Math.random() * 1400;
+    o.frequency.setValueAtTime(freq, t);
+    o.frequency.exponentialRampToValueAtTime(freq * 1.5, t + 0.08);
+
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.10, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+
+    o.connect(g).connect(masterGain);
+    o.start(t);
+    o.stop(t + 0.25);
+
+    // schedule the next chirp
+    setTimeout(chirp, 1800 + Math.random() * 4500);
+  }
+  setTimeout(chirp, 1200);
+}
+
+// Spot sound for UI feedback (a soft "tick")
+function uiBlip() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const o = audioCtx.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(620, t);
+  o.frequency.exponentialRampToValueAtTime(440, t + 0.1);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.08, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+  o.connect(g).connect(masterGain);
+  o.start(t); o.stop(t + 0.16);
+}
+
+/* ============================================================
+   DIALOGUE / QUEST SYSTEM
+   ------------------------------------------------------------
+   A static branching graph. No live AI in the runtime — every
+   line is hand-authored, every choice deterministically routes
+   to a next node. Mirrors AI Quests' architecture: the AI work
+   happened in production (writing, art, voice); play is scripted.
+   ============================================================ */
+
+const story = {
+  intro: {
+    text: "Welcome to Market Marshes, traveller. I'm Professor Skye. The villagers here are losing crops to sudden floods — and I think you and I can help them with an AI flood-prediction model. Are you ready?",
+    choices: [
+      { text: "I'm ready to help.", next: 'data_question' }
+    ]
+  },
+
+  data_question: {
+    text: "Every AI model needs data to learn from. Before we train anything, we have to decide where to collect data about past floods. This is the most important choice you'll make. Which sounds best?",
+    choices: [
+      { text: "Only from the village center — that's where the people live.", next: 'biased', tag: 'biased' },
+      { text: "From across the whole marsh — different terrain, different seasons.", next: 'diverse', tag: 'diverse' },
+      { text: "Only from spots that flooded badly last year — those are the real cases.", next: 'leak', tag: 'leak' }
+    ]
+  },
+
+  biased: {
+    text: "Hmm. Collecting only near the village means our model won't know what 'normal' marsh looks like — it'll only ever see one kind of place. That's called sampling bias. Let's still train it and see what happens.",
+    choices: [
+      { text: "Train the model anyway.", next: 'train', acc: 54 }
+    ]
+  },
+
+  diverse: {
+    text: "Excellent thinking. A diverse dataset — different parts of the marsh, wet seasons and dry — gives the model a real chance to learn what flooding actually looks like. This is how Google's real flood-forecasting team approaches it. Let's train.",
+    choices: [
+      { text: "Train the model.", next: 'train', acc: 89 }
+    ]
+  },
+
+  leak: {
+    text: "Careful! If we only sample from spots we already know flooded, the model just memorises last year — it won't generalise to new conditions. That's a kind of data leakage. We can try, but expectations should be modest.",
+    choices: [
+      { text: "Train it anyway.", next: 'train', acc: 61 }
+    ]
+  },
+
+  train: {
+    // This node triggers the training overlay rather than dialogue.
+    special: 'train'
+  },
+
+  result_low: {
+    text: "Our model predicts the village will flood about half the time it actually does. Not great — but now you understand why. AI is only as good as the data it learns from.",
+    choices: [
+      { text: "Try again with different data?", next: 'data_question' },
+      { text: "End quest.", next: 'end' }
+    ]
+  },
+  result_mid: {
+    text: "Reasonable but flawed. The model misses floods in areas we didn't sample well. In a real deployment, this gap could mean a village isn't warned in time.",
+    choices: [
+      { text: "Try again with different data?", next: 'data_question' },
+      { text: "End quest.", next: 'end' }
+    ]
+  },
+  result_high: {
+    text: "Wonderful! Our model predicts floods with strong accuracy. The villagers will get warnings hours before the water rises. This is the same principle behind Google's real Flood Hub — but you just walked through every decision yourself.",
+    choices: [
+      { text: "End quest.", next: 'end' }
+    ]
+  },
+
+  end: {
+    text: "You've finished Marsh Quest. The marsh remembers your name. Refresh the page to try again with different data choices.",
+    choices: []
+  }
+};
+
+const dialog = document.getElementById('dialog');
+const speakerEl = document.getElementById('speaker');
+const textEl = document.getElementById('text');
+const choicesEl = document.getElementById('choices');
+let lastAccuracy = 0;
+
+function showNode(key) {
+  const node = story[key];
+  if (!node) return;
+
+  if (node.special === 'train') {
+    runTraining(lastAccuracy);
+    return;
+  }
+
+  dialog.classList.remove('hidden');
+  // Typewriter effect
+  textEl.textContent = '';
+  choicesEl.innerHTML = '';
+  const fullText = node.text;
+  let i = 0;
+  const interval = setInterval(() => {
+    textEl.textContent = fullText.slice(0, i++);
+    if (i > fullText.length) {
+      clearInterval(interval);
+      // Render choices
+      node.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice';
+        btn.textContent = c.text;
+        btn.onclick = () => {
+          uiBlip();
+          if (typeof c.acc === 'number') lastAccuracy = c.acc;
+          showNode(c.next);
+        };
+        choicesEl.appendChild(btn);
+      });
+    }
+  }, 14);
+}
+
+/* ---------- Training mini-visualization ----------
+   2D canvas overlay: data points fall into a "model" circle,
+   accuracy ticks up toward the target value, then we route to
+   the appropriate result node. */
+
+function runTraining(targetAcc) {
+  const tEl = document.getElementById('training');
+  const accEl = document.getElementById('accuracy');
+  const statusEl = document.getElementById('training-status');
+  const cv = document.getElementById('training-canvas');
+  const ctx = cv.getContext('2d');
+  tEl.classList.add('show');
+
+  const W = cv.width, H = cv.height;
+  const particles = [];
+  for (let i = 0; i < 60; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: -Math.random() * H,
+      vy: 0.5 + Math.random() * 1.2,
+      hue: 180 + Math.random() * 60,
+      arrived: false
+    });
+  }
+  const cx = W / 2, cy = H * 0.65, r = 40;
+  let acc = 0;
+  let frames = 0;
+  const targetFrames = 180; // ~3 seconds at 60fps
+
+  function tick() {
+    ctx.fillStyle = 'rgba(10, 18, 28, 0.25)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw model "circle"
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(201, 160, 220, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(201, 160, 220, 0.08)';
+    ctx.fill();
+
+    // Update particles
+    particles.forEach(p => {
+      if (!p.arrived) {
+        // ease toward model
+        const dx = cx - p.x, dy = cy - p.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < r) { p.arrived = true; return; }
+        p.x += (dx / dist) * (1 + Math.random() * 1.5);
+        p.y += (dy / dist) * (1 + Math.random() * 1.5);
+        ctx.fillStyle = `hsl(${p.hue}, 80%, 70%)`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // orbiting inside model
+        const angle = (Date.now() * 0.001 + p.hue) % (Math.PI * 2);
+        const rr = (p.hue % 30) + 4;
+        ctx.fillStyle = `hsl(${p.hue}, 80%, 70%)`;
+        ctx.beginPath();
+        ctx.arc(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    // Tick accuracy
+    frames++;
+    const progress = Math.min(frames / targetFrames, 1);
+    acc = Math.round(targetAcc * easeOutCubic(progress));
+    accEl.textContent = acc + '%';
+
+    if (progress < 1) {
+      requestAnimationFrame(tick);
+    } else {
+      statusEl.textContent = 'Training complete.';
+      setTimeout(() => {
+        tEl.classList.remove('show');
+        if (targetAcc < 60)      showNode('result_low');
+        else if (targetAcc < 80) showNode('result_mid');
+        else                     showNode('result_high');
+      }, 1200);
+    }
+  }
+  tick();
+}
+
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+/* ---------- Mouse-look (subtle parallax) ---------- */
+
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', e => {
+  mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  mouseY = (e.clientY / window.innerHeight) * 2 - 1;
+});
+
+/* ---------- Animation loop ---------- */
+
+const clock = new THREE.Clock();
+function animate() {
+  const t = clock.getElapsedTime();
+
+  // Mentor: gentle bobbing + slow rotation toward camera
+  skye.position.y = Math.sin(t * 0.9) * 0.12;
+  skye.rotation.y = Math.sin(t * 0.3) * 0.15;
+  // Arms float
+  skye.userData.armL.position.y = 0.7 + Math.sin(t * 1.4) * 0.08;
+  skye.userData.armR.position.y = 0.7 + Math.sin(t * 1.4 + 1.5) * 0.08;
+
+  // Data points: gentle vertical bob via geometry update
+  const dpPos = dataPoints.geometry.attributes.position;
+  for (let i = 0; i < dpPos.count; i++) {
+    const y0 = 1 + (i % 5) * 0.5;
+    dpPos.setY(i, y0 + Math.sin(t * 1.2 + i) * 0.15);
+  }
+  dpPos.needsUpdate = true;
+  dataPoints.rotation.y = t * 0.05;
+
+  // Camera parallax
+  const targetX = mouseX * 0.8;
+  const targetY = 2.4 + mouseY * 0.3;
+  camera.position.x += (targetX - camera.position.x) * 0.04;
+  camera.position.y += (targetY - camera.position.y) * 0.04;
+  camera.lookAt(0, 1.2, 0);
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ---------- Resize ---------- */
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ---------- Boot ---------- */
+
+document.getElementById('start-btn').addEventListener('click', () => {
+  startAudio();
+  document.getElementById('start-screen').style.display = 'none';
+  setTimeout(() => showNode('intro'), 400);
+});
+</script>
+</body>
+</html>

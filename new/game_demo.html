@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cute Demo — Storybook Meadow</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #b8e3ff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Comic Sans MS", sans-serif; color: #4a3a5a; }
+  #app { position: fixed; inset: 0; }
+  canvas { display: block; }
+  #hud {
+    position: fixed; top: 16px; left: 16px;
+    background: rgba(255, 245, 250, 0.85); backdrop-filter: blur(10px);
+    padding: 14px 18px; border-radius: 18px;
+    font-size: 13px; line-height: 1.8; color: #6b4a7a;
+    border: 2px solid #ffc4d8;
+    box-shadow: 0 6px 18px rgba(180, 120, 180, 0.18);
+    max-width: 260px;
+  }
+  #hud h2 { font-size: 14px; margin-bottom: 6px; color: #d56a9b; font-weight: 700; }
+  #hud kbd {
+    background: #fff; padding: 1px 7px; border-radius: 8px;
+    font-size: 11px; font-family: 'SF Mono', monospace;
+    border: 1.5px solid #f4b8d0; color: #d56a9b; font-weight: 600;
+  }
+  #status {
+    position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+    background: rgba(255, 245, 250, 0.85); padding: 8px 20px; border-radius: 20px;
+    font-size: 12px; letter-spacing: 1.5px; color: #b878a0;
+    border: 2px solid #ffc4d8;
+    box-shadow: 0 4px 14px rgba(180, 120, 180, 0.15);
+  }
+  #action-toast {
+    position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 40px; font-weight: 800; opacity: 0;
+    text-shadow: 0 4px 0 #fff, 0 6px 20px rgba(255, 150, 200, 0.5);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    color: #ff85a2;
+  }
+  #action-toast.show { opacity: 1; transform: translate(-50%, -60%); }
+  #loading {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(180deg, #ffe5f1 0%, #c4e8ff 100%);
+    z-index: 100; font-size: 16px; letter-spacing: 2px; color: #d56a9b; font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div id="loading">✨ Loading meadow… ✨</div>
+<div id="app"></div>
+<div id="hud">
+  <h2>🌸 Storybook Meadow</h2>
+  <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</div>
+  <div><kbd>Shift</kbd> run</div>
+  <div><kbd>Space</kbd> jump</div>
+  <div><kbd>Mouse</kbd> rotate camera</div>
+  <div><kbd>Scroll</kbd> zoom</div>
+  <div><kbd>E</kbd> wave · <kbd>F</kbd> cheer</div>
+</div>
+<div id="status">🎀 cute demo · third-person</div>
+<div id="action-toast"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+
+// ============== HELPERS ==============
+// Densify a control-point profile via a Catmull-Rom curve so the lathe surface
+// reads as one continuous arc rather than a piecewise polyline.
+function smoothProfile(controlPts, samples = 40) {
+  const pts3 = controlPts.map(p => new THREE.Vector3(p.x, p.y, 0));
+  const curve = new THREE.CatmullRomCurve3(pts3, false, 'catmullrom', 0.5);
+  return curve.getPoints(samples).map(p => new THREE.Vector2(Math.max(0.001, p.x), p.y));
+}
+
+// ============== SCENE ==============
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 600);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.getElementById('app').appendChild(renderer.domElement);
+
+scene.fog = new THREE.Fog(0xc4e8ff, 60, 180);
+
+// ============== TOON GRADIENT MAP ==============
+const gradientData = new Uint8Array([80, 170, 255]);
+const gradientMap = new THREE.DataTexture(gradientData, 3, 1, THREE.RedFormat);
+gradientMap.minFilter = THREE.NearestFilter;
+gradientMap.magFilter = THREE.NearestFilter;
+gradientMap.needsUpdate = true;
+
+function toonMat(color) {
+  return new THREE.MeshToonMaterial({ color, gradientMap });
+}
+
+// ============== SKY ==============
+const skyGeo = new THREE.SphereGeometry(280, 32, 16);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  uniforms: {
+    topColor: { value: new THREE.Color(0x7ec8f5) },
+    midColor: { value: new THREE.Color(0xc4e8ff) },
+    botColor: { value: new THREE.Color(0xffe5f1) },
+  },
+  vertexShader: `
+    varying vec3 vWorldPos;
+    void main() {
+      vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 topColor, midColor, botColor;
+    varying vec3 vWorldPos;
+    void main() {
+      float h = normalize(vWorldPos).y;
+      vec3 col;
+      if (h > 0.15) col = mix(midColor, topColor, smoothstep(0.15, 0.7, h));
+      else col = mix(botColor, midColor, smoothstep(-0.1, 0.15, h));
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `
+});
+scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+// ============== CLOUDS (puffy spheres, drift) ==============
+const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const clouds = [];
+for (let i = 0; i < 14; i++) {
+  const cloud = new THREE.Group();
+  const blobs = 3 + Math.floor(Math.random() * 4);
+  for (let j = 0; j < blobs; j++) {
+    const r = 2 + Math.random() * 2.5;
+    const blob = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 8), cloudMat);
+    blob.position.set(
+      (Math.random() - 0.5) * 6,
+      (Math.random() - 0.5) * 1.5,
+      (Math.random() - 0.5) * 4
+    );
+    cloud.add(blob);
+  }
+  const angle = (i / 14) * Math.PI * 2 + Math.random() * 0.5;
+  const dist = 60 + Math.random() * 60;
+  cloud.position.set(
+    Math.cos(angle) * dist,
+    35 + Math.random() * 20,
+    Math.sin(angle) * dist
+  );
+  cloud.userData.driftSpeed = 0.3 + Math.random() * 0.4;
+  scene.add(cloud);
+  clouds.push(cloud);
+}
+
+// ============== LIGHTS ==============
+scene.add(new THREE.AmbientLight(0xfff0e8, 0.75));
+
+const sun = new THREE.DirectionalLight(0xfff5e0, 1.3);
+sun.position.set(25, 40, 20);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = -50;
+sun.shadow.camera.right = 50;
+sun.shadow.camera.top = 50;
+sun.shadow.camera.bottom = -50;
+sun.shadow.camera.near = 1;
+sun.shadow.camera.far = 120;
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.02;
+scene.add(sun);
+
+const fill = new THREE.DirectionalLight(0xb4e0ff, 0.35);
+fill.position.set(-20, 15, -10);
+scene.add(fill);
+
+// ============== GROUND ==============
+const groundGeo = new THREE.PlaneGeometry(220, 220, 100, 100);
+const gPos = groundGeo.attributes.position;
+for (let i = 0; i < gPos.count; i++) {
+  const x = gPos.getX(i), y = gPos.getY(i);
+  const h = Math.sin(x * 0.06) * Math.cos(y * 0.06) * 0.7 + Math.sin(x * 0.12 + 1) * 0.25;
+  gPos.setZ(i, h);
+}
+groundGeo.computeVertexNormals();
+const ground = new THREE.Mesh(groundGeo, toonMat(0x8fd96a));
+ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+scene.add(ground);
+
+function getGroundHeight(x, z) {
+  return Math.sin(x * 0.06) * Math.cos(z * 0.06) * 0.7 + Math.sin(x * 0.12 + 1) * 0.25;
+}
+
+// ============== GRASS TUFTS (instanced, green) ==============
+const grassCount = 3500;
+const bladeGeo = new THREE.ConeGeometry(0.08, 0.55, 4);
+bladeGeo.translate(0, 0.275, 0);
+const grassColors = [0x6ec84a, 0x82d65a, 0x5cb84a, 0x96e070];
+const grassMeshes = [];
+for (const color of grassColors) {
+  const m = new THREE.InstancedMesh(bladeGeo, toonMat(color), Math.floor(grassCount / grassColors.length));
+  m.receiveShadow = true;
+  scene.add(m);
+  grassMeshes.push({ mesh: m, data: [] });
+}
+const dummy = new THREE.Object3D();
+let gi = 0;
+for (const gm of grassMeshes) {
+  for (let i = 0; i < gm.mesh.count; i++) {
+    const x = (Math.random() - 0.5) * 140;
+    const z = (Math.random() - 0.5) * 140;
+    const y = getGroundHeight(x, z);
+    const rotY = Math.random() * Math.PI;
+    const scale = 0.8 + Math.random() * 0.7;
+    gm.data.push({ x, y, z, rotY, scale, phase: Math.random() * Math.PI * 2 });
+    dummy.position.set(x, y, z);
+    dummy.rotation.set(0, rotY, 0);
+    dummy.scale.setScalar(scale);
+    dummy.updateMatrix();
+    gm.mesh.setMatrixAt(i, dummy.matrix);
+  }
+  gm.mesh.instanceMatrix.needsUpdate = true;
+}
+
+// ============== FLOWERS (instanced colorful tops) ==============
+const flowerColors = [0xff9ec7, 0xffd966, 0xffffff, 0xc4a6e8, 0xff85a2, 0xfff5b8];
+const flowerGeo = new THREE.SphereGeometry(0.12, 8, 6);
+const flowerMeshes = [];
+for (const color of flowerColors) {
+  const m = new THREE.InstancedMesh(flowerGeo, toonMat(color), 90);
+  m.castShadow = false;
+  scene.add(m);
+  flowerMeshes.push({ mesh: m, data: [] });
+}
+for (const fm of flowerMeshes) {
+  for (let i = 0; i < fm.mesh.count; i++) {
+    const x = (Math.random() - 0.5) * 100;
+    const z = (Math.random() - 0.5) * 100;
+    const y = getGroundHeight(x, z) + 0.3 + Math.random() * 0.2;
+    const scale = 0.7 + Math.random() * 0.6;
+    fm.data.push({ x, y, z, scale });
+    dummy.position.set(x, y, z);
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.setScalar(scale);
+    dummy.updateMatrix();
+    fm.mesh.setMatrixAt(i, dummy.matrix);
+  }
+  fm.mesh.instanceMatrix.needsUpdate = true;
+}
+
+// ============== TREES (stylized blob trees) ==============
+function makeTree(x, z) {
+  const tree = new THREE.Group();
+  tree.position.set(x, getGroundHeight(x, z), z);
+
+  const trunkH = 1.5 + Math.random() * 1.2;
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.25, 0.35, trunkH, 8),
+    toonMat(0x9b6b47)
+  );
+  trunk.position.y = trunkH / 2;
+  trunk.castShadow = true;
+  trunk.receiveShadow = true;
+  tree.add(trunk);
+
+  // 3 overlapping spheres of foliage in varying greens
+  const foliageColors = [0x4caf50, 0x66c266, 0x7dd47d];
+  const numBlobs = 3 + Math.floor(Math.random() * 3);
+  for (let i = 0; i < numBlobs; i++) {
+    const r = 1 + Math.random() * 0.8;
+    const blob = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 12, 10),
+      toonMat(foliageColors[i % foliageColors.length])
+    );
+    blob.position.set(
+      (Math.random() - 0.5) * 1.2,
+      trunkH + 0.4 + Math.random() * 0.8,
+      (Math.random() - 0.5) * 1.2
+    );
+    blob.castShadow = true;
+    tree.add(blob);
+  }
+  return tree;
+}
+
+// Scatter trees, avoiding center area and both castle areas
+for (let i = 0; i < 22; i++) {
+  let x, z, attempt = 0;
+  do {
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 12 + Math.random() * 50;
+    x = Math.cos(angle) * dist;
+    z = Math.sin(angle) * dist;
+    attempt++;
+  } while (
+    (Math.hypot(x, z) < 10 ||
+     Math.hypot(x - 25, z + 28) < 14 ||
+     Math.hypot(x + 25, z + 28) < 14) && attempt < 20
+  );
+  scene.add(makeTree(x, z));
+}
+
+// ============== MUSHROOMS (cute red w/ white dots) ==============
+function makeMushroom(x, z) {
+  const m = new THREE.Group();
+  m.position.set(x, getGroundHeight(x, z), z);
+  const scale = 0.6 + Math.random() * 0.5;
+  m.scale.setScalar(scale);
+
+  // Single continuous mushroom silhouette: stem rises, flares outward into
+  // the cap's underside, rolls up and over to the top. One mesh, two materials
+  // split along the cap-underside ring — shading bands flow without a junction.
+  const profile = [
+    new THREE.Vector2(0.22, 0),       // ─── stem bottom
+    new THREE.Vector2(0.26, 0.06),
+    new THREE.Vector2(0.27, 0.13),
+    new THREE.Vector2(0.23, 0.24),
+    new THREE.Vector2(0.20, 0.34),
+    new THREE.Vector2(0.22, 0.42),    // ─── stem top, just before cap flare
+    new THREE.Vector2(0.32, 0.45),    // ─── underside begins flaring out
+    new THREE.Vector2(0.45, 0.48),
+    new THREE.Vector2(0.54, 0.53),    // cap outer rim
+    new THREE.Vector2(0.52, 0.62),    // curving up and over
+    new THREE.Vector2(0.45, 0.72),
+    new THREE.Vector2(0.32, 0.81),
+    new THREE.Vector2(0.16, 0.87),
+    new THREE.Vector2(0.001, 0.90),   // top center
+  ];
+  const geo = makeLatheWithSplit(profile, 22, 0.43);
+  const mushroom = new THREE.Mesh(geo, [
+    toonMat(0xfff5e0),  // stem (cream)
+    toonMat(0xff6b6b),  // cap (red)
+  ]);
+  mushroom.castShadow = true;
+  m.add(mushroom);
+
+  // White dots on cap (puffy)
+  for (let i = 0; i < 5; i++) {
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08, 10, 8),
+      toonMat(0xffffff)
+    );
+    const a = (i / 5) * Math.PI * 2 + Math.random() * 0.5;
+    dot.position.set(Math.cos(a) * 0.32, 0.72, Math.sin(a) * 0.32);
+    m.add(dot);
+  }
+  return m;
+}
+
+for (let i = 0; i < 18; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const dist = 6 + Math.random() * 45;
+  const x = Math.cos(angle) * dist;
+  const z = Math.sin(angle) * dist;
+  if (Math.hypot(x, z) < 5) continue;
+  scene.add(makeMushroom(x, z));
+}
+
+// ============== ROCKS (smooth pastel) ==============
+const rockColors = [0xd4c5e8, 0xf5d5e8, 0xc8e0f0, 0xe8d4f0];
+for (let i = 0; i < 16; i++) {
+  const r = 0.6 + Math.random() * 1.4;
+  const geo = new THREE.SphereGeometry(r, 12, 8);
+  const p = geo.attributes.position;
+  for (let j = 0; j < p.count; j++) {
+    p.setXYZ(j,
+      p.getX(j) * (0.9 + Math.random() * 0.2),
+      p.getY(j) * (0.5 + Math.random() * 0.4),
+      p.getZ(j) * (0.9 + Math.random() * 0.2));
+  }
+  geo.computeVertexNormals();
+  const rock = new THREE.Mesh(geo, toonMat(rockColors[i % rockColors.length]));
+  const angle = Math.random() * Math.PI * 2;
+  const dist = 7 + Math.random() * 50;
+  rock.position.set(
+    Math.cos(angle) * dist,
+    getGroundHeight(Math.cos(angle) * dist, Math.sin(angle) * dist) + r * 0.2,
+    Math.sin(angle) * dist
+  );
+  if (Math.hypot(rock.position.x, rock.position.z) < 5) continue;
+  rock.rotation.y = Math.random() * Math.PI;
+  rock.castShadow = true;
+  rock.receiveShadow = true;
+  scene.add(rock);
+}
+
+// ============== CHIBI CHARACTER ==============
+const character = new THREE.Group();
+
+const skinMat = toonMat(0xffd4b8);
+const hairMat = toonMat(0x6ee0d0);
+const topMat  = toonMat(0xff9ec7);
+const trimMat = toonMat(0xffffff);
+const skirtMat = toonMat(0xb19cd9);
+const bootMat = toonMat(0x7a5cc4);
+const eyeMat  = toonMat(0x3a2a4a);
+const cheekMat = new THREE.MeshBasicMaterial({ color: 0xff8fb1, transparent: true, opacity: 0.7 });
+
+// Body (round dumpling — squished sphere)
+const body = new THREE.Mesh(
+  new THREE.SphereGeometry(0.42, 22, 18),
+  topMat
+);
+body.position.y = 0.95;
+body.scale.set(1, 0.95, 1);
+body.castShadow = true;
+character.add(body);
+
+// Collar trim (puffier)
+const collar = new THREE.Mesh(
+  new THREE.TorusGeometry(0.36, 0.08, 10, 20),
+  trimMat
+);
+collar.position.y = 1.22;
+collar.rotation.x = Math.PI / 2;
+character.add(collar);
+
+// Skirt (puffy round bell — squished sphere)
+const skirt = new THREE.Mesh(
+  new THREE.SphereGeometry(0.6, 22, 16),
+  skirtMat
+);
+skirt.position.y = 0.58;
+skirt.scale.set(1, 0.7, 1);
+skirt.castShadow = true;
+character.add(skirt);
+
+// Skirt trim (rounded white ring at bottom)
+const skirtTrim = new THREE.Mesh(
+  new THREE.TorusGeometry(0.58, 0.07, 10, 24),
+  trimMat
+);
+skirtTrim.position.y = 0.45;
+skirtTrim.rotation.x = Math.PI / 2;
+character.add(skirtTrim);
+
+// Head (chibi: HUGE and round)
+const head = new THREE.Mesh(
+  new THREE.SphereGeometry(0.58, 24, 22),
+  skinMat
+);
+head.position.y = 1.85;
+head.scale.set(1.05, 1, 1.02);
+head.castShadow = true;
+character.add(head);
+
+// Hair: big round back puff
+const hairBack = new THREE.Mesh(
+  new THREE.SphereGeometry(0.62, 22, 20),
+  hairMat
+);
+hairBack.position.y = 1.88;
+hairBack.position.z = -0.05;
+hairBack.castShadow = true;
+character.add(hairBack);
+
+// Bangs (rounded fringe — squished sphere on forehead)
+const bangs = new THREE.Mesh(
+  new THREE.SphereGeometry(0.58, 22, 14, 0, Math.PI * 2, 0, Math.PI / 2),
+  hairMat
+);
+bangs.position.y = 2.02;
+bangs.position.z = 0.05;
+bangs.rotation.x = -0.18;
+bangs.scale.set(1, 0.8, 1);
+bangs.castShadow = true;
+character.add(bangs);
+
+// Twin tail buns (rounder, plumper)
+const tailL = new THREE.Mesh(
+  new THREE.SphereGeometry(0.28, 16, 14),
+  hairMat
+);
+tailL.position.set(-0.55, 1.78, -0.08);
+tailL.castShadow = true;
+character.add(tailL);
+const tailR = tailL.clone();
+tailR.position.x = 0.55;
+character.add(tailR);
+
+// Hair bows (pink, plumper)
+const bowMat = toonMat(0xff85a2);
+function makeBow(x) {
+  const bow = new THREE.Group();
+  const l = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), bowMat);
+  l.position.x = -0.09;
+  l.scale.set(1, 0.75, 0.6);
+  const r = l.clone(); r.position.x = 0.09;
+  const c = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), bowMat);
+  bow.add(l, r, c);
+  bow.position.set(x, 2.02, -0.05);
+  return bow;
+}
+character.add(makeBow(-0.55));
+character.add(makeBow(0.55));
+
+// FACE: big anime eyes, cheeks, mouth (on +Z front of head)
+const eyeBaseGeo = new THREE.SphereGeometry(0.12, 14, 12);
+const eyeL = new THREE.Mesh(eyeBaseGeo, eyeMat);
+eyeL.position.set(-0.18, 1.85, 0.5);
+eyeL.scale.set(1, 1.25, 0.4);
+character.add(eyeL);
+const eyeR = eyeL.clone();
+eyeR.position.x = 0.18;
+character.add(eyeR);
+
+// Eye highlights (big white sparkles)
+const sparkleMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const sparkleGeo = new THREE.SphereGeometry(0.045, 10, 8);
+const sparkL = new THREE.Mesh(sparkleGeo, sparkleMat);
+sparkL.position.set(-0.14, 1.92, 0.56);
+character.add(sparkL);
+const sparkR = sparkL.clone();
+sparkR.position.x = 0.22;
+character.add(sparkR);
+
+// Smaller secondary sparkle in each eye for extra cuteness
+const eyeSparkleGeo = new THREE.SphereGeometry(0.022, 8, 6);
+const sparkL2 = new THREE.Mesh(eyeSparkleGeo, sparkleMat);
+sparkL2.position.set(-0.21, 1.82, 0.56);
+character.add(sparkL2);
+const sparkR2 = sparkL2.clone();
+sparkR2.position.x = 0.15;
+character.add(sparkR2);
+
+// Cheeks (round pink blush — small spheres, not flat)
+const cheekGeo = new THREE.SphereGeometry(0.085, 12, 10);
+const cheekMatRound = toonMat(0xff9ec0);
+const cheekL = new THREE.Mesh(cheekGeo, cheekMatRound);
+cheekL.position.set(-0.32, 1.74, 0.45);
+cheekL.scale.set(1, 0.7, 0.3);
+character.add(cheekL);
+const cheekR = cheekL.clone();
+cheekR.position.x = 0.32;
+character.add(cheekR);
+
+// Tiny smiling mouth
+const mouth = new THREE.Mesh(
+  new THREE.TorusGeometry(0.045, 0.015, 6, 12, Math.PI),
+  toonMat(0x5a3a4a)
+);
+mouth.position.set(0, 1.7, 0.54);
+mouth.rotation.x = Math.PI;
+mouth.rotation.z = Math.PI;
+character.add(mouth);
+
+// Arms — single continuous shape per side: shoulder → forearm → wrist swell → mitten.
+// One mesh, one material, one set of smooth normals — no visible junction.
+// Origin (y=0) is the shoulder pivot so rotation.x swings the whole arm.
+const armProfile = smoothProfile([
+  new THREE.Vector2(0.12, 0.04),     // shoulder cap
+  new THREE.Vector2(0.135, -0.02),   // upper arm
+  new THREE.Vector2(0.12, -0.14),    // mid arm
+  new THREE.Vector2(0.11, -0.22),    // wrist narrowing
+  new THREE.Vector2(0.15, -0.30),    // wrist swell into hand
+  new THREE.Vector2(0.18, -0.38),    // hand widest
+  new THREE.Vector2(0.16, -0.46),    // hand tapering
+  new THREE.Vector2(0.08, -0.52),    // fingertips
+  new THREE.Vector2(0.001, -0.54),   // close
+], 50);
+const armGeo = new THREE.LatheGeometry(armProfile, 22);
+armGeo.computeVertexNormals();
+const armL = new THREE.Mesh(armGeo, skinMat);
+armL.position.set(-0.46, 1.27, 0);
+armL.castShadow = true;
+character.add(armL);
+const armR = armL.clone();
+armR.position.x = 0.46;
+character.add(armR);
+
+// Empty "hand" Object3D markers so existing animation code still has handL/handR
+// to position — they're invisible but used purely as transforms reference points.
+// (Kept for code compatibility; the visible hand is part of armL/armR now.)
+const handL = new THREE.Object3D();
+const handR = new THREE.Object3D();
+character.add(handL, handR);
+
+// Legs (short stubby — just a tights segment + big round boot)
+function makeLeg(x) {
+  const leg = new THREE.Group();
+
+  // Tights segment (purple, short)
+  const tights = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.14, 0.18, 8, 12),
+    skirtMat
+  );
+  tights.position.y = 0.25;
+  tights.castShadow = true;
+  leg.add(tights);
+
+  // White ankle band (cute trim)
+  const ankle = new THREE.Mesh(
+    new THREE.TorusGeometry(0.15, 0.04, 8, 14),
+    trimMat
+  );
+  ankle.position.y = 0.08;
+  ankle.rotation.x = Math.PI / 2;
+  leg.add(ankle);
+
+  // BIG round boot (chubby blob)
+  const boot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 14, 12),
+    bootMat
+  );
+  boot.position.y = -0.05;
+  boot.scale.set(1, 0.75, 1.35);
+  boot.position.z = 0.02;
+  boot.castShadow = true;
+  leg.add(boot);
+
+  leg.position.set(x, 0.2, 0);
+  return leg;
+}
+const legL = makeLeg(-0.18);
+const legR = makeLeg(0.18);
+character.add(legL);
+character.add(legR);
+
+scene.add(character);
+
+const charState = {
+  velocity: new THREE.Vector3(),
+  onGround: true,
+  jumpVel: 0,
+  speed: 0,
+  facing: 0,
+  action: null,
+  actionTime: 0,
+};
+
+// ============== FAIRYTALE CASTLE (right-front) ==============
+const castle = new THREE.Group();
+const castleX = 25, castleZ = -28;
+castle.position.set(castleX, getGroundHeight(castleX, castleZ), castleZ);
+
+const wallMat = toonMat(0xfff0e0);     // cream
+const wallPinkMat = toonMat(0xffd8e6); // blush
+const roofMat = toonMat(0x5db8e0);     // sky blue
+const roofPinkMat = toonMat(0xff9ec7); // pink roof for variety
+const goldMat = toonMat(0xffd966);     // gold
+const doorMat = toonMat(0xb87ed4);     // purple door
+const windowMat = toonMat(0xffe066);   // warm window light
+
+const flagsList = [];
+
+// Build a single LatheGeometry from a control-point profile, then split into
+// TWO material groups (body / roof) along a chosen profile index. Because all
+// vertices live in one geometry, the boundary ring is SHARED — computeVertexNormals
+// averages face normals across the body/dome divide, producing a continuous
+// arc of shading instead of a visible seam.
+function makeLatheWithSplit(controlPts, segments, splitY) {
+  const profile = smoothProfile(controlPts, 60);
+  const pl = profile.length;
+
+  const vertices = [];
+  const uvs = [];
+  for (let i = 0; i <= segments; i++) {
+    const phi = (i / segments) * Math.PI * 2;
+    const sinP = Math.sin(phi), cosP = Math.cos(phi);
+    for (let j = 0; j < pl; j++) {
+      vertices.push(profile[j].x * sinP, profile[j].y, profile[j].x * cosP);
+      uvs.push(i / segments, j / (pl - 1));
+    }
+  }
+
+  // Find the profile index closest to splitY
+  let splitIdx = 0;
+  for (let j = 0; j < pl - 1; j++) {
+    if (profile[j].y <= splitY) splitIdx = j;
+  }
+
+  // Build indices in two passes so material 0 (body) triangles come first,
+  // material 1 (roof) triangles second — clean group ranges
+  const bodyIdx = [];
+  const roofIdx = [];
+  for (let i = 0; i < segments; i++) {
+    for (let j = 0; j < pl - 1; j++) {
+      const base = j + i * pl;
+      const a = base, b = base + pl, c = base + pl + 1, d = base + 1;
+      const target = (j < splitIdx) ? bodyIdx : roofIdx;
+      target.push(a, b, d, b, c, d);
+    }
+  }
+  const indexArray = [...bodyIdx, ...roofIdx];
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geo.setIndex(indexArray);
+  geo.addGroup(0, bodyIdx.length, 0);
+  geo.addGroup(bodyIdx.length, roofIdx.length, 1);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function makeFairyTower(x, z, radius, height, roofColor) {
+  const tower = new THREE.Group();
+  tower.position.set(x, 0, z);
+
+  const R = radius, H = height;
+  const domeH = R * 2.8;
+
+  // ONE continuous profile from base of tower all the way to dome tip.
+  // The slope transitions smoothly through the body→dome boundary (both sides
+  // angled slightly outward at y=H, so no kink).
+  const profile = [
+    // ─── body (cream) ──────────────────────────────────────────
+    new THREE.Vector2(R * 1.05, 0),
+    new THREE.Vector2(R * 1.10, H * 0.22),
+    new THREE.Vector2(R * 1.15, H * 0.45),
+    new THREE.Vector2(R * 1.16, H * 0.60),
+    new THREE.Vector2(R * 1.12, H * 0.80),
+    new THREE.Vector2(R * 1.08, H * 0.92),
+    new THREE.Vector2(R * 1.07, H),              // ← body/dome boundary
+    // ─── onion dome (roof color) ───────────────────────────────
+    new THREE.Vector2(R * 1.10, H + domeH * 0.05),
+    new THREE.Vector2(R * 1.18, H + domeH * 0.15),
+    new THREE.Vector2(R * 1.25, H + domeH * 0.28),
+    new THREE.Vector2(R * 1.22, H + domeH * 0.42),
+    new THREE.Vector2(R * 1.05, H + domeH * 0.55),
+    new THREE.Vector2(R * 0.78, H + domeH * 0.66),
+    new THREE.Vector2(R * 0.48, H + domeH * 0.76),
+    new THREE.Vector2(R * 0.25, H + domeH * 0.85),
+    new THREE.Vector2(R * 0.10, H + domeH * 0.93),
+    new THREE.Vector2(0.02, H + domeH),
+  ];
+
+  const geo = makeLatheWithSplit(profile, 28, H);
+  const tower_body = new THREE.Mesh(geo, [wallMat, roofColor]);
+  tower_body.castShadow = true;
+  tower_body.receiveShadow = true;
+  tower.add(tower_body);
+
+  // Pink decorative band sitting flush against the body bulge.
+  // Not structural — purely an applique ring at the widest point.
+  const band = new THREE.Mesh(
+    new THREE.TorusGeometry(R * 1.18, 0.14, 14, 28),
+    wallPinkMat
+  );
+  band.position.y = H * 0.55;
+  band.rotation.x = Math.PI / 2;
+  tower.add(band);
+
+  // Gold ball on top of dome
+  const goldBall = new THREE.Mesh(
+    new THREE.SphereGeometry(R * 0.3, 14, 12),
+    goldMat
+  );
+  goldBall.position.y = height + radius * 2.8 + 0.05;
+  tower.add(goldBall);
+
+  // Tiny spire
+  const spire = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 0.7, 6),
+    goldMat
+  );
+  spire.position.y = height + radius * 2.8 + 0.5;
+  tower.add(spire);
+
+  // Flag
+  const flag = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.8, 0.5),
+    toonMat(0xff85a2)
+  );
+  flag.position.set(0.4, height + radius * 2.8 + 0.85, 0);
+  flag.castShadow = true;
+  tower.add(flag);
+  flagsList.push(flag);
+
+  // Round window with pink frame
+  const win = new THREE.Mesh(
+    new THREE.CircleGeometry(radius * 0.28, 16),
+    windowMat
+  );
+  win.position.set(0, height * 0.55, radius * 1.18);
+  tower.add(win);
+  const winFrame = new THREE.Mesh(
+    new THREE.TorusGeometry(radius * 0.3, 0.06, 8, 16),
+    wallPinkMat
+  );
+  winFrame.position.set(0, height * 0.55, radius * 1.18);
+  tower.add(winFrame);
+
+  return tower;
+}
+
+// 4 tall corner towers + 1 huge central keep tower
+const wallSpan = 5.5;
+const towerR = 1.3;
+const towerH = 7.5;
+castle.add(makeFairyTower(-wallSpan, -wallSpan, towerR, towerH, roofMat));
+castle.add(makeFairyTower(wallSpan, -wallSpan, towerR, towerH, roofMat));
+castle.add(makeFairyTower(-wallSpan, wallSpan, towerR, towerH, roofPinkMat));
+castle.add(makeFairyTower(wallSpan, wallSpan, towerR, towerH, roofPinkMat));
+
+// Central keep — taller, bigger
+castle.add(makeFairyTower(0, 0, 2.2, 11, roofMat));
+
+// Curtain walls between corner towers (with crenellations)
+function makeWall(x1, z1, x2, z2) {
+  const wall = new THREE.Group();
+  const dx = x2 - x1, dz = z2 - z1;
+  const len = Math.hypot(dx, dz);
+  const angle = Math.atan2(dz, dx);
+  const h = 4;
+
+  const w = new THREE.Mesh(
+    new THREE.BoxGeometry(len, h, 1),
+    wallMat
+  );
+  w.position.set((x1 + x2) / 2, h / 2, (z1 + z2) / 2);
+  w.rotation.y = -angle;
+  w.castShadow = true;
+  w.receiveShadow = true;
+  wall.add(w);
+
+  // Pink trim along top
+  const trim = new THREE.Mesh(
+    new THREE.BoxGeometry(len, 0.25, 1.08),
+    wallPinkMat
+  );
+  trim.position.set((x1 + x2) / 2, h - 0.1, (z1 + z2) / 2);
+  trim.rotation.y = -angle;
+  wall.add(trim);
+
+  // Battlements (rounded, alternating)
+  const merlonCount = Math.floor(len / 0.9);
+  for (let i = 0; i < merlonCount; i++) {
+    if (i % 2 === 0) continue;
+    const m = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.22, 0.55, 10),
+      wallMat
+    );
+    const tParam = (i + 0.5) / merlonCount;
+    m.position.set(
+      x1 + dx * tParam,
+      h + 0.27,
+      z1 + dz * tParam
+    );
+    m.castShadow = true;
+    wall.add(m);
+    // Pink dome cap on top
+    const cap = new THREE.Mesh(
+      new THREE.SphereGeometry(0.22, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      wallPinkMat
+    );
+    cap.position.copy(m.position);
+    cap.position.y += 0.27;
+    wall.add(cap);
+  }
+  return wall;
+}
+
+castle.add(makeWall(-wallSpan, -wallSpan, wallSpan, -wallSpan));
+castle.add(makeWall(-wallSpan, wallSpan, -1.4, wallSpan));
+castle.add(makeWall(1.4, wallSpan, wallSpan, wallSpan));
+castle.add(makeWall(-wallSpan, -wallSpan, -wallSpan, wallSpan));
+castle.add(makeWall(wallSpan, -wallSpan, wallSpan, wallSpan));
+
+// Gate arch (above the door gap)
+const archTop = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.4, 1.4, 1.1, 16, 1, false, 0, Math.PI),
+  wallPinkMat
+);
+archTop.rotation.z = Math.PI / 2;
+archTop.rotation.y = Math.PI / 2;
+archTop.position.set(0, 3.4, wallSpan);
+archTop.castShadow = true;
+castle.add(archTop);
+
+// Heart above gate — proper smooth heart silhouette via Shape + ExtrudeGeometry.
+// One continuous outline, beveled edges for soft cartoon depth.
+function makeHeart(x, y, z, scale = 1) {
+  const s = new THREE.Shape();
+  // Path drawn clockwise. Starts at top notch between the two bumps.
+  s.moveTo(0, 0.25);
+  // Up-and-over right bump, down to right side
+  s.bezierCurveTo(0.05, 0.55, 0.55, 0.65, 0.55, 0.20);
+  // Right side curving down to the bottom tip
+  s.bezierCurveTo(0.55, -0.15, 0.30, -0.40, 0, -0.75);
+  // Bottom tip back up the left side
+  s.bezierCurveTo(-0.30, -0.40, -0.55, -0.15, -0.55, 0.20);
+  // Up-and-over left bump, back to notch
+  s.bezierCurveTo(-0.55, 0.65, -0.05, 0.55, 0, 0.25);
+
+  const geo = new THREE.ExtrudeGeometry(s, {
+    depth: 0.22,
+    bevelEnabled: true,
+    bevelSegments: 6,
+    bevelSize: 0.07,
+    bevelThickness: 0.07,
+    curveSegments: 24,
+  });
+  // Center the depth so the front face is at z=0 when positioned
+  geo.translate(0, 0, -0.11);
+
+  const heart = new THREE.Mesh(geo, toonMat(0xff5e9b));
+  heart.position.set(x, y, z);
+  heart.scale.setScalar(scale);
+  heart.castShadow = true;
+  return heart;
+}
+const heart = makeHeart(0, 4.3, wallSpan + 0.65, 1.1);
+castle.add(heart);
+
+// Door (purple, plump arched shape)
+const doorBase = new THREE.Mesh(
+  new THREE.BoxGeometry(2.4, 2.6, 0.25),
+  doorMat
+);
+doorBase.position.set(0, 1.3, wallSpan + 0.05);
+doorBase.castShadow = true;
+castle.add(doorBase);
+
+// Round top of door
+const doorTop = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.2, 1.2, 0.25, 20, 1, false, 0, Math.PI),
+  doorMat
+);
+doorTop.rotation.z = Math.PI / 2;
+doorTop.rotation.y = Math.PI / 2;
+doorTop.position.set(0, 2.6, wallSpan + 0.05);
+castle.add(doorTop);
+
+// Gold doorknob (bigger and rounder)
+const knob = new THREE.Mesh(
+  new THREE.SphereGeometry(0.13, 14, 12),
+  goldMat
+);
+knob.position.set(0.6, 1.3, wallSpan + 0.2);
+castle.add(knob);
+
+// Decorative vertical line on door
+const doorLine = new THREE.Mesh(
+  new THREE.BoxGeometry(0.06, 2.4, 0.05),
+  goldMat
+);
+doorLine.position.set(0, 1.3, wallSpan + 0.16);
+castle.add(doorLine);
+
+scene.add(castle);
+
+// ============== DISNEY-STYLE CASTLE (left-front) ==============
+// Different silhouette from the onion-dome castle: sharply pointed cone spires
+// of varied heights, tiered cake structure, that iconic "fairy-tale fortress"
+// reaching skyward. Built with the same continuous-lathe approach so the
+// body→spire transition is smooth.
+const disneyCastle = new THREE.Group();
+const dCastleX = -25, dCastleZ = -28;
+disneyCastle.position.set(dCastleX, getGroundHeight(dCastleX, dCastleZ), dCastleZ);
+
+// Disney tower — cylindrical body with slight outward corbel at top,
+// transitioning into a sharply pointed cone spire. One continuous mesh.
+function makeDisneyTower(x, z, R, H, spireH, roofColor) {
+  const tower = new THREE.Group();
+  tower.position.set(x, 0, z);
+
+  const profile = [
+    // ─── body (cream) ───
+    new THREE.Vector2(R, 0),
+    new THREE.Vector2(R * 1.02, H * 0.25),
+    new THREE.Vector2(R * 1.03, H * 0.5),
+    new THREE.Vector2(R * 1.0, H * 0.78),
+    new THREE.Vector2(R * 0.96, H * 0.88),    // slight pinch before corbel
+    new THREE.Vector2(R * 1.15, H * 0.95),    // flared corbel out
+    new THREE.Vector2(R * 1.15, H),           // top of corbel
+    // ─── spire (roof color) — sharp pointed cone ───
+    new THREE.Vector2(R * 1.05, H + 0.05),    // step inward to spire base
+    new THREE.Vector2(R * 1.0, H + 0.12),
+    new THREE.Vector2(R * 0.78, H + spireH * 0.25),
+    new THREE.Vector2(R * 0.55, H + spireH * 0.45),
+    new THREE.Vector2(R * 0.35, H + spireH * 0.65),
+    new THREE.Vector2(R * 0.18, H + spireH * 0.82),
+    new THREE.Vector2(R * 0.06, H + spireH * 0.94),
+    new THREE.Vector2(0.02, H + spireH),
+  ];
+
+  const geo = makeLatheWithSplit(profile, 22, H + 0.06);
+  const tower_body = new THREE.Mesh(geo, [wallMat, roofColor]);
+  tower_body.castShadow = true;
+  tower_body.receiveShadow = true;
+  tower.add(tower_body);
+
+  // Gold ball + star spike at the very tip (classic Disney castle finial)
+  const goldBall = new THREE.Mesh(
+    new THREE.SphereGeometry(R * 0.16, 12, 10),
+    goldMat
+  );
+  goldBall.position.y = H + spireH + R * 0.08;
+  tower.add(goldBall);
+
+  const star = new THREE.Mesh(
+    new THREE.OctahedronGeometry(R * 0.18, 0),
+    goldMat
+  );
+  star.position.y = H + spireH + R * 0.42;
+  star.rotation.y = Math.PI / 4;
+  tower.add(star);
+
+  // Flag hanging just below the finial
+  const flag = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.65, 0.4),
+    toonMat(0xff85a2)
+  );
+  flag.position.set(0.32, H + spireH * 0.65, 0);
+  tower.add(flag);
+  flagsList.push(flag);
+
+  // Round window on body (faces +Z)
+  const win = new THREE.Mesh(
+    new THREE.CircleGeometry(R * 0.22, 16),
+    windowMat
+  );
+  win.position.set(0, H * 0.45, R * 1.05);
+  tower.add(win);
+  const winFrame = new THREE.Mesh(
+    new THREE.TorusGeometry(R * 0.24, 0.05, 8, 18),
+    wallPinkMat
+  );
+  winFrame.position.set(0, H * 0.45, R * 1.05);
+  tower.add(winFrame);
+
+  return tower;
+}
+
+// Helper: rounded crenellations along the top of a box building
+function addBoxCrenellations(parent, width, depth, top, merlonSize = 0.35) {
+  const positions = [];
+  const stepW = merlonSize * 2.2;
+  // Front + back edges
+  for (let x = -width / 2 + merlonSize; x <= width / 2 - merlonSize; x += stepW) {
+    positions.push({ x, z: depth / 2 });
+    positions.push({ x, z: -depth / 2 });
+  }
+  // Left + right edges
+  for (let z = -depth / 2 + merlonSize; z <= depth / 2 - merlonSize; z += stepW) {
+    positions.push({ x: -width / 2, z });
+    positions.push({ x: width / 2, z });
+  }
+  for (const p of positions) {
+    const m = new THREE.Mesh(
+      new THREE.CylinderGeometry(merlonSize * 0.45, merlonSize * 0.45, merlonSize * 1.6, 12),
+      wallMat
+    );
+    m.position.set(p.x, top + merlonSize * 0.8, p.z);
+    m.castShadow = true;
+    parent.add(m);
+    // Pink dome cap
+    const cap = new THREE.Mesh(
+      new THREE.SphereGeometry(merlonSize * 0.45, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+      wallPinkMat
+    );
+    cap.position.set(p.x, top + merlonSize * 1.6, p.z);
+    parent.add(cap);
+  }
+}
+
+// ─── TIER 1: wide main keep ───
+const tier1W = 8, tier1H = 5;
+const tier1 = new THREE.Mesh(
+  new THREE.BoxGeometry(tier1W, tier1H, tier1W),
+  wallMat
+);
+tier1.position.y = tier1H / 2;
+tier1.castShadow = true;
+tier1.receiveShadow = true;
+disneyCastle.add(tier1);
+
+// Pink horizontal trim band around tier 1
+const tier1Trim = new THREE.Mesh(
+  new THREE.BoxGeometry(tier1W * 1.02, 0.4, tier1W * 1.02),
+  wallPinkMat
+);
+tier1Trim.position.y = tier1H * 0.65;
+disneyCastle.add(tier1Trim);
+
+addBoxCrenellations(disneyCastle, tier1W, tier1W, tier1H, 0.4);
+
+// 4 tall corner spires flanking the main keep
+disneyCastle.add(makeDisneyTower(-tier1W / 2 - 0.2, -tier1W / 2 - 0.2, 0.55, 7, 4.5, roofMat));
+disneyCastle.add(makeDisneyTower(tier1W / 2 + 0.2, -tier1W / 2 - 0.2, 0.55, 7, 4.5, roofMat));
+disneyCastle.add(makeDisneyTower(-tier1W / 2 - 0.2, tier1W / 2 + 0.2, 0.55, 7, 4.5, roofMat));
+disneyCastle.add(makeDisneyTower(tier1W / 2 + 0.2, tier1W / 2 + 0.2, 0.55, 7, 4.5, roofMat));
+
+// ─── TIER 2: smaller block on top of tier 1 ───
+const tier2W = 5, tier2H = 3.5;
+const tier2 = new THREE.Mesh(
+  new THREE.BoxGeometry(tier2W, tier2H, tier2W),
+  wallMat
+);
+tier2.position.y = tier1H + tier2H / 2;
+tier2.castShadow = true;
+disneyCastle.add(tier2);
+
+// Tier 2 trim
+const tier2Trim = new THREE.Mesh(
+  new THREE.BoxGeometry(tier2W * 1.02, 0.3, tier2W * 1.02),
+  wallPinkMat
+);
+tier2Trim.position.y = tier1H + tier2H * 0.7;
+disneyCastle.add(tier2Trim);
+
+addBoxCrenellations(disneyCastle, tier2W, tier2W, tier1H + tier2H, 0.32);
+
+// Tier 2 corner mini-spires
+disneyCastle.add(makeDisneyTower(-tier2W / 2 - 0.15, -tier2W / 2 - 0.15, 0.32, tier1H + tier2H + 0.1, 2.5, roofPinkMat));
+disneyCastle.add(makeDisneyTower(tier2W / 2 + 0.15, -tier2W / 2 - 0.15, 0.32, tier1H + tier2H + 0.1, 2.5, roofPinkMat));
+disneyCastle.add(makeDisneyTower(-tier2W / 2 - 0.15, tier2W / 2 + 0.15, 0.32, tier1H + tier2H + 0.1, 2.5, roofPinkMat));
+disneyCastle.add(makeDisneyTower(tier2W / 2 + 0.15, tier2W / 2 + 0.15, 0.32, tier1H + tier2H + 0.1, 2.5, roofPinkMat));
+
+// ─── TIER 3: tall thin central spire (the iconic Disney castle peak) ───
+disneyCastle.add(makeDisneyTower(0, 0, 0.85, tier1H + tier2H + 4, 6, roofMat));
+
+// ─── Two extra thin spires flanking the central peak for that cluster look ───
+disneyCastle.add(makeDisneyTower(-1.6, 0, 0.32, tier1H + tier2H + 7, 4, roofPinkMat));
+disneyCastle.add(makeDisneyTower(1.6, 0, 0.32, tier1H + tier2H + 7, 4, roofPinkMat));
+
+// ─── Main entrance (front of tier 1, facing +Z) ───
+// Tall arched door
+const dDoorBase = new THREE.Mesh(
+  new THREE.BoxGeometry(2.2, 3.2, 0.3),
+  doorMat
+);
+dDoorBase.position.set(0, 1.6, tier1W / 2 + 0.05);
+dDoorBase.castShadow = true;
+disneyCastle.add(dDoorBase);
+
+const dDoorTop = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.1, 1.1, 0.3, 20, 1, false, 0, Math.PI),
+  doorMat
+);
+dDoorTop.rotation.z = Math.PI / 2;
+dDoorTop.rotation.y = Math.PI / 2;
+dDoorTop.position.set(0, 3.2, tier1W / 2 + 0.05);
+disneyCastle.add(dDoorTop);
+
+// Decorative arch frame around door (cream + pink)
+const archFrame = new THREE.Mesh(
+  new THREE.TorusGeometry(1.25, 0.12, 10, 20, Math.PI),
+  wallPinkMat
+);
+archFrame.position.set(0, 3.2, tier1W / 2 + 0.2);
+archFrame.rotation.z = 0;
+disneyCastle.add(archFrame);
+
+// Door windows (two small round portholes)
+for (const dx of [-0.5, 0.5]) {
+  const portWin = new THREE.Mesh(
+    new THREE.CircleGeometry(0.2, 14),
+    windowMat
+  );
+  portWin.position.set(dx, 2.5, tier1W / 2 + 0.21);
+  disneyCastle.add(portWin);
+  const portFrame = new THREE.Mesh(
+    new THREE.TorusGeometry(0.22, 0.04, 8, 14),
+    goldMat
+  );
+  portFrame.position.set(dx, 2.5, tier1W / 2 + 0.21);
+  disneyCastle.add(portFrame);
+}
+
+// Gold doorknob
+const dKnob = new THREE.Mesh(
+  new THREE.SphereGeometry(0.13, 14, 12),
+  goldMat
+);
+dKnob.position.set(0.55, 1.6, tier1W / 2 + 0.22);
+disneyCastle.add(dKnob);
+
+// Vertical gold trim on door
+const dDoorLine = new THREE.Mesh(
+  new THREE.BoxGeometry(0.06, 3, 0.05),
+  goldMat
+);
+dDoorLine.position.set(0, 1.6, tier1W / 2 + 0.21);
+disneyCastle.add(dDoorLine);
+
+// ─── Round windows on tier 1 sides ───
+for (const side of [-1, 1]) {
+  const sideWin = new THREE.Mesh(
+    new THREE.CircleGeometry(0.4, 18),
+    windowMat
+  );
+  sideWin.position.set(side * (tier1W / 2 + 0.01), 3.2, 0);
+  sideWin.rotation.y = side * Math.PI / 2;
+  disneyCastle.add(sideWin);
+  const sideFrame = new THREE.Mesh(
+    new THREE.TorusGeometry(0.43, 0.07, 10, 18),
+    wallPinkMat
+  );
+  sideFrame.position.set(side * (tier1W / 2 + 0.01), 3.2, 0);
+  sideFrame.rotation.y = side * Math.PI / 2;
+  disneyCastle.add(sideFrame);
+}
+
+// Round window on back
+const backWin = new THREE.Mesh(
+  new THREE.CircleGeometry(0.4, 18),
+  windowMat
+);
+backWin.position.set(0, 3.2, -(tier1W / 2 + 0.01));
+backWin.rotation.y = Math.PI;
+disneyCastle.add(backWin);
+
+// Tier 2 round windows
+for (const side of [-1, 1]) {
+  const t2Win = new THREE.Mesh(
+    new THREE.CircleGeometry(0.3, 16),
+    windowMat
+  );
+  t2Win.position.set(side * (tier2W / 2 + 0.01), tier1H + 1.5, 0);
+  t2Win.rotation.y = side * Math.PI / 2;
+  disneyCastle.add(t2Win);
+}
+// Tier 2 front window
+const t2Front = new THREE.Mesh(
+  new THREE.CircleGeometry(0.3, 16),
+  windowMat
+);
+t2Front.position.set(0, tier1H + 1.5, tier2W / 2 + 0.01);
+disneyCastle.add(t2Front);
+
+// Face toward the spawn area (consistent with the other castle's orientation)
+disneyCastle.rotation.y = Math.atan2(-dCastleX, -dCastleZ) + Math.PI;
+scene.add(disneyCastle);
+
+// ============== SPARKLES (floating dust) ==============
+const sparkleCount = 100;
+const sparklePositions = new Float32Array(sparkleCount * 3);
+const sparkleSpeeds = [];
+for (let i = 0; i < sparkleCount; i++) {
+  sparklePositions[i * 3] = (Math.random() - 0.5) * 80;
+  sparklePositions[i * 3 + 1] = 1 + Math.random() * 8;
+  sparklePositions[i * 3 + 2] = (Math.random() - 0.5) * 80;
+  sparkleSpeeds.push({ phase: Math.random() * Math.PI * 2, speed: 0.5 + Math.random() * 0.8 });
+}
+const sparkleGeo2 = new THREE.BufferGeometry();
+sparkleGeo2.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
+const sparkleMat2 = new THREE.PointsMaterial({
+  color: 0xfff5b8, size: 0.18, transparent: true, opacity: 0.85,
+  sizeAttenuation: true,
+});
+const sparkles = new THREE.Points(sparkleGeo2, sparkleMat2);
+scene.add(sparkles);
+
+// ============== CAMERA RIG ==============
+const camRig = {
+  yaw: 0, pitch: 0.35, distance: 7,
+  target: new THREE.Vector3(),
+  smoothPos: new THREE.Vector3(0, 3, 8),
+};
+
+// ============== INPUT ==============
+const keys = {};
+let mouseDown = false;
+const lastMouse = { x: 0, y: 0 };
+
+window.addEventListener('keydown', (e) => {
+  keys[e.code] = true;
+  if (e.code === 'KeyE' && !charState.action) {
+    charState.action = 'wave'; charState.actionTime = 0;
+    showToast('👋 Hi!');
+  }
+  if (e.code === 'KeyF' && !charState.action) {
+    charState.action = 'celebrate'; charState.actionTime = 0;
+    showToast('🌸 Yay! 🌸');
+  }
+  if (e.code === 'Space' && charState.onGround) {
+    charState.jumpVel = 8;
+    charState.onGround = false;
+  }
+});
+window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+renderer.domElement.addEventListener('mousedown', (e) => {
+  mouseDown = true; lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+});
+window.addEventListener('mouseup', () => { mouseDown = false; });
+window.addEventListener('mousemove', (e) => {
+  if (mouseDown) {
+    camRig.yaw -= (e.clientX - lastMouse.x) * 0.005;
+    camRig.pitch += (e.clientY - lastMouse.y) * 0.005;
+    camRig.pitch = Math.max(0.05, Math.min(1.2, camRig.pitch));
+    lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+  }
+});
+window.addEventListener('wheel', (e) => {
+  camRig.distance += e.deltaY * 0.01;
+  camRig.distance = Math.max(3, Math.min(15, camRig.distance));
+});
+
+let touchStart = null;
+renderer.domElement.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+});
+renderer.domElement.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 1 && touchStart) {
+    camRig.yaw -= (e.touches[0].clientX - touchStart.x) * 0.005;
+    camRig.pitch += (e.touches[0].clientY - touchStart.y) * 0.005;
+    camRig.pitch = Math.max(0.05, Math.min(1.2, camRig.pitch));
+    touchStart.x = e.touches[0].clientX;
+    touchStart.y = e.touches[0].clientY;
+  }
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+const toast = document.getElementById('action-toast');
+let toastTimer;
+function showToast(text) {
+  toast.textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1200);
+}
+
+// ============== UPDATE ==============
+const clock = new THREE.Clock();
+let totalTime = 0;
+
+function update(dt) {
+  totalTime += dt;
+
+  // Movement input
+  const moveDir = new THREE.Vector3();
+  if (keys['KeyW']) moveDir.z -= 1;
+  if (keys['KeyS']) moveDir.z += 1;
+  if (keys['KeyA']) moveDir.x -= 1;
+  if (keys['KeyD']) moveDir.x += 1;
+  const running = keys['ShiftLeft'] || keys['ShiftRight'];
+  const moveSpeed = running ? 7 : 3.5;
+
+  if (moveDir.lengthSq() > 0) {
+    moveDir.normalize();
+    const cosY = Math.cos(camRig.yaw), sinY = Math.sin(camRig.yaw);
+    const wx = moveDir.x * cosY - moveDir.z * sinY;
+    const wz = moveDir.x * sinY + moveDir.z * cosY;
+    charState.velocity.x = wx * moveSpeed;
+    charState.velocity.z = wz * moveSpeed;
+    charState.speed = moveSpeed;
+    const targetFacing = Math.atan2(wx, wz);
+    let diff = targetFacing - charState.facing;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    charState.facing += diff * Math.min(1, dt * 12);
+  } else {
+    charState.velocity.x *= 0.82;
+    charState.velocity.z *= 0.82;
+    charState.speed *= 0.82;
+  }
+
+  // Gravity / jump
+  charState.jumpVel -= 22 * dt;
+  character.position.y += charState.jumpVel * dt;
+  const groundH = getGroundHeight(character.position.x, character.position.z);
+  if (character.position.y <= groundH) {
+    character.position.y = groundH;
+    charState.jumpVel = 0;
+    charState.onGround = true;
+  }
+
+  character.position.x += charState.velocity.x * dt;
+  character.position.z += charState.velocity.z * dt;
+
+  // Clamp
+  const maxR = 65;
+  const r = Math.hypot(character.position.x, character.position.z);
+  if (r > maxR) {
+    character.position.x *= maxR / r;
+    character.position.z *= maxR / r;
+  }
+
+  character.rotation.y = charState.facing;
+
+  // Animation
+  const moving = charState.speed > 0.5;
+  const animSpeed = moving ? (running ? 12 : 8) : 2;
+  const swing = moving ? (running ? 0.7 : 0.45) : 0.04;
+  const t = totalTime * animSpeed;
+
+  // Idle breathing bounce
+  const breath = moving ? 0 : Math.sin(totalTime * 2.5) * 0.025;
+
+  if (charState.action === 'wave') {
+    charState.actionTime += dt;
+    armR.rotation.x = -2.2;
+    armR.rotation.z = -0.4 + Math.sin(charState.actionTime * 12) * 0.4;
+    handR.position.set(
+      0.46 + Math.sin(charState.actionTime * 12) * 0.18,
+      1.45,
+      0.08
+    );
+    armL.rotation.x = 0; armL.rotation.z = 0;
+    if (charState.actionTime > 1.5) {
+      charState.action = null;
+      handR.position.set(0.46, 0.85, 0);
+    }
+  } else if (charState.action === 'celebrate') {
+    charState.actionTime += dt;
+    const bounce = Math.abs(Math.sin(charState.actionTime * 8)) * 0.35;
+    character.position.y = groundH + bounce;
+    armL.rotation.x = -2.5; armL.rotation.z = 0.3;
+    armR.rotation.x = -2.5; armR.rotation.z = -0.3;
+    handL.position.set(-0.58, 1.5 + bounce, -0.15);
+    handR.position.set(0.58, 1.5 + bounce, -0.15);
+    if (charState.actionTime > 2) {
+      charState.action = null;
+      handL.position.set(-0.46, 0.85, 0);
+      handR.position.set(0.46, 0.85, 0);
+    }
+  } else {
+    armL.rotation.x = Math.sin(t) * swing;
+    armR.rotation.x = Math.sin(t + Math.PI) * swing;
+    armL.rotation.z = 0; armR.rotation.z = 0;
+    handL.position.set(-0.46, 0.85 + Math.sin(t) * swing * 0.25, Math.sin(t) * swing * 0.3);
+    handR.position.set(0.46, 0.85 + Math.sin(t + Math.PI) * swing * 0.25, Math.sin(t + Math.PI) * swing * 0.3);
+    legL.rotation.x = Math.sin(t + Math.PI) * swing * 0.8;
+    legR.rotation.x = Math.sin(t) * swing * 0.8;
+  }
+
+  // Head bob
+  head.position.y = 1.85 + breath + (moving ? Math.abs(Math.sin(t * 0.5)) * 0.05 : 0);
+  hairBack.position.y = head.position.y + 0.03;
+  bangs.position.y = head.position.y + 0.17;
+  tailL.position.y = head.position.y - 0.07;
+  tailR.position.y = head.position.y - 0.07;
+  eyeL.position.y = head.position.y;
+  eyeR.position.y = head.position.y;
+  sparkL.position.y = head.position.y + 0.07;
+  sparkR.position.y = head.position.y + 0.07;
+  sparkL2.position.y = head.position.y - 0.03;
+  sparkR2.position.y = head.position.y - 0.03;
+  cheekL.position.y = head.position.y - 0.11;
+  cheekR.position.y = head.position.y - 0.11;
+  mouth.position.y = head.position.y - 0.15;
+
+  // Twin tail sway
+  const sway = Math.sin(totalTime * 4) * 0.2 + (moving ? Math.sin(t * 0.7) * 0.15 : 0);
+  tailL.rotation.z = 0.15 + sway;
+  tailR.rotation.z = -0.15 - sway;
+
+  // Jump pose override
+  if (!charState.onGround && !charState.action) {
+    armL.rotation.x = -0.8; armR.rotation.x = -0.8;
+    legL.rotation.x = -0.2; legR.rotation.x = -0.2;
+  }
+
+  // Grass sway
+  const windStr = 0.18;
+  for (const gm of grassMeshes) {
+    for (let i = 0; i < gm.mesh.count; i += 3) {
+      const g = gm.data[i];
+      const wind = Math.sin(totalTime * 2 + g.phase + g.x * 0.1) * windStr;
+      dummy.position.set(g.x, g.y, g.z);
+      dummy.rotation.set(wind, g.rotY, wind * 0.4);
+      dummy.scale.setScalar(g.scale);
+      dummy.updateMatrix();
+      gm.mesh.setMatrixAt(i, dummy.matrix);
+    }
+    gm.mesh.instanceMatrix.needsUpdate = true;
+  }
+
+  // Castle flags
+  for (let i = 0; i < flagsList.length; i++) {
+    flagsList[i].rotation.y = Math.sin(totalTime * 3 + i) * 0.5;
+    flagsList[i].scale.x = 1 + Math.sin(totalTime * 4 + i) * 0.12;
+  }
+
+  // Clouds drift
+  for (const c of clouds) {
+    c.position.x += c.userData.driftSpeed * dt;
+    if (c.position.x > 120) c.position.x = -120;
+  }
+
+  // Sparkles float
+  const sp = sparkles.geometry.attributes.position;
+  for (let i = 0; i < sparkleCount; i++) {
+    const s = sparkleSpeeds[i];
+    sp.array[i * 3 + 1] = 2 + Math.sin(totalTime * s.speed + s.phase) * 1.5 + ((i % 6));
+    sp.array[i * 3] += Math.sin(totalTime * 0.5 + s.phase) * 0.01;
+  }
+  sp.needsUpdate = true;
+
+  // Camera follow
+  camRig.target.copy(character.position);
+  camRig.target.y += 1.4;
+  const camOffset = new THREE.Vector3(
+    Math.sin(camRig.yaw) * Math.cos(camRig.pitch) * camRig.distance,
+    Math.sin(camRig.pitch) * camRig.distance,
+    Math.cos(camRig.yaw) * Math.cos(camRig.pitch) * camRig.distance
+  );
+  const targetPos = camRig.target.clone().add(camOffset);
+  camRig.smoothPos.lerp(targetPos, Math.min(1, dt * 8));
+  camera.position.copy(camRig.smoothPos);
+  camera.lookAt(camRig.target);
+}
+
+function animate() {
+  const dt = Math.min(0.05, clock.getDelta());
+  update(dt);
+  renderer.render(scene, camera);
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('loading').style.display = 'none';
+animate();
+</script>
+</body>
+</html>
