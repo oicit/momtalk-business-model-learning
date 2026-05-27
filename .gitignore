@@ -6,3 +6,6 @@ dist
 .vite
 .env*.local
 .gstack/
+
+# STEM Lab symlink (~7.8GB, local-dev only — not deployed)
+public/stem

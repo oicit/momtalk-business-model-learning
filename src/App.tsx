@@ -7,6 +7,8 @@ import Business101Page from './pages/Business101Page';
 import PetShopPage from './pages/PetShopPage';
 import YouTubeCreatorPage from './pages/YouTubeCreatorPage';
 import CookieBakeryPage from './pages/CookieBakeryPage';
+import WordBattlePage from './pages/WordBattlePage';
+import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
 import CertificatePage from './pages/CertificatePage';
 import PracticePage from './pages/PracticePage';
@@ -27,6 +29,8 @@ export default function App() {
       <Route path="/pet-shop" element={<PetShopPage />} />
       <Route path="/youtube-creator" element={<YouTubeCreatorPage />} />
       <Route path="/cookie-bakery" element={<CookieBakeryPage />} />
+      <Route path="/word-battle" element={<WordBattlePage />} />
+      <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />
       <Route path="/certificate" element={<CertificatePage />} />
       <Route path="/practice" element={<PracticePage />} />
