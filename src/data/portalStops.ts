@@ -257,6 +257,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'disney',
   },
   {
+    id: 'farm-stand',
+    emoji: '🌱',
+    title: 'Farm\nStand',
+    color: '#E8F0FF',
+    themeKey: 'supply',
+    path: '/farm-stand',
+    status: 'available',
+    progressKey: 'farm-stand',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

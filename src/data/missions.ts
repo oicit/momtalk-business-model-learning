@@ -24,9 +24,10 @@ import costco from './lessons/costco';
 import amazon from './lessons/amazon';
 import lego from './lessons/lego';
 import disney from './lessons/disney';
+import farmStand from './lessons/farm-stand';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco, amazon, lego, disney];
+const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco, amazon, lego, disney, farmStand];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {

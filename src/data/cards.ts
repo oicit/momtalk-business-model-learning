@@ -205,6 +205,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'disney',
   },
   {
+    id: 'farm-hand',
+    emoji: '🌱',
+    title: 'Farm Hand',
+    fact: 'One $3 packet of seeds can grow $100 worth of food!',
+    color: '#E8F0FF',
+    rarity: 'Uncommon',
+    awardedBy: 'farm-stand',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
