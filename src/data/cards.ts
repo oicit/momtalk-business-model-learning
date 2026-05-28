@@ -196,6 +196,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'lego',
   },
   {
+    id: 'ip-inventor',
+    emoji: '🐭',
+    title: 'IP Inventor',
+    fact: '98-year-old Mickey Mouse STILL earns Disney $5 billion a year!',
+    color: '#FCE7F3',
+    rarity: 'Legendary',
+    awardedBy: 'disney',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

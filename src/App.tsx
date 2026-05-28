@@ -20,6 +20,7 @@ import RobloxPage from './pages/RobloxPage';
 import CostcoPage from './pages/CostcoPage';
 import AmazonPage from './pages/AmazonPage';
 import LegoPage from './pages/LegoPage';
+import DisneyPage from './pages/DisneyPage';
 import WordBattlePage from './pages/WordBattlePage';
 import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
@@ -55,6 +56,7 @@ export default function App() {
       <Route path="/costco" element={<CostcoPage />} />
       <Route path="/amazon" element={<AmazonPage />} />
       <Route path="/lego" element={<LegoPage />} />
+      <Route path="/disney" element={<DisneyPage />} />
       <Route path="/word-battle" element={<WordBattlePage />} />
       <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />
