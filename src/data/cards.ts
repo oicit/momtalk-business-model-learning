@@ -250,6 +250,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'etsy-shop',
   },
   {
+    id: 'margin-master',
+    emoji: '🍕',
+    title: 'Margin Master',
+    fact: 'Movie popcorn costs $0.20 to make but sells for $9 — 2% food cost!',
+    color: '#FFE8E0',
+    rarity: 'Uncommon',
+    awardedBy: 'pizza-place',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

@@ -307,6 +307,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'etsy-shop',
   },
   {
+    id: 'pizza-place',
+    emoji: '🍕',
+    title: 'Pizza\nPlace',
+    color: '#FFE8E0',
+    themeKey: 'pizza',
+    path: '/pizza-place',
+    status: 'available',
+    progressKey: 'pizza-place',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',
