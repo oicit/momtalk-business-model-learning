@@ -317,6 +317,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'pizza-place',
   },
   {
+    id: 'startup-pitch',
+    emoji: '🦄',
+    title: 'Startup\nPitch',
+    color: '#E5FAF1',
+    themeKey: 'startup-pitch',
+    path: '/startup-pitch',
+    status: 'available',
+    progressKey: 'startup-pitch',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

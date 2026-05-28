@@ -318,11 +318,12 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'entrepreneur',
-    emoji: '🚀',
-    title: 'Entrepreneur',
-    fact: 'Walt Disney was fired before creating Disney!',
-    color: '#FFE8F0',
-    rarity: 'Rare',
+    emoji: '🦄',
+    title: 'Founder',
+    fact: 'Airbnb was REJECTED by 7 investors before becoming worth $80 billion!',
+    color: '#E5FAF1',
+    rarity: 'Legendary',
+    awardedBy: 'startup-pitch',
   },
   {
     id: 'inflation-fighter',

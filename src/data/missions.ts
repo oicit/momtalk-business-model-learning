@@ -30,9 +30,10 @@ import marketingMountain from './lessons/marketing-mountain';
 import surveyMaster from './lessons/survey-master';
 import etsyShop from './lessons/etsy-shop';
 import pizzaPlace from './lessons/pizza-place';
+import startupPitch from './lessons/startup-pitch';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco, amazon, lego, disney, farmStand, snowDayHustle, marketingMountain, surveyMaster, etsyShop, pizzaPlace];
+const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco, amazon, lego, disney, farmStand, snowDayHustle, marketingMountain, surveyMaster, etsyShop, pizzaPlace, startupPitch];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {
