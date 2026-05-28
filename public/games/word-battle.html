@@ -496,6 +496,58 @@
   }
   .ff-continue:active { transform: translateY(3px); box-shadow: 0 2px 0 #B68A00; }
 
+  /* ===== Wonder Card (end-of-session micro-mission) ===== */
+  #wonder-card {
+    position: absolute; inset: 0; z-index: 25;
+    background: rgba(74,37,17,0.55);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 320ms ease;
+    padding: 18px; box-sizing: border-box;
+  }
+  #wonder-card.show { opacity: 1; pointer-events: auto; }
+  .wonder-card {
+    background: #FFF8E7; border: 5px solid #4A2511; border-radius: 26px;
+    box-shadow: 0 10px 0 rgba(74,37,17,0.35);
+    width: 100%; max-width: 360px; padding: 22px 22px 18px;
+    text-align: center; font-family: 'Fredoka', sans-serif;
+    transform: scale(0.85); transition: transform 320ms cubic-bezier(.34,1.56,.64,1);
+  }
+  #wonder-card.show .wonder-card { transform: scale(1); }
+  .wonder-card-momo {
+    width: 76px; height: 76px; margin: -56px auto 4px;
+    background: linear-gradient(180deg,#FFFFFF 0%,#EAF3FF 100%);
+    border: 5px solid #4A2511; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; box-shadow: 0 5px 0 rgba(74,37,17,0.3);
+  }
+  .wonder-card-momo img { width: 44px; height: 44px; }
+  .wonder-card-title {
+    font-size: 22px; font-weight: 700; color: #5B21B6; margin-bottom: 4px;
+  }
+  .wonder-card-tag {
+    display: inline-block; background: #FFD23F; color: #4A2511;
+    border: 3px solid #4A2511; border-radius: 999px;
+    padding: 2px 14px; font-size: 14px; font-weight: 700; margin-bottom: 10px;
+  }
+  .wonder-card-text {
+    font-size: 19px; font-weight: 600; color: #4A2511; line-height: 1.4;
+    background: #FFF1CC; border: 3px solid #E8C66A; border-radius: 16px;
+    padding: 14px; margin-bottom: 14px;
+  }
+  .wonder-card-text img { width: 22px; height: 22px; vertical-align: -5px; }
+  .wonder-card-replay {
+    display: inline-block; background: #FFE9B6; border: 3px solid #4A2511;
+    border-radius: 999px; padding: 7px 16px; font-size: 14px; font-weight: 700;
+    font-family: inherit; color: #4A2511; cursor: pointer; margin-right: 8px;
+  }
+  .wonder-card-skip {
+    background: linear-gradient(180deg,#FFE16B 0%,#FFC727 100%);
+    border: 3px solid #2D2D2D; border-radius: 999px; padding: 7px 18px;
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    color: #4A2511; cursor: pointer; box-shadow: 0 3px 0 #B68A00;
+  }
+  .wonder-card-skip:active { transform: translateY(2px); box-shadow: 0 1px 0 #B68A00; }
+
   /* ----- Star burst (hit feedback) ----- */
   .burst {
     position: absolute; pointer-events: none; z-index: 5;
@@ -1713,6 +1765,10 @@
         <span class="label">Stars earned</span>
         <span class="value" id="stars-count">0</span>
       </div>
+      <div class="stat-row" id="sparked-row">
+        <span class="label">Sparked today</span>
+        <span class="value" id="sparked-line">—</span>
+      </div>
       <!-- Mastered today: words that graduated from fragile this session.
            Shown only when at least one word was mastered — a celebration moment. -->
       <div class="word-section mastered-section" id="mastered-section" style="display:none;">
@@ -1751,6 +1807,18 @@
         <button class="ff-replay" id="ff-replay">🔊 Hear it again</button>
         <button class="ff-continue" id="ff-continue">Got it! Keep playing →</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Wonder Card — end-of-session real-world micro-mission -->
+  <div id="wonder-card">
+    <div class="wonder-card">
+      <div class="wonder-card-momo">🐶</div>
+      <div class="wonder-card-title">Try this today!</div>
+      <div class="wonder-card-tag" id="wonder-card-tag">💰 Money mission</div>
+      <div class="wonder-card-text" id="wonder-card-text">…</div>
+      <button class="wonder-card-replay" id="wonder-card-replay">🔊 Hear it again</button>
+      <button class="wonder-card-skip" id="wonder-card-skip">Skip →</button>
     </div>
   </div>
 </div>
@@ -1837,29 +1905,106 @@ function shuffle(arr) {
   return a;
 }
 
+// Common English rimes (the ending of single-syllable words). Used by
+// pickClusterMate to find words that share a sound family. Longest-match wins.
+const RIMES = [
+  "at","an","ad","ag","am","ap","as","ack","ake","ame","ash","ate",
+  "ed","en","et","ell","est",
+  "id","ig","ip","is","it","ill","ick","ing","ink","ide","ine","ime",
+  "od","og","op","ot","ock","old","ook","ound","out","own",
+  "ud","ug","um","un","up","ut","uck","ump","unk",
+];
+function rimeOf(word) {
+  const w = (word || "").toLowerCase();
+  let best = "";
+  for (const r of RIMES) {
+    if (w.length > r.length && w.endsWith(r) && r.length > best.length) best = r;
+  }
+  return best;
+}
+// Find a word in `pool` that shares a sound-family with `seedWord`.
+// Same-rime mates win; same-initial fallback; null if neither exists.
+// `exclude` is an array of already-picked words to avoid duplicates.
+function pickClusterMate(seedWord, pool, exclude) {
+  if (!seedWord) return null;
+  const s = seedWord.toLowerCase();
+  const rime = rimeOf(s);
+  const initial = s[0];
+  const ex = new Set((exclude || []).filter(Boolean).map(w => w.toLowerCase()));
+  ex.add(s);
+  const sameRime = pool.filter(w => {
+    const lw = w.toLowerCase();
+    return !ex.has(lw) && rime && rimeOf(lw) === rime;
+  });
+  if (sameRime.length) return sameRime[Math.floor(Math.random() * sameRime.length)];
+  const sameInitial = pool.filter(w => !ex.has(w.toLowerCase()) && w[0] && w[0].toLowerCase() === initial);
+  if (sameInitial.length) return sameInitial[Math.floor(Math.random() * sameInitial.length)];
+  return null;
+}
+
 // Smart session picker: mix fragile review words with new from current level.
 // BUGFIX: only inject fragile words that BELONG to this level — previously
 // any fragile word from any level got pulled in, so Level 5 and Level 1
 // sessions both looked the same once a kid had a few fragile words from
 // earlier levels. Cross-level review still happens via the dedicated
 // Practice button (pickPracticeFragile), which is the right place for it.
-function pickSessionWords(level, count = 10) {
-  const levelWords = FRY_WORDS[level] || FRY_WORDS[1];
-  const levelWordSet = new Set(levelWords);
-  const levelFragile = Object.values(game.memory)
-    .filter(m => m.fragile && levelWordSet.has(m.text))
-    .map(m => m.text);
-  const reviewSlots = Math.min(levelFragile.length, Math.floor(count / 2));
-  const reviewWords = shuffle(levelFragile).slice(0, reviewSlots);
-  const remaining = levelWords.filter(w => !reviewWords.includes(w));
-  // Sort by seen ascending (untouched first, then least-seen)
-  remaining.sort((a, b) => {
-    const sa = game.memory[a]?.seen || 0;
-    const sb = game.memory[b]?.seen || 0;
-    return sa - sb;
+function pickSessionWords(level, count) {
+  const N = count || 10;
+  const pool = (FRY_WORDS[level] || []).slice();
+  if (pool.length === 0) return [];
+  // Classify each pool word using the EXISTING classifier
+  const bucket = { strong: [], fragile: [], learning: [], fresh: [] };
+  for (const w of pool) {
+    const c = classifyWord(w);
+    if      (c === "strong")    bucket.strong.push(w);
+    else if (c === "fragile")   bucket.fragile.push(w);
+    else if (c === "learning")  bucket.learning.push(w);
+    else                        bucket.fresh.push(w);
+  }
+  // Sort strong by most-recent-correct first (memory[w].lastCorrectAt or .seen as fallback)
+  bucket.strong.sort((a, b) => {
+    const ma = (game.memory[a] && (game.memory[a].lastCorrectAt || game.memory[a].seen || 0)) || 0;
+    const mb = (game.memory[b] && (game.memory[b].lastCorrectAt || game.memory[b].seen || 0)) || 0;
+    return mb - ma;
   });
-  const newCount = count - reviewSlots;
-  return shuffle([...reviewWords, ...remaining.slice(0, newCount)]);
+  // Shuffle the other buckets for variety
+  for (const k of ["fragile", "learning", "fresh"]) {
+    bucket[k].sort(() => Math.random() - 0.5);
+  }
+  const pop = (b) => (bucket[b].length ? bucket[b].shift() : null);
+  const out = new Array(N).fill(null);
+  // Slot 1 (idx 0): Warm Hello — strongest known
+  out[0] = pop("strong") || pop("learning") || pop("fragile") || pop("fresh");
+  // Slot 3 (idx 2): First spaced-rep review
+  out[2] = pop("fragile") || pop("fresh") || pop("learning");
+  // Slot 5 (idx 4): Turning point — fresh
+  out[4] = pop("fresh") || pop("fragile") || pop("learning");
+  // Slot 7 (idx 6): Stretch — fresh or fragile
+  out[6] = pop("fresh") || pop("fragile") || pop("learning");
+  // Slot 8 (idx 7): Cluster mate of slot 7 (same rime OR same initial)
+  const mate = pickClusterMate(out[6], pool, out);
+  if (mate) {
+    out[7] = mate;
+    for (const k of ["strong", "learning", "fragile", "fresh"]) {
+      const i = bucket[k].indexOf(mate);
+      if (i >= 0) { bucket[k].splice(i, 1); break; }
+    }
+  } else {
+    out[7] = pop("strong") || pop("learning") || pop("fresh") || pop("fragile");
+  }
+  // Slot 9 (idx 8): Spaced review — REPEAT slot 3
+  out[8] = out[2];
+  // Slot 10 (idx 9): Finale — learning > strong > fresh > fragile
+  out[9] = pop("learning") || pop("strong") || pop("fresh") || pop("fragile");
+  // Fill slots 2, 4, 6 (idx 1, 3, 5) with KNOWN words
+  for (const idx of [1, 3, 5]) {
+    out[idx] = pop("strong") || pop("learning") || pop("fresh") || pop("fragile");
+  }
+  // Belt + braces: ensure all N slots filled (degenerate case = tiny pool)
+  for (let i = 0; i < N; i++) {
+    if (!out[i]) out[i] = pool[i % pool.length] || "";
+  }
+  return out;
 }
 
 // Practice picker: focuses on fragile words across all levels.
@@ -1930,6 +2075,34 @@ async function loadGameData() {
 let _saveTimer = null;
 let _saveInflight = false;
 let _savePending = false;
+// ISO week key like "2026-W22" — used for weekly counter rollover
+function weekKey() {
+  const d = new Date(); d.setUTCHours(0, 0, 0, 0);
+  // Thursday in the current week determines the ISO year
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getUTCFullYear() + "-W" + String(week).padStart(2, "0");
+}
+
+// Increment the per-kid "categories sparked" counters. Tracks BOTH a weekly
+// rolling count (resets Sunday→Monday) and a lifetime total.
+function bumpSkill(category) {
+  if (!category) return;
+  if (!game.memory._skillsSeen) {
+    game.memory._skillsSeen = { weekly: {}, lifetime: {}, weekStartedAt: weekKey() };
+  }
+  const s = game.memory._skillsSeen;
+  const currentWeek = weekKey();
+  if (s.weekStartedAt !== currentWeek) {
+    s.weekly = {};
+    s.weekStartedAt = currentWeek;
+  }
+  s.weekly[category]   = (s.weekly[category]   || 0) + 1;
+  s.lifetime[category] = (s.lifetime[category] || 0) + 1;
+  scheduleSave();
+}
+
 function scheduleSave(delayMs = 1500) {
   if (_saveTimer) clearTimeout(_saveTimer);
   _saveTimer = setTimeout(() => { _saveTimer = null; saveGameData(); }, delayMs);
@@ -5168,7 +5341,7 @@ function startNextWord() {
     // EXPANSION PASS F: BEFRIEND MODE — visually distinguish the goblin so it
     // looks like a friend from the start, not an enemy. Pink tint + floating
     // hearts above its head + bow-tie accessory.
-    if (goblin && game.session && game.session.mode === "befriend") {
+    if (goblin && currentMode() === "befriend") {
       // Wait for spawn animation to start before decorating
       setTimeout(() => {
         if (!goblin || !goblin.userData.alive) return;
@@ -5214,20 +5387,20 @@ function startNextWord() {
 
     // EXPANSION PASS G: themed-combat costumes — applied after spawn so the
     // goblin's normal mesh exists before we attach the cosmetic group.
-    if (goblin && game.session && game.session.mode === "halloween") {
+    if (goblin && currentMode() === "halloween") {
       setTimeout(() => attachHalloweenCostume(), 100);
     }
-    if (goblin && game.session && game.session.mode === "birthday") {
+    if (goblin && currentMode() === "birthday") {
       setTimeout(() => attachBirthdayCostume(), 100);
     }
-    if (goblin && game.session && game.session.mode === "underwater") {
+    if (goblin && currentMode() === "underwater") {
       setTimeout(() => attachUnderwaterCostume(), 100);
     }
-    if (goblin && game.session && game.session.mode === "pajama") {
+    if (goblin && currentMode() === "pajama") {
       setTimeout(() => attachPajamaCostume(), 100);
     }
     // PANTS PATROL — a BIG goblin wearing silly colorful pants
-    if (goblin && game.session && game.session.mode === "silly_pants") {
+    if (goblin && currentMode() === "silly_pants") {
       goblin.userData.sizeMul = 1.45;
       goblin.scale.setScalar(0.3 * 1.45);
       setTimeout(() => attachPantsCostume(), 100);
@@ -5457,7 +5630,7 @@ function startAttack() {
 
   // EXPANSION PASS F: BEFRIEND mode — no staff swing, no projectile.
   // Instead, the kid runs to the goblin and they HOLD HANDS + DANCE.
-  if (game.session && game.session.mode === "befriend" && goblin && goblin.userData.alive) {
+  if (currentMode() === "befriend" && goblin && goblin.userData.alive) {
     startBefriendDance();
     return;
   }
@@ -5531,7 +5704,7 @@ function defeatGoblin() {
   }
 
   // EXPANSION PASS F: befriend mode — bump the persistent friends counter
-  if (goblin && game.session && game.session.mode === "befriend") {
+  if (goblin && currentMode() === "befriend") {
     bumpBefriendedCount();
   }
 
@@ -5663,7 +5836,7 @@ function onProjectileHit() {
 
   // ---- Pick the goofy reaction style — extended pool ----
   // Silly-pants session mode: every word uses pants-drop defeat.
-  if (game.session && game.session.mode === "silly_pants") {
+  if (currentMode() === "silly_pants") {
     anim.reaction = "pants";
   } else {
     anim.reaction = pickReactionForKind(isBossHit ? { kind: "boss" } : kindObj, currentProjectile);
@@ -5730,9 +5903,52 @@ function finish() {
   bowlBoardHide();
   defenseCancel();
   removeAllBowlingDecoys();
-  // Save Bun-Bun: the bunny's escape leap is triggered the moment the last
-  // cage bar dissolves (see advanceMission), so no extra celebration here.
+  // Mission finales fire HERE at session end so they're guaranteed to play —
+  // the per-hit carrot/bar counts can desync from the word count when the
+  // mid-level quiz interrupts, so we don't rely on "all collected".
+  let _resultsDelay = 350;
+  let _wonderCardWillShow = false;
+  if (game.session && game.session.missionMeta) {
+    const meta = game.session.missionMeta;
+    if (meta.kind === "carrots") {
+      // Barn cracks wide open: roof blows off + a big pile of carrots bursts out.
+      meta.roofPop = true;
+      burstBarnCarrots(meta, 30);
+      sfxYay();
+      _resultsDelay = 2100;
+    } else if (meta.kind === "cage") {
+      // Dissolve any bars still standing, then spring Bun-Bun free.
+      for (const bar of meta.bars) {
+        if (!bar.userData.dissolved) {
+          bar.userData.dissolved = true; bar.userData.fadeT = 0; bar.userData.fadeDur = 0.4; bar.userData.fading = true;
+        }
+      }
+      if (_bunnyEscapeStartedAt < 0) triggerBunnyEscape();
+      _resultsDelay = 1800;
+    }
+  } else {
+    // Non-mission session → show a Wonder Card before the results screen.
+    _wonderCardWillShow = true;
+    _resultsDelay = 4500;
+    const cat = (game.session && game.session.lastQuizCategory) || "Wonder";
+    showWonderCard(cat, null);
+  }
   starsCountEl.textContent = String(game.score);
+  // "Sparked today" row — which curiosity categories the kid touched this session
+  // (Momo's Quiz fact + Wonder Card mission). WONDER_CATEGORY_LABEL maps
+  // category id → display string like "💰 Money mission".
+  const sparkedEl = document.getElementById("sparked-line");
+  if (sparkedEl) {
+    const seen = [];
+    if (game.session && game.session.lastQuizCategory) {
+      seen.push(WONDER_CATEGORY_LABEL[game.session.lastQuizCategory] || ("✨ " + game.session.lastQuizCategory));
+    }
+    if (game.session && game.session.lastWonderCategory && game.session.lastWonderCategory !== game.session.lastQuizCategory) {
+      seen.push(WONDER_CATEGORY_LABEL[game.session.lastWonderCategory] || ("✨ " + game.session.lastWonderCategory));
+    }
+    sparkedEl.textContent = seen.length ? seen.join(" · ") : "—";
+    _twemojify(sparkedEl);
+  }
   // Populate completion overlay
   wordsCountEl.textContent = String(game.words.length);
   strongListEl.innerHTML = "";
@@ -5784,7 +6000,7 @@ function finish() {
       fragileListEl.appendChild(c);
     }
   }
-  setTimeout(() => completionEl.classList.add("show"), 350);
+  setTimeout(() => completionEl.classList.add("show"), _resultsDelay);
   sfxComplete();
 }
 
@@ -5856,6 +6072,121 @@ const FUN_FACTS = [
   // ---- Random (2) ----
   { c:"Random", e:"🦈", t:"Sharks are older than trees.", f:"Sharks first appeared just last week.", w:"True! Sharks have swum the oceans for about 400 million years — before trees grew." },
   { c:"Random", e:"🎂", t:"Some of the very first cakes were baked in ancient Egypt.", f:"Cakes were invented only 10 years ago.", w:"True! People have loved cake for thousands of years." },
+  // ---- Money & Business (12) ----
+  { c:"Money", e:"💰", t:"A budget is a plan for how to use your money.", f:"A budget is a kind of cookie.", w:"True! A budget helps you decide what to spend, save, and share." },
+  { c:"Money", e:"🍋", t:"If a cup of lemonade costs $1 and you sell 5 cups, you earned $5.", f:"Selling 5 cups for $1 each earns you 1 dollar total.", w:"True! Money you earn from selling adds up — 5 × $1 = $5." },
+  { c:"Money", e:"🐷", t:"Saving means putting money away instead of spending it right now.", f:"Saving means buying things as fast as you can.", w:"True! Saving is for the future you — it's a gift to your tomorrow self." },
+  { c:"Money", e:"🐚", t:"Long ago, people traded shells, beads, and salt as money.", f:"People have always used dollar bills, since forever.", w:"True! Before paper money, shells, salt, and even cocoa beans were money." },
+  { c:"Money", e:"💵", t:"If you spend all your money on candy, you can still buy a toy with the SAME money.", f:"You can spend the same dollar twice.", w:"False! Money is used up when you spend it — you can only spend it once." },
+  { c:"Money", e:"🛒", t:"Selling means you give a thing AND get money for it.", f:"Selling means giving things away with no money.", w:"True! Selling = thing leaves, money comes in. Giving with no money is called a gift." },
+  { c:"Money", e:"🍪", t:"Making cookies yourself usually costs less than buying them at a store.", f:"Homemade cookies always cost more than store cookies.", w:"True! When you make things, you skip the store's costs — and yours taste better too." },
+  { c:"Money", e:"👷", t:"A 'job' is something you do where you get paid.", f:"A job is when you pay someone else.", w:"True! A job is work you do for money. Doing chores at home is practice for jobs!" },
+  { c:"Money", e:"🍕", t:"If 3 friends share 6 cookies fairly, each gets 2 cookies.", f:"If 3 friends share 6 cookies, each gets 3.", w:"True! 6 ÷ 3 = 2. Fair sharing means everyone gets the same amount." },
+  { c:"Money", e:"🌳", t:"Money grows on trees if you wait long enough.", f:"Wait — money does grow on trees.", w:"False! Money is made by people working or making things. Trees grow leaves, not dollars!" },
+  { c:"Money", e:"🏪", t:"A 'business' is when you make or sell something to lots of people.", f:"A business is a house where one family lives.", w:"True! A business sells something the world wants — lemonade, books, toys, ideas." },
+  { c:"Money", e:"💖", t:"Being kind to customers makes them want to come back.", f:"Customers like it when you're mean to them.", w:"True! Kindness is good business — people remember how you made them feel." },
+
+  // ---- Character & Kindness (12) ----
+  { c:"Character", e:"🦁", t:"Brave means doing the right thing EVEN when you're scared.", f:"Brave means never feeling scared at all.", w:"True! Everyone gets scared. Brave is what you do anyway." },
+  { c:"Character", e:"🙏", t:"Saying 'I'm sorry' when you hurt someone is a strong thing to do.", f:"Only weak kids say sorry.", w:"True! It takes real strength to say sorry — strong people own their mistakes." },
+  { c:"Character", e:"🤝", t:"Sharing means BOTH people end up with some.", f:"Sharing means the other person gets all and you get none.", w:"True! Sharing splits a thing — you both get some. Giving everything away is being generous, not sharing." },
+  { c:"Character", e:"😢", t:"It's okay to feel sad sometimes — even grown-ups do.", f:"Big kids never feel sad.", w:"True! All feelings are okay. Sad feelings come and go like weather." },
+  { c:"Character", e:"🤣", t:"If your friend is crying, the kindest thing is to laugh at them.", f:"Laughing at a crying friend is helpful.", w:"False! Sit with them, ask what's wrong, or just give them a hug. That's kindness." },
+  { c:"Character", e:"⏳", t:"'Patient' means you can wait without getting upset.", f:"Patient means yelling until you get what you want.", w:"True! Patience is a superpower — it lets you handle waiting like a pro." },
+  { c:"Character", e:"🦸", t:"Helping someone smaller than you is being a leader.", f:"Leaders only help themselves.", w:"True! Real leaders lift others up. That's what makes them leaders." },
+  { c:"Character", e:"🔮", t:"Telling the truth is brave, even when it's hard.", f:"Lying is easier and always works out.", w:"True! Truth-telling builds trust, and trust is more valuable than anything." },
+  { c:"Character", e:"🌟", t:"Everyone is good at SOMETHING — even if it's not the same thing as you.", f:"Only one person can be good at one thing.", w:"True! The world has room for every kind of talent. Yours matters." },
+  { c:"Character", e:"🎩", t:"Saying 'please' and 'thank you' is just for fancy parties.", f:"Manners are only for grown-ups in suits.", w:"False! Polite words make EVERY day a little nicer — at home, at school, everywhere." },
+  { c:"Character", e:"💪", t:"When you keep trying after you fall, that's called 'grit.'", f:"Grit means giving up the first time something's hard.", w:"True! Grit is a real superpower. Every champion has it." },
+  { c:"Character", e:"👂", t:"Listening with your whole body means looking AND staying still.", f:"You can listen better while running around.", w:"True! Quiet body + eyes on the speaker = your brain catches every word." },
+  // ---- Brain & Puzzles (10) ----
+  { c:"Brain", e:"🐱", t:"All cats have tails. Misa is a cat. So Misa has a tail.", f:"All cats have tails. Misa is a cat. So Misa is a dog.", w:"True! If a rule is true for all cats, it's true for Misa too. That's called reasoning." },
+  { c:"Brain", e:"🧱", t:"If you stack 3 blocks, then put 2 more on top, you have 5 blocks total.", f:"3 blocks plus 2 more blocks equals 6 blocks.", w:"True! 3 + 2 = 5. Adding small numbers in your head is brain practice." },
+  { c:"Brain", e:"📅", t:"Today is Tuesday. So tomorrow is Wednesday.", f:"If today is Tuesday, tomorrow is Saturday.", w:"True! Days go in a fixed order: Mon → Tue → Wed → Thu → Fri → Sat → Sun." },
+  { c:"Brain", e:"🔟", t:"Half of 10 is 5.", f:"Half of 10 is 4.", w:"True! Splitting 10 into two equal piles = 5 and 5." },
+  { c:"Brain", e:"🍽️", t:"If it takes 1 minute to wash 1 plate, it takes 10 minutes to wash 10 plates one by one.", f:"Washing 10 plates one at a time takes less than 1 minute total.", w:"True! 1 minute × 10 plates = 10 minutes. (Doing them at the same time would be faster!)" },
+  { c:"Brain", e:"🔤", t:"A is the first letter of the alphabet, Z is the last. There are 26 letters.", f:"The alphabet has 50 letters.", w:"True! English has exactly 26 letters from A to Z." },
+  { c:"Brain", e:"🍎", t:"If you have 2 apples and you eat 1, you have 1 apple left.", f:"If you have 2 apples and you eat 1, you have 3.", w:"True! 2 minus 1 equals 1. Eating takes away — that's subtraction." },
+  { c:"Brain", e:"📆", t:"If today is Friday, the day before yesterday was Wednesday.", f:"If today is Friday, the day before yesterday was Tuesday.", w:"True! Yesterday was Thursday. Day before yesterday was Wednesday." },
+  { c:"Brain", e:"➖", t:"10 minus 4 equals 6.", f:"10 minus 4 equals 14.", w:"True! Subtraction takes away: 10 − 4 = 6." },
+  { c:"Brain", e:"📄", t:"If you fold a paper in half twice, it has 4 layers.", f:"Folding a paper in half twice makes 8 layers.", w:"True! First fold: 2 layers. Second fold: 2 × 2 = 4 layers. Brain math!" },
+  // ---- Wonder Questions (10) ----
+  { c:"Wonder", e:"🌌", t:"Scientists STILL don't fully know why the sky is blue.", f:"Scientists figured out exactly why the sky is blue 2 days ago.", w:"True! There's a science answer (light scatters), but the deep 'why' keeps teaching us new things. Wonder is forever." },
+  { c:"Wonder", e:"👶", t:"Babies don't have to learn how to cry — they just KNOW.", f:"Babies have to take crying lessons.", w:"True! Crying is one of the first things humans can do. Pretty amazing, huh?" },
+  { c:"Wonder", e:"🦠", t:"Some living things are too small to see — like germs.", f:"If something is too small to see, it doesn't exist.", w:"True! Germs, viruses, and tiny cells are all alive — and all invisible without a microscope." },
+  { c:"Wonder", e:"❓", t:"If you ask 'why?' five times in a row, you usually find a really cool deeper answer.", f:"Asking 'why' more than once is rude.", w:"True! It's called the '5 Whys' — the best detectives, scientists, and inventors do it all the time." },
+  { c:"Wonder", e:"🧠", t:"Nobody on Earth knows EVERYTHING. Not even grown-ups.", f:"Grown-ups know everything about every topic.", w:"True! Even the smartest people are still learning every day. That's why questions matter so much." },
+  { c:"Wonder", e:"🌳", t:"Trees breathe out the air WE breathe in.", f:"Trees and people breathe the exact same way.", w:"True! Trees take in CO₂ and give off oxygen. We do the opposite. We need each other!" },
+  { c:"Wonder", e:"💭", t:"Your brain is busy even when you're sleeping.", f:"Your brain turns off when you fall asleep.", w:"True! Sleeping brains organize memories, grow, and dream. Sleep is brain work." },
+  { c:"Wonder", e:"🌱", t:"Every question you ask makes your brain a little bit smarter.", f:"Asking questions makes your brain tired and smaller.", w:"True! Curiosity is brain food. The more you wonder, the more your brain grows." },
+  { c:"Wonder", e:"☀️", t:"Light from the sun takes about 8 minutes to reach your eyes.", f:"Sunlight reaches Earth instantly, in zero seconds.", w:"True! The sun is so far away that even at light-speed, it's an 8-minute trip." },
+  { c:"Wonder", e:"👀", t:"Two people can look at the same thing and see it differently.", f:"Everyone sees the world exactly the same way.", w:"True! Your eyes work the same, but your brain colors what you see with everything you've ever felt." },
+];
+
+// Real-world micro-missions shown on the Wonder Card after a session.
+// Each entry: { c: category (matches a FUN_FACTS category), e: emoji, m: mission text }.
+// Picker biases toward matching today's most recent fun-fact category.
+const WONDER_MISSIONS = [
+  // 💰 Money
+  { c:"Money", e:"💰", m:"Ask a grown-up what 'saving' means. Tell Momo tomorrow!" },
+  { c:"Money", e:"🪙", m:"Find 3 coins around your house. Tell Momo what colors they are." },
+  { c:"Money", e:"🏷️", m:"Look at one toy you have. Guess how much it cost to make!" },
+  { c:"Money", e:"🍎", m:"Tomorrow at the store, find one thing that costs less than $5." },
+  { c:"Money", e:"🤝", m:"Sell one drawing or craft to a family member for 1 hug." },
+  { c:"Money", e:"💡", m:"Think of one BUSINESS you could start when you grow up." },
+  { c:"Money", e:"🎯", m:"Save 3 pennies (or any 3 coins) in one spot for 3 days." },
+  { c:"Money", e:"🛒", m:"Count how many things in your fridge somebody had to BUY." },
+  { c:"Money", e:"🧮", m:"If a cookie is $1, how much for two cookies? Three? Tell Momo!" },
+  { c:"Money", e:"✨", m:"Find 3 things in your house that someone had to MAKE first." },
+  // ❤️ Character
+  { c:"Character", e:"💗", m:"Say 'thank you' for something small today — like a meal or a hug." },
+  { c:"Character", e:"🦁", m:"Notice one BRAVE thing you do today. Tell Momo what it was!" },
+  { c:"Character", e:"🤝", m:"Help somebody in your house without being asked. Just once." },
+  { c:"Character", e:"😊", m:"Smile at three people today. See what happens!" },
+  { c:"Character", e:"👂", m:"Listen to a grown-up for one full minute without talking. Try it!" },
+  { c:"Character", e:"🛌", m:"Make your bed tonight without anyone reminding you." },
+  { c:"Character", e:"💪", m:"Try something HARD today and keep going even when it's tricky." },
+  { c:"Character", e:"🎁", m:"Give a compliment to someone — say what you really like about them." },
+  { c:"Character", e:"🙏", m:"If you bump into someone, say 'sorry' first. Even if it's tiny." },
+  { c:"Character", e:"🌟", m:"Find one thing your sibling or friend is GOOD at and tell them!" },
+  // 🧠 Brain
+  { c:"Brain", e:"🪟", m:"Count how many windows are in your house. Tell Momo the number!" },
+  { c:"Brain", e:"⬜", m:"Find 3 things shaped like a SQUARE. Then 3 things shaped like a CIRCLE." },
+  { c:"Brain", e:"📦", m:"Read the words on a cereal box. How many words can you spot?" },
+  { c:"Brain", e:"🔢", m:"Count your steps from your bed to the kitchen." },
+  { c:"Brain", e:"🧩", m:"Find a puzzle (or build one with toys) and finish it today!" },
+  { c:"Brain", e:"⏱️", m:"Time how fast you can put on your shoes. Try to beat it tomorrow!" },
+  { c:"Brain", e:"🎨", m:"Draw a maze on paper. Ask someone to solve it." },
+  { c:"Brain", e:"🍎", m:"Sort 5 things in your toy bin into 2 groups. Tell Momo how you grouped them." },
+  { c:"Brain", e:"🤔", m:"Ask 'why?' five times in a row about ONE thing. See where it leads!" },
+  { c:"Brain", e:"🎲", m:"Make up a new game with 3 rules. Play it with someone!" },
+  // ✨ Wonder
+  { c:"Wonder", e:"🌌", m:"Ask a grown-up: 'why is the sky blue?' See what they say!" },
+  { c:"Wonder", e:"🌙", m:"Look at the moon tonight. Is it round? Tell Momo what shape it is!" },
+  { c:"Wonder", e:"🐛", m:"Find a tiny living thing outside. Bug? Plant? Tell Momo about it!" },
+  { c:"Wonder", e:"🎨", m:"Make up a brand-new word for the color blue. Tell Momo what it is!" },
+  { c:"Wonder", e:"💭", m:"Look around RIGHT NOW. What do you see that you've never noticed before?" },
+  { c:"Wonder", e:"🦋", m:"What do you think a butterfly dreams about?" },
+  { c:"Wonder", e:"🐠", m:"What would you ask a fish if you could talk to it?" },
+  { c:"Wonder", e:"⭐", m:"Make a wish on the first star you see tonight. Tell Momo what you wished!" },
+  { c:"Wonder", e:"📖", m:"Open a book to ANY page. Read one sentence to Momo tomorrow." },
+  { c:"Wonder", e:"❓", m:"Write down (or remember) 3 questions you really wonder about." },
+  // 🐙 Animals
+  { c:"Animals", e:"🐕", m:"Find a real animal today (pet, bug, bird). Tell Momo what it was doing." },
+  { c:"Animals", e:"🐱", m:"If you could be ANY animal for one day, which one? Why?" },
+  { c:"Animals", e:"🐦", m:"Listen for a bird outside. How long until you hear one?" },
+  // 🌈 Nature
+  { c:"Nature", e:"🌳", m:"Touch a tree today. Count its leaves on one branch (or guess!)." },
+  { c:"Nature", e:"💧", m:"Catch a raindrop on your hand. (Or just imagine it if no rain.)" },
+  // 🚀 Space
+  { c:"Space", e:"☀️", m:"Notice WHERE the sun is in the sky. Check again tomorrow!" },
+  // 👁️ Body
+  { c:"Body", e:"❤️", m:"Put your hand on your chest. Feel your heart? It's been beating ALL day." },
+  { c:"Body", e:"👃", m:"Find 3 smells in your house. Which is your favorite?" },
+  // 🦖 Dinosaurs
+  { c:"Dinosaurs", e:"🦕", m:"Roar like a dinosaur. Did anyone come check on you?" },
+  // 🍯 Food
+  { c:"Food", e:"🍎", m:"Eat ONE thing today that's the color RED." },
 ];
 
 // Element refs for the quiz overlay
@@ -5890,6 +6221,8 @@ function _ffPick() {
 function showFunFact(onContinue) {
   _ffOnContinue = onContinue || null;
   const fact = _ffPick();
+  bumpSkill(fact.c);
+  if (game.session) game.session.lastQuizCategory = fact.c;
   const askTrue = Math.random() < 0.5;          // pose the true or the twisted version
   _ffState = { fact, askTrue, answered: false };
   const statement = askTrue ? fact.t : fact.f;
@@ -5946,6 +6279,79 @@ ffContinueBtn.addEventListener("click", () => {
   if (cb) setTimeout(cb, 200);
 });
 
+// ============================================================
+//        WONDER CARD — end-of-session real-world micro-mission
+// ============================================================
+const wonderEl       = document.getElementById("wonder-card");
+const wonderTagEl    = document.getElementById("wonder-card-tag");
+const wonderTextEl   = document.getElementById("wonder-card-text");
+const wonderReplayEl = document.getElementById("wonder-card-replay");
+const wonderSkipEl   = document.getElementById("wonder-card-skip");
+
+const WONDER_CATEGORY_LABEL = {
+  Money: "💰 Money mission", Character: "❤️ Kindness mission",
+  Brain: "🧠 Brain mission", Wonder: "✨ Wonder mission",
+  Animals: "🐙 Animal mission", Nature: "🌈 Nature mission",
+  Space: "🚀 Space mission", Body: "👁️ Body mission",
+  Dinosaurs: "🦖 Dino mission", Food: "🍎 Food mission",
+  Bugs: "🐝 Bug mission", Random: "🎲 Mystery mission",
+};
+
+let _wonderRecent = [];          // last few mission indices, avoid repeats
+let _wonderTimer  = null;
+let _wonderOnDone = null;
+let _wonderCurrentSpeech = "";
+
+function pickWonderMission(preferCategory) {
+  const matching = WONDER_MISSIONS
+    .map((m, i) => ({ m, i }))
+    .filter(o => o.m.c === preferCategory && !_wonderRecent.includes(o.i));
+  const fallback = WONDER_MISSIONS
+    .map((m, i) => ({ m, i }))
+    .filter(o => !_wonderRecent.includes(o.i));
+  const pool = matching.length > 0
+    ? matching
+    : (fallback.length > 0 ? fallback : WONDER_MISSIONS.map((m, i) => ({ m, i })));
+  const chosen = pool[Math.floor(Math.random() * pool.length)];
+  _wonderRecent.push(chosen.i);
+  if (_wonderRecent.length > 12) _wonderRecent.shift();
+  return chosen.m;
+}
+
+// Show the Wonder Card. onDone is called when card dismisses (auto or by tap).
+function showWonderCard(preferCategory, onDone) {
+  _wonderOnDone = onDone || null;
+  const m = pickWonderMission(preferCategory || "Wonder");
+  bumpSkill(m.c);
+  if (game.session) game.session.lastWonderCategory = m.c;
+  wonderTagEl.textContent = WONDER_CATEGORY_LABEL[m.c] || "✨ Wonder mission";
+  wonderTextEl.textContent = m.m + "  " + m.e;
+  _wonderCurrentSpeech = m.m;
+  _twemojify(wonderEl);
+  wonderEl.classList.add("show");
+  setTimeout(() => speakWord(_wonderCurrentSpeech), 360);
+  if (_wonderTimer) clearTimeout(_wonderTimer);
+  _wonderTimer = setTimeout(() => dismissWonderCard(), 4000);
+}
+
+function dismissWonderCard() {
+  if (_wonderTimer) { clearTimeout(_wonderTimer); _wonderTimer = null; }
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  wonderEl.classList.remove("show");
+  const cb = _wonderOnDone; _wonderOnDone = null;
+  // 500ms fade matches the CSS transition
+  setTimeout(() => { if (cb) cb(); }, 500);
+}
+
+wonderReplayEl.addEventListener("click", () => {
+  if (_wonderCurrentSpeech) speakWord(_wonderCurrentSpeech);
+});
+wonderSkipEl.addEventListener("click", dismissWonderCard);
+// Tap the dim overlay (but NOT the card itself) also skips
+wonderEl.addEventListener("click", (ev) => {
+  if (ev.target === wonderEl) dismissWonderCard();
+});
+
 function playAgain(opts = {}) {
   // opts.words = custom word list, opts.advanceLevel = bool, opts.setLevel = 1..20,
   // opts.practice = explicit "this is a review/practice session" flag
@@ -5963,6 +6369,7 @@ function playAgain(opts = {}) {
 
   // ---- EXPANSION: choose this session's mode + set up its visuals/banner ----
   clearMissionProps();
+  clearBarnBurst();       // leftover carrot-burst from a previous carrots session
   clearFallenPins();      // bowling debris from a previous session
   removeAllBowlingDecoys();   // standing pins from a previous session
   clearGardenFlowers();   // EXPANSION PASS F: clear last session's garden
@@ -6006,6 +6413,14 @@ function playAgain(opts = {}) {
   } else if (game.session.mode === "silly_pants") {
     // Same word/boss structure, but every defeat = pants-drop. No mission banner needed.
     setTimeout(() => showMissionIntro("BONUS ROUND", "PANTS PATROL!", "All goblins lose their pants today"), 100);
+  } else if (game.session.mode === "mixed") {
+    // VARIETY PACK — every word picks a different themed-combat mode at random.
+    // Continuous-progress modes (cage, carrots, builders, bowling) are intentionally
+    // excluded so the session is consistent moment-to-moment.
+    game.wordKinds = game.wordKinds.map(k => k.kind === "boss" ? { kind: "normal" } : k);
+    game.session.wordModes = game.words.map(() => MIXED_MODE_POOL[Math.floor(Math.random() * MIXED_MODE_POOL.length)]);
+    missionBannerShow("🎲", "Mix it up — surprise every word!");
+    setTimeout(() => showMissionIntro("VARIETY PACK", "MIX IT UP!", "A different goblin gag every word"), 100);
   } else if (game.session.mode === "bowling") {
     // Strip bosses — bowling is its own rhythm. Spawn 5 standing pin decoys
     // so the whole lineup is visible; the active goblin will replace the
@@ -6185,6 +6600,7 @@ const MODE_CARDS = [
   { mode: "underwater",      emoji: "🌊",  title: "Underwater Dive",desc: "Bubble-trap pufferfish goblins",    kind: "new", isNew: true },
   { mode: "pajama",          emoji: "🛌",  title: "Pajama Party",   desc: "Pillow fight! Teddy tucks them in", kind: "new", isNew: true },
   { mode: "castle_build",    emoji: "🏰",  title: "Build a Castle", desc: "10 pieces, dragon on top!",         kind: "new", isNew: true },
+  { mode: "mixed",           emoji: "🎲",  title: "Mix It Up",      desc: "A different gag every word",        kind: "new", isNew: true },
 ];
 
 const modesOverlay = document.getElementById("modes-overlay");
@@ -7182,12 +7598,12 @@ function pickReactionForKind(kindObj, projectileEntry) {
   // EXPANSION: bowling mode → always "topple" (pin clatter)
   if (game.session && game.session.mode === "bowling") return "topple";
   // EXPANSION PASS F: befriend mode → always "befriend"
-  if (game.session && game.session.mode === "befriend") return "befriend";
+  if (currentMode() === "befriend") return "befriend";
   // EXPANSION PASS G: themed combat modes — each forces a signature reaction
-  if (game.session && game.session.mode === "halloween")  return "candy_coma";
-  if (game.session && game.session.mode === "birthday")   return "cake_smash";
-  if (game.session && game.session.mode === "underwater") return "bubble_float";
-  if (game.session && game.session.mode === "pajama")     return "teddy_tuck";
+  if (currentMode() === "halloween")  return "candy_coma";
+  if (currentMode() === "birthday")   return "cake_smash";
+  if (currentMode() === "underwater") return "bubble_float";
+  if (currentMode() === "pajama")     return "teddy_tuck";
   // Themed pairings: certain projectiles always trigger a matching transform
   if (projectileEntry) {
     if (projectileEntry.id === "ice")   return "statue";
@@ -7440,11 +7856,32 @@ REACTION_ANIMATORS.glitterbomb = (g, t) => {
 // Mode is chosen in playAgain(). Mission progress advances on each
 // successful word read.
 const SESSION_MODE_WEIGHTS = [
-  { mode: "standard",        weight: 65 },
-  { mode: "mission_cage",    weight: 15 },
-  { mode: "mission_carrots", weight: 15 },
+  { mode: "standard",        weight: 50 },
+  { mode: "mixed",           weight: 30 },  // variety pack: per-word themed combat
+  { mode: "mission_cage",    weight: 12 },
+  { mode: "mission_carrots", weight: 12 },
   { mode: "silly_pants",     weight: 5 },  // entire session = pants-drop defeats
 ];
+
+// Per-word mixable mode pool. These all do their setup per-word (costume +
+// reaction + projectile) with no session-level state, so they can be safely
+// mixed within a single level. Continuous-progress modes (cage / carrots /
+// garden_grow / snowman_build / castle_build / bowling) stay full-session.
+const MIXED_MODE_POOL = ["standard", "silly_pants", "halloween", "birthday", "underwater", "pajama", "befriend"];
+
+// Returns the EFFECTIVE mode for the current word. In a "mixed" session this
+// is the per-word entry from game.session.wordModes; everywhere else it's the
+// session's single mode. Use this for per-word checks (costumes, reactions,
+// projectile overrides); use game.session.mode for session-level checks
+// (mission props, bowling alley, builder bases).
+function currentMode() {
+  const s = game && game.session;
+  if (!s) return "standard";
+  if (s.wordModes && s.wordModes.length) {
+    return s.wordModes[Math.min(game.wordIndex || 0, s.wordModes.length - 1)];
+  }
+  return s.mode;
+}
 function pickSessionMode() {
   // Always start the first 2 sessions in standard mode so kids learn the basics first.
   if (game.totalSessions < 2) return "standard";
@@ -7610,6 +8047,86 @@ function buildCarrotPile() {
 
 // ---------- Mission per-word effect (called inside onProjectileHit) ----------
 const flyingCarrots = [];   // animated carrots zooming home
+
+// Add a jagged dark crack to the barn's front face. Called once per hit, so
+// the barn looks progressively more shattered across the 10 reads. Cracks are
+// children of the barn body (meta.barn) so they shake/sag along with it.
+function addBarnCrack(meta) {
+  if (!meta || !meta.barn) return;
+  meta._crackCount = (meta._crackCount || 0) + 1;
+  const crackMat = new THREE.MeshStandardMaterial({ color: 0x2A0A06, roughness: 1 });
+  let x = (Math.random() - 0.5) * 0.72;          // body-local x  (face spans -0.5..0.5)
+  let y = 0.26 - Math.random() * 0.48;           // body-local y  (-0.36..0.36)
+  const segs = 3 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < segs; i++) {
+    const len = 0.1 + Math.random() * 0.1;
+    const seg = new THREE.Mesh(new THREE.BoxGeometry(0.028, len, 0.02), crackMat);
+    seg.position.set(x, y, 0.42);                // just proud of the front face (z≈0.41)
+    seg.rotation.z = (Math.random() - 0.5) * 1.4;
+    meta.barn.add(seg);
+    y -= len * 0.7;
+    x += (Math.random() - 0.5) * 0.16;
+  }
+  // Soot-darken the barn + sag it a little more with each crack
+  if (meta.barn.material && meta.barn.material.color) {
+    meta.barn.material.color.lerp(new THREE.Color(0x5B1810), 0.09);
+  }
+  meta.barn.rotation.x = -Math.min(0.14, meta._crackCount * 0.014);
+}
+
+// When the barn finally cracks open, a whole pile of carrots bursts out and
+// rains down. These are physics-y (velocity + gravity), ticked in
+// tickMissionAnimations and auto-removed.
+const barnBurst = [];
+function burstBarnCarrots(meta, count) {
+  if (!meta || !meta.pile) return;
+  const orange = new THREE.MeshStandardMaterial({ color: 0xFF8C42, roughness: 0.45, emissive: 0xCC5500, emissiveIntensity: 0.3 });
+  const green  = new THREE.MeshStandardMaterial({ color: 0x6BBE3F, roughness: 0.55 });
+  const origin = new THREE.Vector3();
+  meta.pile.getWorldPosition(origin); origin.y += 0.6;   // burst from the open top
+  for (let i = 0; i < count; i++) {
+    const c = new THREE.Group();
+    c.add(new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.48, 8), orange));     // big, clearly a carrot
+    const tp = new THREE.Mesh(new THREE.SphereGeometry(0.08, 7, 5), green); tp.position.y = 0.26; c.add(tp);
+    c.position.copy(origin);
+    c.position.x += (Math.random() - 0.5) * 0.3;
+    c.position.z += (Math.random() - 0.5) * 0.3;
+    const ang = Math.random() * Math.PI * 2;
+    const sp = 0.9 + Math.random() * 1.7;          // gentle outward spread
+    c.userData.vx = Math.cos(ang) * sp;
+    c.userData.vz = Math.sin(ang) * sp;
+    c.userData.vy = 4.6 + Math.random() * 3.2;     // SHOOT high up into the sky
+    c.userData.spin = (Math.random() - 0.5) * 13;
+    c.userData.life = 0;
+    c.userData.maxLife = 1.9 + Math.random() * 0.7;
+    arenaGroup.add(c);
+    barnBurst.push(c);
+  }
+}
+function tickBarnBurst(dt) {
+  for (let i = barnBurst.length - 1; i >= 0; i--) {
+    const c = barnBurst[i];
+    c.userData.life += dt;
+    c.position.x += c.userData.vx * dt;
+    c.position.y += c.userData.vy * dt;
+    c.position.z += c.userData.vz * dt;
+    c.userData.vy -= dt * 5.2;                 // gravity (gentle, so they hang in the air)
+    c.rotation.x += c.userData.spin * dt;
+    c.rotation.z += c.userData.spin * 0.7 * dt;
+    if (c.userData.life >= c.userData.maxLife || c.position.y < 0.05) {
+      arenaGroup.remove(c);
+      c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      barnBurst.splice(i, 1);
+    }
+  }
+}
+function clearBarnBurst() {
+  for (const c of barnBurst) {
+    if (c && c.parent) c.parent.remove(c);
+    if (c) c.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+  }
+  barnBurst.length = 0;
+}
 function advanceMission() {
   const meta = game.session.missionMeta;
   if (!meta) return;
@@ -7644,15 +8161,15 @@ function advanceMission() {
       next.userData.flyTo = bunny.position.clone().add(new THREE.Vector3(0, 0.55, 0));
       flyingCarrots.push(next);
       sfxCarrotZoom();
-      // Crack the barn — punchy shake + a burst of debris sparks
+      // Crack the barn — punchy shake, a burst of debris sparks, AND a new
+      // crack that stays, so the barn looks more and more broken each hit.
       meta.shakeT = 0.4;
       const w = new THREE.Vector3(); meta.pile.getWorldPosition(w); w.y += 0.8;
       spawnImpactParticles({ particles: "sparks", impactColor: 0xC0392B }, w);
+      addBarnCrack(meta);
     }
-    // Last carrot out → pop the barn roof off
-    if (!meta.carrots.some(c => !c.userData.collected)) {
-      meta.roofPop = true;
-    }
+    // The big "barn cracks open + carrots burst out" finale fires in finish()
+    // at session end (guaranteed), not here — see finish().
   }
 }
 function tickMissionAnimations(dt) {
@@ -8040,22 +8557,22 @@ pickProjectileForWord = function(word, kindObj) {
     return PROJECTILE_BY_ID.bowl;
   }
   // EXPANSION PASS F: befriend mode always casts a heart bomb
-  if (game.session && game.session.mode === "befriend") {
+  if (currentMode() === "befriend") {
     return PROJECTILE_BY_ID.heart;
   }
   // EXPANSION PASS G: themed-combat projectile lock-ins
-  if (game.session && game.session.mode === "halloween") {
+  if (currentMode() === "halloween") {
     // Trick-or-treat: pink candy = heart projectile re-themed (already sweet)
     return PROJECTILE_BY_ID.heart;
   }
-  if (game.session && game.session.mode === "birthday") {
+  if (currentMode() === "birthday") {
     return PROJECTILE_BY_ID.cake;
   }
-  if (game.session && game.session.mode === "underwater") {
+  if (currentMode() === "underwater") {
     // Bubble = ice projectile (cyan/blue shards read as bubble splash)
     return PROJECTILE_BY_ID.ice;
   }
-  if (game.session && game.session.mode === "pajama") {
+  if (currentMode() === "pajama") {
     return PROJECTILE_BY_ID.pillow;
   }
   return _origPickProjectileForWord(word, kindObj);
@@ -10332,6 +10849,7 @@ function tick() {
   // ---------- EXPANSION: MISSION ANIMATIONS (cage fade, flying carrots) ----------
   tickMissionAnimations(dt);
   if (bowlToppling.length > 0) tickBowlingTopple(dt);
+  if (barnBurst.length > 0) tickBarnBurst(dt);
 
   // ---------- EXPANSION: DEFENSE TOMATO IN FLIGHT ----------
   if (defenseState.flyingTomato) tickDefenseTomato(dt);

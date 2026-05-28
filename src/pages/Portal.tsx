@@ -188,6 +188,10 @@ function KidsPortal() {
             />
           </FadeIn>
 
+          <FadeIn show={ready} delay={350}>
+            <SkillsThisWeek />
+          </FadeIn>
+
           <FadeIn show={ready} delay={400}>
             <BoardMap
               stops={portalStops}
@@ -222,6 +226,77 @@ function KidsPortal() {
       </main>
 
       <Footer />
+    </div>
+  );
+}
+
+function SkillsThisWeek() {
+  const [skills, setSkills] = useState<{ weekly: Record<string, number>; lifetime: Record<string, number> } | null>(null);
+  useEffect(() => {
+    // Scan localStorage for any value with the _skillsSeen shape. The game's
+    // per-kid storage key varies (module_data::word-battle::{kidId}::momo_progress_v1
+    // OR the simpler localStorage fallback). We just take the first valid one.
+    try {
+      const keys = Object.keys(localStorage);
+      let best: any = null;
+      for (const k of keys) {
+        try {
+          const raw = localStorage.getItem(k);
+          if (!raw) continue;
+          // Many keys are non-JSON; skip those quickly
+          if (raw[0] !== '{' && raw[0] !== '[') continue;
+          const v = JSON.parse(raw);
+          if (v && v._skillsSeen && typeof v._skillsSeen === 'object') {
+            best = v._skillsSeen;
+            break;
+          }
+        } catch { /* ignore non-JSON values */ }
+      }
+      if (best) setSkills({ weekly: best.weekly || {}, lifetime: best.lifetime || {} });
+    } catch { /* localStorage unavailable */ }
+  }, []);
+  if (!skills) return null;
+  const entries = Object.entries(skills.weekly)
+    .filter(([, n]) => (n as number) > 0)
+    .sort(([, a], [, b]) => (b as number) - (a as number));
+  if (entries.length === 0) return null;
+
+  const labels: Record<string, { emoji: string; name: string }> = {
+    Money: { emoji: '💰', name: 'Money' },
+    Character: { emoji: '❤️', name: 'Kindness' },
+    Brain: { emoji: '🧠', name: 'Brain' },
+    Wonder: { emoji: '✨', name: 'Wonder' },
+    Animals: { emoji: '🐙', name: 'Animals' },
+    Nature: { emoji: '🌈', name: 'Nature' },
+    Space: { emoji: '🚀', name: 'Space' },
+    Body: { emoji: '👁️', name: 'Body' },
+    Dinosaurs: { emoji: '🦖', name: 'Dinos' },
+    Food: { emoji: '🍎', name: 'Food' },
+    Bugs: { emoji: '🐝', name: 'Bugs' },
+    Random: { emoji: '🎲', name: 'Misc' },
+  };
+  return (
+    <div style={{
+      background: T.white, border: `3px solid ${T.green}`, borderRadius: 18,
+      padding: '14px 18px', margin: '0 0 22px', boxShadow: '4px 4px 0 rgba(45,155,110,.10)',
+      fontFamily: 'inherit',
+    }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: T.coral, letterSpacing: '.06em', marginBottom: 8 }}>
+        🌟 THIS WEEK YOU SPARKED
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        {entries.map(([cat, n]) => {
+          const lab = labels[cat] || { emoji: '✨', name: cat };
+          return (
+            <span key={cat} style={{
+              background: '#FFFDE8', border: `2px solid ${T.green}`, borderRadius: 999,
+              padding: '4px 12px', fontSize: 14, fontWeight: 700, color: T.green,
+            }}>
+              {lab.emoji} {lab.name} <b>{n}</b>
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }
