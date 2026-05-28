@@ -237,6 +237,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'amazon',
   },
   {
+    id: 'lego',
+    emoji: '🧱',
+    title: 'Lego',
+    color: '#FFFAE5',
+    themeKey: 'lego',
+    path: '/lego',
+    status: 'available',
+    progressKey: 'lego',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

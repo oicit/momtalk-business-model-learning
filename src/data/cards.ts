@@ -187,6 +187,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'amazon',
   },
   {
+    id: 'brick-builder',
+    emoji: '🧱',
+    title: 'Brick Builder',
+    fact: '1958 Lego bricks STILL click onto 2026 Lego bricks!',
+    color: '#FFFAE5',
+    rarity: 'Rare',
+    awardedBy: 'lego',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
