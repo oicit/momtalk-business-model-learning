@@ -287,6 +287,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'marketing-mountain',
   },
   {
+    id: 'survey-master',
+    emoji: '📋',
+    title: 'Survey\nMaster',
+    color: '#EEEAFE',
+    themeKey: 'research',
+    path: '/survey-master',
+    status: 'available',
+    progressKey: 'survey-master',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

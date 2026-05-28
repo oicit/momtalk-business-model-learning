@@ -24,6 +24,7 @@ import DisneyPage from './pages/DisneyPage';
 import FarmStandPage from './pages/FarmStandPage';
 import SnowDayHustlePage from './pages/SnowDayHustlePage';
 import MarketingMountainPage from './pages/MarketingMountainPage';
+import SurveyMasterPage from './pages/SurveyMasterPage';
 import WordBattlePage from './pages/WordBattlePage';
 import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
@@ -63,6 +64,7 @@ export default function App() {
       <Route path="/farm-stand" element={<FarmStandPage />} />
       <Route path="/snow-day-hustle" element={<SnowDayHustlePage />} />
       <Route path="/marketing-mountain" element={<MarketingMountainPage />} />
+      <Route path="/survey-master" element={<SurveyMasterPage />} />
       <Route path="/word-battle" element={<WordBattlePage />} />
       <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />

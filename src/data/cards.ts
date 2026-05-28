@@ -232,6 +232,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'marketing-mountain',
   },
   {
+    id: 'research-pro',
+    emoji: '📋',
+    title: 'Research Pro',
+    fact: 'Google runs 7,000 A/B tests every YEAR — they never just guess!',
+    color: '#EEEAFE',
+    rarity: 'Uncommon',
+    awardedBy: 'survey-master',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
