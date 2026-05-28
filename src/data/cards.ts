@@ -106,6 +106,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'piggy-bank',
   },
   {
+    id: 'location-genius',
+    emoji: '📍',
+    title: 'Location Genius',
+    fact: 'McDonald\'s makes more from RENT than from burgers!',
+    color: '#FFE8E5',
+    rarity: 'Uncommon',
+    awardedBy: 'mcdonalds',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

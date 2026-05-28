@@ -104,6 +104,7 @@ export const themes = {
   'pet-shop': { accent: T.lavender, bg: gradient('#EDE9FE') },
   'youtube-creator': { accent: T.blue, bg: gradient('#E0F2FE') },
   'cookie-bakery': { accent: T.coral, bg: gradient('#FFF8F0') },
+  mcdonalds: { accent: T.coral, bg: gradient('#FFE8E5') },
   // Special scenes
   portal: { accent: T.green, bg: T.canvas },
   certificate: { accent: T.yellow, bg: T.canvas },

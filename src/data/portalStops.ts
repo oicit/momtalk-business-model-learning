@@ -137,6 +137,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'stock-market',
   },
   {
+    id: 'mcdonalds',
+    emoji: '🍔',
+    title: 'McDonald\'s',
+    color: '#FFE8E5',
+    themeKey: 'mcdonalds',
+    path: '/mcdonalds',
+    status: 'available',
+    progressKey: 'mcdonalds',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',
