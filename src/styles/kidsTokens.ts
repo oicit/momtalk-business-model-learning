@@ -110,6 +110,11 @@ export const themes = {
   charity: { accent: T.pink, bg: gradient('#FFE5EE') },
   risk: { accent: T.blue, bg: gradient('#E8F4FD') },
   subscription: { accent: T.blue, bg: gradient('#DBEAFE') },
+  roblox: { accent: T.coral, bg: gradient('#FFEDED') },
+  costco: { accent: T.coral, bg: gradient('#FFE5E5') },
+  amazon: { accent: T.yellow, bg: gradient('#FFF0DC') },
+  lego: { accent: T.yellow, bg: gradient('#FFFAE5') },
+  disney: { accent: T.pink, bg: gradient('#FCE7F3') },
   // Special scenes
   portal: { accent: T.green, bg: T.canvas },
   certificate: { accent: T.yellow, bg: T.canvas },

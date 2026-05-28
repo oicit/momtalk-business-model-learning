@@ -207,6 +207,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'subscription-sense',
   },
   {
+    id: 'roblox',
+    emoji: '🎮',
+    title: 'Roblox',
+    color: '#FFEDED',
+    themeKey: 'roblox',
+    path: '/roblox',
+    status: 'available',
+    progressKey: 'roblox',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

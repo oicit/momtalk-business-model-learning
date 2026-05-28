@@ -16,6 +16,7 @@ import CharityLabPage from './pages/CharityLabPage';
 import RiskPoolIslandPage from './pages/RiskPoolIslandPage';
 import TaxTownPage from './pages/TaxTownPage';
 import SubscriptionSensePage from './pages/SubscriptionSensePage';
+import RobloxPage from './pages/RobloxPage';
 import WordBattlePage from './pages/WordBattlePage';
 import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
@@ -47,6 +48,7 @@ export default function App() {
       <Route path="/risk-pool-island" element={<RiskPoolIslandPage />} />
       <Route path="/tax-town" element={<TaxTownPage />} />
       <Route path="/subscription-sense" element={<SubscriptionSensePage />} />
+      <Route path="/roblox" element={<RobloxPage />} />
       <Route path="/word-battle" element={<WordBattlePage />} />
       <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />
