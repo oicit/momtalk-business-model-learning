@@ -11,9 +11,10 @@ import petShop from './lessons/pet-shop';
 import youtubeCreator from './lessons/youtube-creator';
 import cookieBakery from './lessons/cookie-bakery';
 import piggyBank from './lessons/piggy-bank';
+import stockMarket from './lessons/stock-market';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank];
+const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {

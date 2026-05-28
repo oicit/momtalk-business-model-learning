@@ -127,6 +127,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'piggy-bank',
   },
   {
+    id: 'stock-market',
+    emoji: '📈',
+    title: 'Stock\nMarket',
+    color: '#FDE8F4',
+    themeKey: 'stocks',
+    path: '/stock-market',
+    status: 'available',
+    progressKey: 'stock-market',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

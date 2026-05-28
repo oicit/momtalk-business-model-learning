@@ -160,6 +160,7 @@ export const cardData: CardDef[] = [
     fact: 'Stocks have averaged ~10% per year for a century!',
     color: '#FDE8F4',
     rarity: 'Rare',
+    awardedBy: 'stock-market',
   },
   {
     id: 'entrepreneur',
