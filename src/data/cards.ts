@@ -178,6 +178,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'costco',
   },
   {
+    id: 'logistics-lord',
+    emoji: '🚚',
+    title: 'Logistics Lord',
+    fact: 'Amazon Prime is worth $36 BILLION/year — just in fees!',
+    color: '#FFF0DC',
+    rarity: 'Rare',
+    awardedBy: 'amazon',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

@@ -227,6 +227,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'costco',
   },
   {
+    id: 'amazon',
+    emoji: '🚚',
+    title: 'Amazon',
+    color: '#FFF0DC',
+    themeKey: 'amazon',
+    path: '/amazon',
+    status: 'available',
+    progressKey: 'amazon',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',
