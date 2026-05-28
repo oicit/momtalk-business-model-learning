@@ -187,6 +187,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'risk-pool-island',
   },
   {
+    id: 'tax-town',
+    emoji: '🏛️',
+    title: 'Tax\nTown',
+    color: '#FFF5F0',
+    themeKey: 'taxes',
+    path: '/tax-town',
+    status: 'available',
+    progressKey: 'tax-town',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

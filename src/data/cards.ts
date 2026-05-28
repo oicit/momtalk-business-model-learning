@@ -189,6 +189,7 @@ export const cardData: CardDef[] = [
     fact: 'Taxes pay for schools, roads, and parks!',
     color: '#FFF5F0',
     rarity: 'Uncommon',
+    awardedBy: 'tax-town',
   },
   {
     id: 'market-mind',
