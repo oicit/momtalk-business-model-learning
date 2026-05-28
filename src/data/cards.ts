@@ -160,6 +160,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'subscription-sense',
   },
   {
+    id: 'game-maker',
+    emoji: '🎮',
+    title: 'Game Maker',
+    fact: 'A 17-year-old earned $1M building games on Roblox!',
+    color: '#FFEDED',
+    rarity: 'Rare',
+    awardedBy: 'roblox',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
