@@ -177,6 +177,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'charity-lab',
   },
   {
+    id: 'risk-pool-island',
+    emoji: '🛡️',
+    title: 'Risk\nPool',
+    color: '#E8F4FD',
+    themeKey: 'risk',
+    path: '/risk-pool-island',
+    status: 'available',
+    progressKey: 'risk-pool-island',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

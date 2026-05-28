@@ -142,6 +142,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'charity-lab',
   },
   {
+    id: 'risk-master',
+    emoji: '🛡️',
+    title: 'Risk Master',
+    fact: '10 friends + $10 each = 1 broken bike replaced. That\'s insurance!',
+    color: '#E8F4FD',
+    rarity: 'Rare',
+    awardedBy: 'risk-pool-island',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

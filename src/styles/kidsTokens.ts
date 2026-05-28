@@ -108,6 +108,8 @@ export const themes = {
   inventor: { accent: T.lavender, bg: gradient('#F0E8FD') },
   'deal-maker': { accent: T.yellow, bg: gradient('#FFF8DC') },
   charity: { accent: T.pink, bg: gradient('#FFE5EE') },
+  risk: { accent: T.blue, bg: gradient('#E8F4FD') },
+  subscription: { accent: T.blue, bg: gradient('#DBEAFE') },
   // Special scenes
   portal: { accent: T.green, bg: T.canvas },
   certificate: { accent: T.yellow, bg: T.canvas },
