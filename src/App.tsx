@@ -28,6 +28,7 @@ import SurveyMasterPage from './pages/SurveyMasterPage';
 import EtsyShopPage from './pages/EtsyShopPage';
 import PizzaPlacePage from './pages/PizzaPlacePage';
 import StartupPitchPage from './pages/StartupPitchPage';
+import AppMakerPage from './pages/AppMakerPage';
 import WordBattlePage from './pages/WordBattlePage';
 import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
@@ -71,6 +72,7 @@ export default function App() {
       <Route path="/etsy-shop" element={<EtsyShopPage />} />
       <Route path="/pizza-place" element={<PizzaPlacePage />} />
       <Route path="/startup-pitch" element={<StartupPitchPage />} />
+      <Route path="/app-maker" element={<AppMakerPage />} />
       <Route path="/word-battle" element={<WordBattlePage />} />
       <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />

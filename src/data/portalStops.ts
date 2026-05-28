@@ -327,6 +327,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'startup-pitch',
   },
   {
+    id: 'app-maker',
+    emoji: '📱',
+    title: 'App\nMaker',
+    color: '#E0EAFE',
+    themeKey: 'app-maker',
+    path: '/app-maker',
+    status: 'available',
+    progressKey: 'app-maker',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

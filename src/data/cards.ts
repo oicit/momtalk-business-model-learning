@@ -259,6 +259,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'pizza-place',
   },
   {
+    id: 'software-sensei',
+    emoji: '📱',
+    title: 'Software Sensei',
+    fact: 'Notion went from 2 founders to a $10 BILLION app — software scales infinitely!',
+    color: '#E0EAFE',
+    rarity: 'Legendary',
+    awardedBy: 'app-maker',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
