@@ -297,6 +297,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'survey-master',
   },
   {
+    id: 'etsy-shop',
+    emoji: '🪡',
+    title: 'Etsy\nShop',
+    color: '#FFEBE0',
+    themeKey: 'etsy',
+    path: '/etsy-shop',
+    status: 'available',
+    progressKey: 'etsy-shop',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

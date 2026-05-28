@@ -241,6 +241,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'survey-master',
   },
   {
+    id: 'maker-pro',
+    emoji: '🪡',
+    title: 'Maker Pro',
+    fact: 'A 12-year-old makes $2,000/MONTH selling slime kits on Etsy!',
+    color: '#FFEBE0',
+    rarity: 'Rare',
+    awardedBy: 'etsy-shop',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
