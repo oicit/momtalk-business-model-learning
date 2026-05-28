@@ -169,6 +169,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'roblox',
   },
   {
+    id: 'member-master',
+    emoji: '🛍️',
+    title: 'Member Master',
+    fact: 'Costco makes nearly ALL its profit from the $65 membership fee!',
+    color: '#FFE5E5',
+    rarity: 'Uncommon',
+    awardedBy: 'costco',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

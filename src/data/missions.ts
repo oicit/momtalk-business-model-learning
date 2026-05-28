@@ -20,9 +20,10 @@ import riskPoolIsland from './lessons/risk-pool-island';
 import taxTown from './lessons/tax-town';
 import subscriptionSense from './lessons/subscription-sense';
 import roblox from './lessons/roblox';
+import costco from './lessons/costco';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox];
+const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {

@@ -217,6 +217,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'roblox',
   },
   {
+    id: 'costco',
+    emoji: '🛍️',
+    title: 'Costco',
+    color: '#FFE5E5',
+    themeKey: 'costco',
+    path: '/costco',
+    status: 'available',
+    progressKey: 'costco',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',
