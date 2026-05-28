@@ -97,6 +97,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'cookie-bakery',
   },
   {
+    id: 'savings-sensei',
+    emoji: '🏦',
+    title: 'Savings Sensei',
+    fact: 'Saving + time = the most powerful money trick on Earth!',
+    color: '#FFF0F5',
+    rarity: 'Uncommon',
+    awardedBy: 'piggy-bank',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

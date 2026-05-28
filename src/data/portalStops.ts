@@ -117,6 +117,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'cookie-bakery',
   },
   {
+    id: 'piggy-bank',
+    emoji: '🏦',
+    title: 'Piggy\nBank',
+    color: '#FFF0F5',
+    themeKey: 'saving',
+    path: '/piggy-bank',
+    status: 'available',
+    progressKey: 'piggy-bank',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',
