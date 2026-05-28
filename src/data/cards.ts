@@ -151,6 +151,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'risk-pool-island',
   },
   {
+    id: 'recurring-royal',
+    emoji: '🔁',
+    title: 'Recurring Royal',
+    fact: 'Netflix went from $50M to $250B by switching to a subscription!',
+    color: '#DBEAFE',
+    rarity: 'Rare',
+    awardedBy: 'subscription-sense',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',

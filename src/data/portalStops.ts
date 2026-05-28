@@ -197,6 +197,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'tax-town',
   },
   {
+    id: 'subscription-sense',
+    emoji: '🔁',
+    title: 'Subscription\nSense',
+    color: '#DBEAFE',
+    themeKey: 'subscription',
+    path: '/subscription-sense',
+    status: 'available',
+    progressKey: 'subscription-sense',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

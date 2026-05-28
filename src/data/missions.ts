@@ -18,9 +18,10 @@ import dealMaker from './lessons/deal-maker';
 import charityLab from './lessons/charity-lab';
 import riskPoolIsland from './lessons/risk-pool-island';
 import taxTown from './lessons/tax-town';
+import subscriptionSense from './lessons/subscription-sense';
 import { currentWeeklyBonus, weeklyPool } from './weeklyBonus';
 
-const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown];
+const LESSONS = [business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator, cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker, charityLab, riskPoolIsland, taxTown, subscriptionSense];
 
 /** Pull every per-lesson mission out of all known lessons. */
 export function listLessonMissions(): RealWorldMissionDef[] {
