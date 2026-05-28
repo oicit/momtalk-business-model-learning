@@ -34,7 +34,7 @@ export default function CardsPage() {
     if (earnedCount === 0) {
       return {
         mood: 'encouraging',
-        msg: 'No cards yet! Finish a lesson on the map to earn your first card.',
+        msg: `Here's the full collection — ${totalCards} cards waiting! Finish a lesson on the map to unlock your first one.`,
       };
     }
     if (earnedCount < totalCards) {
