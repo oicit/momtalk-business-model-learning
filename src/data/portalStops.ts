@@ -267,6 +267,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'farm-stand',
   },
   {
+    id: 'snow-day-hustle',
+    emoji: '❄️',
+    title: 'Snow Day\nHustle',
+    color: '#E0F4FE',
+    themeKey: 'hustle',
+    path: '/snow-day-hustle',
+    status: 'available',
+    progressKey: 'snow-day-hustle',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

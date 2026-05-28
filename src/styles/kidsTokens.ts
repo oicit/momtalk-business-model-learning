@@ -115,6 +115,13 @@ export const themes = {
   amazon: { accent: T.yellow, bg: gradient('#FFF0DC') },
   lego: { accent: T.yellow, bg: gradient('#FFFAE5') },
   disney: { accent: T.pink, bg: gradient('#FCE7F3') },
+  hustle: { accent: T.blue, bg: gradient('#E0F4FE') },
+  marketing: { accent: T.pink, bg: gradient('#FEE5F2') },
+  research: { accent: T.lavender, bg: gradient('#EEEAFE') },
+  etsy: { accent: T.coral, bg: gradient('#FFEBE0') },
+  pizza: { accent: T.coral, bg: gradient('#FFE8E0') },
+  'startup-pitch': { accent: T.green, bg: gradient('#E5FAF1') },
+  'app-maker': { accent: T.blue, bg: gradient('#E0EAFE') },
   // Special scenes
   portal: { accent: T.green, bg: T.canvas },
   certificate: { accent: T.yellow, bg: T.canvas },

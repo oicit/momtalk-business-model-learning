@@ -214,6 +214,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'farm-stand',
   },
   {
+    id: 'hustle-hero',
+    emoji: '❄️',
+    title: 'Hustle Hero',
+    fact: 'A 15-year-old made $14,000 in ONE winter shoveling driveways!',
+    color: '#E0F4FE',
+    rarity: 'Uncommon',
+    awardedBy: 'snow-day-hustle',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
