@@ -10,6 +10,9 @@ import CookieBakeryPage from './pages/CookieBakeryPage';
 import PiggyBankPage from './pages/PiggyBankPage';
 import StockMarketPage from './pages/StockMarketPage';
 import McDonaldsPage from './pages/McDonaldsPage';
+import InventorsLabPage from './pages/InventorsLabPage';
+import DealMakerPage from './pages/DealMakerPage';
+import CharityLabPage from './pages/CharityLabPage';
 import WordBattlePage from './pages/WordBattlePage';
 import StemLabPage from './pages/StemLabPage';
 import CardsPage from './pages/CardsPage';
@@ -35,6 +38,9 @@ export default function App() {
       <Route path="/piggy-bank" element={<PiggyBankPage />} />
       <Route path="/stock-market" element={<StockMarketPage />} />
       <Route path="/mcdonalds" element={<McDonaldsPage />} />
+      <Route path="/inventors-lab" element={<InventorsLabPage />} />
+      <Route path="/deal-maker" element={<DealMakerPage />} />
+      <Route path="/charity-lab" element={<CharityLabPage />} />
       <Route path="/word-battle" element={<WordBattlePage />} />
       <Route path="/stem-lab" element={<StemLabPage />} />
       <Route path="/cards" element={<CardsPage />} />

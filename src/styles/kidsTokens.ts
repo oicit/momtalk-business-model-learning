@@ -105,6 +105,9 @@ export const themes = {
   'youtube-creator': { accent: T.blue, bg: gradient('#E0F2FE') },
   'cookie-bakery': { accent: T.coral, bg: gradient('#FFF8F0') },
   mcdonalds: { accent: T.coral, bg: gradient('#FFE8E5') },
+  inventor: { accent: T.lavender, bg: gradient('#F0E8FD') },
+  'deal-maker': { accent: T.yellow, bg: gradient('#FFF8DC') },
+  charity: { accent: T.pink, bg: gradient('#FFE5EE') },
   // Special scenes
   portal: { accent: T.green, bg: T.canvas },
   certificate: { accent: T.yellow, bg: T.canvas },
