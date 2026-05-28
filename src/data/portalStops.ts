@@ -277,6 +277,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'snow-day-hustle',
   },
   {
+    id: 'marketing-mountain',
+    emoji: '📣',
+    title: 'Marketing\nMountain',
+    color: '#FEE5F2',
+    themeKey: 'marketing',
+    path: '/marketing-mountain',
+    status: 'available',
+    progressKey: 'marketing-mountain',
+  },
+  {
     id: 'word-battle',
     emoji: '⚔️',
     title: 'Word\nBattle',

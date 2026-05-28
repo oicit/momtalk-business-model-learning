@@ -223,6 +223,15 @@ export const cardData: CardDef[] = [
     awardedBy: 'snow-day-hustle',
   },
   {
+    id: 'marketing-maven',
+    emoji: '📣',
+    title: 'Marketing Maven',
+    fact: 'Coke spends $4 BILLION/year telling you about a brown drink!',
+    color: '#FEE5F2',
+    rarity: 'Uncommon',
+    awardedBy: 'marketing-mountain',
+  },
+  {
     id: 'money-master',
     emoji: '💵',
     title: 'Money Master',
