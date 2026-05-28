@@ -5790,7 +5790,11 @@ function onProjectileHit() {
     impactWorld.add(new THREE.Vector3(0, 1.0 * _hitMul, 0));
   }
   const sp = worldToScreen(goblinBasePos.clone().add(new THREE.Vector3(0, 1.2 * _hitMul, 0)));
-  spawnComicText(sp.x, sp.y);
+  // Bowling mode: skip the BONK/POW comic pop — it competes visually with the
+  // mini-goblins flying off when the ball hits. Star-burst + sfx still fire.
+  if (!game.session || game.session.mode !== "bowling") {
+    spawnComicText(sp.x, sp.y);
+  }
   spawnBurst(sp.x, sp.y);
   sfxBonk();
   // Funny goblin reaction on every impact — 50/50 between a silly laugh
@@ -8287,23 +8291,45 @@ const bowlStrikeOverlay = document.getElementById("bowl-strike");
 const fallenPins = [];
 const bowlToppling = [];   // mini-goblins mid-topple after a strike
 
-// One ball topples the ENTIRE lineup of mini-goblins at once (a strike!),
-// then a fresh lineup pops back up for the next word.
+// One ball BLASTS the ENTIRE lineup of mini-goblins (a strike!) — each pin
+// gets velocity + gravity so they fly outward, spinning through the air, then
+// a fresh lineup pops back up for the next word.
 function bowlStrikeAll() {
   const bs = game.session && game.session.bowlingState;
   if (!bs) return;
   for (const d of (bs.decoys || [])) {
     if (!d) continue;
-    d.userData.toppleT = 0;
-    d.userData.toppleDir = Math.random() < 0.5 ? 1 : -1;
+    // Outward from the cluster center. Tuned so pins arc THROUGH the visible
+    // arena instead of shooting straight up out of frame: lots of horizontal,
+    // modest vertical, lighter gravity (ticked elsewhere).
+    const dx = d.position.x - BOWL_CENTER.x;
+    const dz = d.position.z - BOWL_CENTER.z;
+    const mag = Math.hypot(dx, dz) + 0.01;
+    const outX = (dx / mag) * (1.8 + Math.random() * 2.0);
+    const outZ = (dz / mag) * (1.8 + Math.random() * 2.0);
+    d.userData.vx   = outX + (Math.random() - 0.5) * 1.2;
+    d.userData.vy   = 2.3 + Math.random() * 1.6;          // modest up — long, low arc
+    d.userData.vz   = outZ + (Math.random() - 0.5) * 1.2; // radial spread, no backward bias
+    d.userData.spinX = (Math.random() - 0.5) * 14;
+    d.userData.spinZ = (Math.random() - 0.5) * 12;
+    d.userData.life  = 0;
+    d.userData.maxLife = 2.2 + Math.random() * 0.6;
+    // Scale them up so the kid can SEE the mini-goblins flying through the air
+    d.scale.setScalar(1.6);
     bowlToppling.push(d);
   }
   bs.decoys = [];
   bs.strikes += 1;
   bs.fallen = PIN_SLOTS.map(() => true);
   bowlRenderPins();
-  bowlSpawnStrikeOverlay();
-  // Fresh lineup for the next word
+  // Inline celebration — same energy as bowlSpawnStrikeOverlay() WITHOUT the
+  // giant "STRIKE!" text that would cover the flying mini-goblins.
+  sfxBowlStrike();
+  setTimeout(() => sfxBowlStrike(), 220);
+  setTimeout(() => sfxYay(), 380);
+  spawnConfettiRain();
+  setTimeout(() => spawnRainbowFlash(), 100);
+  // Fresh lineup for the next word — long enough for the flyout to play out
   setTimeout(() => {
     for (const d of bowlToppling) {
       if (d && d.parent) d.parent.remove(d);
@@ -8315,15 +8341,26 @@ function bowlStrikeAll() {
       buildBowlingDecoys();
       bowlRenderPins();
     }
-  }, 800);
+  }, 1200);
 }
 function tickBowlingTopple(dt) {
-  for (const d of bowlToppling) {
-    if (d.userData.toppleT === undefined || d.userData.toppleT >= 1) continue;
-    d.userData.toppleT = Math.min(1, d.userData.toppleT + dt * 3.2);
-    const k = d.userData.toppleT;
-    d.rotation.z = d.userData.toppleDir * k * Math.PI * 0.5;   // fall flat
-    d.position.y = 0.4 - k * 0.22;                              // sink to the ground
+  for (let i = bowlToppling.length - 1; i >= 0; i--) {
+    const d = bowlToppling[i];
+    if (d.userData.life === undefined) continue;
+    d.userData.life += dt;
+    d.position.x += d.userData.vx * dt;
+    d.position.y += d.userData.vy * dt;
+    d.position.z += d.userData.vz * dt;
+    d.userData.vy -= dt * 4.2;                       // lighter gravity — longer hangtime
+    d.rotation.x += d.userData.spinX * dt;
+    d.rotation.z += d.userData.spinZ * dt;
+    // Self-cleanup when the pin hits the ground or its life is up — the
+    // 1200ms respawn still force-removes anything still in the array.
+    if (d.userData.life >= d.userData.maxLife || d.position.y < 0.05) {
+      if (d.parent) d.parent.remove(d);
+      if (d.traverse) d.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) (Array.isArray(o.material) ? o.material.forEach(m=>m.dispose()) : o.material.dispose()); });
+      bowlToppling.splice(i, 1);
+    }
   }
 }
 
