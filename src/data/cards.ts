@@ -12,6 +12,23 @@ import { T } from '../styles/kidsTokens';
 
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Legendary';
 
+/**
+ * Skill lanes — the kid's "business gym" categories. Cards group by skill
+ * for the alternate `/cards?view=skill` layout. Each card is tagged with the
+ * primary skill its lesson trains.
+ */
+export type Skill =
+  | 'Saving'
+  | 'Investing'
+  | 'Pricing'
+  | 'Service'
+  | 'Branding'
+  | 'Operations'
+  | 'Creativity'
+  | 'Negotiation'
+  | 'Giving'
+  | 'Foundations';
+
 export interface CardDef {
   id: string;
   emoji: string;
@@ -21,6 +38,8 @@ export interface CardDef {
   /** Card background color. */
   color: string;
   rarity: Rarity;
+  /** Primary skill lane this card represents. */
+  skill: Skill;
   /** Optional — lesson slug that awards this card. */
   awardedBy?: string;
 }
@@ -32,9 +51,38 @@ export const RARITY_COLORS: Record<Rarity, string> = {
   Legendary: T.coral,
 };
 
+/** Display order for skill lanes — foundational → advanced. */
+export const SKILL_ORDER: Skill[] = [
+  'Foundations',
+  'Saving',
+  'Investing',
+  'Pricing',
+  'Operations',
+  'Service',
+  'Branding',
+  'Creativity',
+  'Negotiation',
+  'Giving',
+];
+
+/** Emoji icon shown next to each skill lane header. */
+export const SKILL_ICONS: Record<Skill, string> = {
+  Foundations: '🧠',
+  Saving: '🏦',
+  Investing: '📈',
+  Pricing: '🏷️',
+  Operations: '⚙️',
+  Service: '💛',
+  Branding: '✨',
+  Creativity: '💡',
+  Negotiation: '🤝',
+  Giving: '❤️',
+};
+
 export const cardData: CardDef[] = [
   {
     id: 'business-brain',
+    skill: 'Foundations',
     emoji: '🧠',
     title: 'Business Brain',
     fact: 'Every business has 5 building blocks. You can see them all!',
@@ -44,6 +92,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'service-pro',
+    skill: 'Service',
     emoji: '🐔',
     title: 'Service Pro',
     fact: '"My pleasure" is Chick-fil-A\'s secret superpower!',
@@ -53,6 +102,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'pricing-pro',
+    skill: 'Pricing',
     emoji: '🏷️',
     title: 'Pricing Pro',
     fact: 'Set the right price and your stuff flies off the table!',
@@ -62,6 +112,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'lemonade-boss',
+    skill: 'Pricing',
     emoji: '🍋',
     title: 'Lemonade Boss',
     fact: 'Revenue minus cost = profit. Easy money math!',
@@ -71,6 +122,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'pet-care-pro',
+    skill: 'Service',
     emoji: '🐾',
     title: 'Pet Care Pro',
     fact: 'Repeat customers turn one good walk into months of work!',
@@ -80,6 +132,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'content-creator',
+    skill: 'Branding',
     emoji: '🎬',
     title: 'Content Creator',
     fact: 'Niche audiences pay better than huge ones — specificity is leverage!',
@@ -89,6 +142,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'master-baker',
+    skill: 'Operations',
     emoji: '🍪',
     title: 'Master Baker',
     fact: 'Bigger batches share setup costs — that\'s economies of scale!',
@@ -98,6 +152,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'savings-sensei',
+    skill: 'Saving',
     emoji: '🏦',
     title: 'Savings Sensei',
     fact: 'Saving + time = the most powerful money trick on Earth!',
@@ -107,6 +162,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'location-genius',
+    skill: 'Operations',
     emoji: '📍',
     title: 'Location Genius',
     fact: 'McDonald\'s makes more from RENT than from burgers!',
@@ -116,6 +172,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'inventor',
+    skill: 'Creativity',
     emoji: '💡',
     title: 'Inventor',
     fact: 'Every great invention started UGLY. Velcro. Spanx. The iPhone.',
@@ -125,6 +182,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'negotiator',
+    skill: 'Negotiation',
     emoji: '🤝',
     title: 'Negotiator',
     fact: 'Not asking costs grown-ups $500,000 over a career. Always ask!',
@@ -134,6 +192,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'heart-of-gold',
+    skill: 'Giving',
     emoji: '❤️',
     title: 'Heart of Gold',
     fact: 'A 6-year-old raised $19,000 for cancer research with lemonade!',
@@ -143,6 +202,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'risk-master',
+    skill: 'Saving',
     emoji: '🛡️',
     title: 'Risk Master',
     fact: '10 friends + $10 each = 1 broken bike replaced. That\'s insurance!',
@@ -152,6 +212,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'recurring-royal',
+    skill: 'Pricing',
     emoji: '🔁',
     title: 'Recurring Royal',
     fact: 'Netflix went from $50M to $250B by switching to a subscription!',
@@ -161,6 +222,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'game-maker',
+    skill: 'Operations',
     emoji: '🎮',
     title: 'Game Maker',
     fact: 'A 17-year-old earned $1M building games on Roblox!',
@@ -170,6 +232,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'member-master',
+    skill: 'Pricing',
     emoji: '🛍️',
     title: 'Member Master',
     fact: 'Costco makes nearly ALL its profit from the $65 membership fee!',
@@ -179,6 +242,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'logistics-lord',
+    skill: 'Operations',
     emoji: '🚚',
     title: 'Logistics Lord',
     fact: 'Amazon Prime is worth $36 BILLION/year — just in fees!',
@@ -188,6 +252,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'brick-builder',
+    skill: 'Branding',
     emoji: '🧱',
     title: 'Brick Builder',
     fact: '1958 Lego bricks STILL click onto 2026 Lego bricks!',
@@ -197,6 +262,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'ip-inventor',
+    skill: 'Branding',
     emoji: '🐭',
     title: 'IP Inventor',
     fact: '98-year-old Mickey Mouse STILL earns Disney $5 billion a year!',
@@ -206,6 +272,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'farm-hand',
+    skill: 'Operations',
     emoji: '🌱',
     title: 'Farm Hand',
     fact: 'One $3 packet of seeds can grow $100 worth of food!',
@@ -215,6 +282,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'hustle-hero',
+    skill: 'Service',
     emoji: '❄️',
     title: 'Hustle Hero',
     fact: 'A 15-year-old made $14,000 in ONE winter shoveling driveways!',
@@ -224,6 +292,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'marketing-maven',
+    skill: 'Branding',
     emoji: '📣',
     title: 'Marketing Maven',
     fact: 'Coke spends $4 BILLION/year telling you about a brown drink!',
@@ -233,6 +302,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'research-pro',
+    skill: 'Foundations',
     emoji: '📋',
     title: 'Research Pro',
     fact: 'Google runs 7,000 A/B tests every YEAR — they never just guess!',
@@ -242,6 +312,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'maker-pro',
+    skill: 'Creativity',
     emoji: '🪡',
     title: 'Maker Pro',
     fact: 'A 12-year-old makes $2,000/MONTH selling slime kits on Etsy!',
@@ -251,6 +322,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'margin-master',
+    skill: 'Pricing',
     emoji: '🍕',
     title: 'Margin Master',
     fact: 'Movie popcorn costs $0.20 to make but sells for $9 — 2% food cost!',
@@ -260,6 +332,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'software-sensei',
+    skill: 'Operations',
     emoji: '📱',
     title: 'Software Sensei',
     fact: 'Notion went from 2 founders to a $10 BILLION app — software scales infinitely!',
@@ -269,6 +342,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'money-master',
+    skill: 'Foundations',
     emoji: '💵',
     title: 'Money Master',
     fact: 'Money replaced trading goods 2,600 years ago!',
@@ -277,6 +351,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'budget-boss',
+    skill: 'Saving',
     emoji: '📋',
     title: 'Budget Boss',
     fact: 'The 50/30/20 rule: needs, wants, savings!',
@@ -285,6 +360,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'company-pro',
+    skill: 'Foundations',
     emoji: '🏢',
     title: 'Company Pro',
     fact: 'The oldest company in the world is from Japan, 578 AD!',
@@ -293,6 +369,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'bond-expert',
+    skill: 'Investing',
     emoji: '🤝',
     title: 'Bond Expert',
     fact: 'US bonds have never missed a payment in 250 years!',
@@ -301,6 +378,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'tax-whiz',
+    skill: 'Foundations',
     emoji: '🏛️',
     title: 'Tax Whiz',
     fact: 'Taxes pay for schools, roads, and parks!',
@@ -310,6 +388,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'market-mind',
+    skill: 'Foundations',
     emoji: '⚖️',
     title: 'Market Mind',
     fact: 'Scarce + popular = expensive. Supply & demand!',
@@ -318,6 +397,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'stock-trader',
+    skill: 'Investing',
     emoji: '📈',
     title: 'Stock Trader',
     fact: 'Stocks have averaged ~10% per year for a century!',
@@ -327,6 +407,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'entrepreneur',
+    skill: 'Foundations',
     emoji: '🦄',
     title: 'Founder',
     fact: 'Airbnb was REJECTED by 7 investors before becoming worth $80 billion!',
@@ -336,6 +417,7 @@ export const cardData: CardDef[] = [
   },
   {
     id: 'inflation-fighter',
+    skill: 'Foundations',
     emoji: '📊',
     title: 'Inflation Fighter',
     fact: 'A movie ticket was 15¢ in 1920. Today? $12!',
