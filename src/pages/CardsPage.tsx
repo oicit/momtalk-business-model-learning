@@ -91,8 +91,8 @@ export default function CardsPage() {
 
   // Group cards by skill lane for the alternate view
   const groupedBySkill = useMemo(() => {
-    const out: Record<Skill, typeof cardData> = Object.fromEntries(
-      SKILL_ORDER.map((s) => [s, []]),
+    const out = Object.fromEntries(
+      SKILL_ORDER.map((s) => [s, [] as typeof cardData]),
     ) as Record<Skill, typeof cardData>;
     for (const c of cardData) out[c.skill].push(c);
     return out;
@@ -100,7 +100,7 @@ export default function CardsPage() {
 
   // Per-lane earned count for the skill-view subheader
   const skillProgress = useMemo(() => {
-    const out: Record<Skill, { earned: number; total: number }> = Object.fromEntries(
+    const out = Object.fromEntries(
       SKILL_ORDER.map((s) => [s, { earned: 0, total: 0 }]),
     ) as Record<Skill, { earned: number; total: number }>;
     for (const c of cardData) {
