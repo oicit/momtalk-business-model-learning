@@ -143,6 +143,193 @@ const lesson: LessonDef = {
       bonusTip:
         "Chick-fil-A's franchise fee is only $10,000 — way less than most chains. But they keep 50% of profits and 15% of revenue. This unique model means operators are deeply invested in each location's success!",
     },
+
+    // ─── Real-World Mission ────────────────────────────────────────────
+    {
+      kind: 'real-world-mission',
+      mission: {
+        id: 'chick-fil-a',
+        emoji: '😊',
+        title: {
+          easy: 'The "My Pleasure" Challenge',
+          medium: 'Run a 3-day "my pleasure" service experiment',
+          hard: '3-day service-language field experiment',
+        },
+        pitch: {
+          easy:
+            'For 3 days, say "my pleasure" every time someone says "thank you" — to family, friends, anyone. Count how many times you say it. Watch their faces. See what changes.',
+          medium:
+            'Run the Chick-fil-A "my pleasure" trick yourself for 3 days. Every "thank you" → reply "my pleasure." Track the count + the reactions. Notice what shifts.',
+          hard:
+            'Apply Chick-fil-A\'s service-language standard in your own interactions for 3 days. Track frequency, observe counterparty response patterns, log notable reactions.',
+        },
+        steps: [
+          {
+            emoji: '🗣️',
+            text: {
+              easy: 'Practice saying "my pleasure" out loud 5 times so it feels natural.',
+              medium: 'Rehearse the response until it flows naturally — at least 5 reps.',
+              hard: 'Practice the substitution until verbal automaticity is achieved.',
+            },
+          },
+          {
+            emoji: '📅',
+            text: {
+              easy: 'Pick 3 days in a row. Day 1 starts as soon as you say it for the first time.',
+              medium: 'Pick a 3-day window. Day 1 begins at the first applied response.',
+              hard: 'Set a 3-day observation window starting from first applied response.',
+            },
+          },
+          {
+            emoji: '🎯',
+            text: {
+              easy: 'Every time someone says "thank you" to YOU — say "my pleasure" back.',
+              medium: 'On every "thank you" you receive: respond with "my pleasure."',
+              hard: 'Trigger condition: incoming "thank you" → response "my pleasure."',
+            },
+          },
+          {
+            emoji: '✍️',
+            text: {
+              easy: 'Make a tally mark on the tracker every time you say it.',
+              medium: 'Log each occurrence on the tracker. Note any standout reactions.',
+              hard: 'Log frequency + qualitative response data per event.',
+            },
+          },
+          {
+            emoji: '👀',
+            text: {
+              easy: 'Notice: do people smile MORE? Are they nicer back? Write what you see.',
+              medium: 'Observe + record counterparty reactions. Smiles? Surprise? More friendliness?',
+              hard: 'Observational data: counterparty affect, micro-expressions, return engagement.',
+            },
+          },
+        ],
+        reflection: [
+          {
+            key: 'count',
+            prompt: {
+              easy: 'How many times did you say "my pleasure" in 3 days?',
+              medium: 'Total "my pleasure" responses across the 3-day window',
+              hard: 'Cumulative frequency over 3-day observation',
+            },
+            type: 'number',
+            placeholder: '17',
+          },
+          {
+            key: 'reaction',
+            prompt: {
+              easy: 'What did people DO when you said it?',
+              medium: 'Most common counterparty reaction',
+              hard: 'Modal counterparty response pattern',
+            },
+            type: 'text',
+            placeholder: 'A lot of them smiled or said it back',
+          },
+          {
+            key: 'best',
+            prompt: {
+              easy: 'What was the BEST reaction you got?',
+              medium: 'Standout positive response',
+              hard: 'Most impactful response event',
+            },
+            type: 'text',
+            placeholder: 'My grandpa said "wow, where did YOU learn that?"',
+          },
+          {
+            key: 'learned',
+            prompt: {
+              easy: 'What did you learn about WORDS and people?',
+              medium: 'Biggest insight from the service-language experiment',
+              hard: 'Largest insight delta from applied service-language field test',
+            },
+            type: 'longtext',
+            placeholder: 'I didn\'t realize how much a simple phrase could change…',
+          },
+        ],
+        parentNote: {
+          easy: 'Honest reactions! If "my pleasure" sounds weird coming from a kid, react genuinely — the data is the lesson.',
+          medium:
+            'Engage authentically. Polite acknowledgement doesn\'t teach the service-impact lesson; genuine reactions (positive AND surprised) do.',
+          hard:
+            'Authentic counterparty engagement maximizes the lesson value. The kid is learning to read real social signal, not scripted feedback.',
+        },
+        printables: {
+          trackers: [
+            {
+              title: '"My Pleasure" Tally Sheet',
+              note: 'One row per day. Add a tally mark for every time you said it.',
+              columns: ['Day', 'Date', 'Tally Marks', 'Best Reaction'],
+              rows: 3,
+            },
+          ],
+          worksheets: [
+            {
+              title: 'Service Language Field Notes',
+              blocks: [
+                {
+                  label: '🗣️ My exact line',
+                  hint: 'Write the words. Practice them.',
+                  lines: 1,
+                },
+                {
+                  label: '🎯 Who I\'ll try it on (Day 1 list)',
+                  hint: 'Family, friends, neighbors, store clerks.',
+                  lines: 3,
+                },
+                {
+                  label: '📊 Day 1 count',
+                  equation: '_______ times',
+                },
+                {
+                  label: '   Best Day 1 reaction',
+                  lines: 2,
+                },
+                {
+                  label: '📊 Day 2 count',
+                  equation: '_______ times',
+                },
+                {
+                  label: '   Best Day 2 reaction',
+                  lines: 2,
+                },
+                {
+                  label: '📊 Day 3 count',
+                  equation: '_______ times',
+                },
+                {
+                  label: '   Best Day 3 reaction',
+                  lines: 2,
+                },
+                {
+                  label: '💭 What I noticed about people + words',
+                  lines: 4,
+                },
+                {
+                  label: '🤔 Will I keep doing it?',
+                  hint: 'Why or why not.',
+                  lines: 3,
+                },
+              ],
+            },
+          ],
+          checklists: [
+            {
+              title: 'Challenge Setup',
+              items: [
+                'Practiced saying "my pleasure" out loud 5 times',
+                '3 days picked + Day 1 start time set',
+                'Tracker printed + accessible',
+                'Pen or pencil to mark tallies',
+                'I\'m ready to do it EVERY time someone thanks me',
+                'I\'ll notice reactions — not just count',
+              ],
+              note: 'Tip: the secret is consistency. Skip even one "thank you" and the data gets noisy. Stick to it.',
+            },
+          ],
+        },
+      },
+    },
   ],
 };
 
