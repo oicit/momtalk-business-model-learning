@@ -36,7 +36,7 @@ export default function Footer() {
           opacity: 0.9,
           marginBottom: 8,
         }}>
-          Business Model Learning Lab
+          Business Learning Lab
         </p>
 
         <p style={{

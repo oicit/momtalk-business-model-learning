@@ -259,7 +259,7 @@ export default function CertificatePage() {
                 </div>
                 <div style={{ fontSize: 14, color: T.text }}>
                   has completed the{' '}
-                  <b>Business Model Learning</b> adventure
+                  <b>Business Learning</b> adventure
                 </div>
                 <div style={{ fontSize: 14, color: T.text, marginTop: 4 }}>
                   with{' '}
