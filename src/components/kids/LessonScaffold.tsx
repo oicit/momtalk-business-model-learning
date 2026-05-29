@@ -18,6 +18,7 @@ import { useSpacedReview } from '../../hooks/useSpacedReview';
 import { useChildContext } from '../../hooks/useChildContext';
 import { useAdaptive } from '../../hooks/useAdaptive';
 import { useEarnedCards } from '../../lib/cards';
+import { useMissions } from '../../lib/missions';
 import { earnedCardFor } from '../../data/cards';
 import CardEarnedToast from './CardEarnedToast';
 import LemonadeStand from '../games/LemonadeStand';
@@ -53,7 +54,16 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const previousScore = getScore(lesson.id);
   const alreadyDone = isCompleted(lesson.id);
   const { earnCard, hasCard } = useEarnedCards();
+  const { getMission } = useMissions();
   const [toastCardId, setToastCardId] = useState<string | null>(null);
+
+  // Welcome-back nudge: if the kid accepted this lesson's mission on a
+  // previous visit and hasn't reflected yet, prompt them on lesson re-entry.
+  // The mission id matches the lesson id for per-lesson missions.
+  const acceptedMission = getMission(lesson.id);
+  const showWelcomeBack =
+    acceptedMission?.status === 'accepted';
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
   // Beats become wizard steps. Outro is hidden until completion, so it's
   // pruned from the visible step list.
@@ -170,6 +180,23 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
           </div>
         )}
       </div>
+
+      {/* ─── Welcome-back nudge for accepted-but-unreflected missions ─── */}
+      {showWelcomeBack && !nudgeDismissed && stepIdx === 0 && (
+        <WelcomeBackNudge
+          mission={acceptedMission!}
+          lesson={lesson}
+          onReflect={() => {
+            // Jump to the real-world-mission beat (always near the end)
+            const missionStepIdx = visibleBeats.findIndex(
+              (b) => b.kind === 'real-world-mission',
+            );
+            if (missionStepIdx >= 0) setStepIdx(missionStepIdx);
+            setNudgeDismissed(true);
+          }}
+          onDismiss={() => setNudgeDismissed(true)}
+        />
+      )}
 
       {/* ─── Single beat ─── */}
       <main style={{ flex: 1, paddingBottom: 100 /* space for sticky nav */ }}>
@@ -2180,3 +2207,124 @@ function CircleRoadmap({
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WelcomeBackNudge — shown above the intro when the kid has an accepted
+// mission for this lesson on a previous visit. Two outs: 'Yes, let me reflect'
+// jumps straight to the real-world-mission beat; 'Not yet, keep learning'
+// dismisses and lets the kid walk the lesson normally.
+// ─────────────────────────────────────────────────────────────────────────────
+function WelcomeBackNudge({
+  mission,
+  lesson,
+  onReflect,
+  onDismiss,
+}: {
+  mission: import('../../lib/missions').MissionRecord;
+  lesson: LessonDef;
+  onReflect: () => void;
+  onDismiss: () => void;
+}) {
+  // Find the mission definition so we can use its title in the nudge
+  const missionBeat = lesson.beats.find((b) => b.kind === 'real-world-mission');
+  const missionDef = missionBeat?.kind === 'real-world-mission' ? missionBeat.mission : null;
+  const missionTitle =
+    typeof missionDef?.title === 'string'
+      ? missionDef.title
+      : missionDef?.title?.easy ?? 'the mission';
+
+  const days = (() => {
+    const acceptedMs = new Date(mission.acceptedAt).getTime();
+    const elapsed = Math.floor((Date.now() - acceptedMs) / (1000 * 60 * 60 * 24));
+    return elapsed;
+  })();
+  const ago = days <= 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`;
+
+  return (
+    <div
+      role="dialog"
+      aria-label="Welcome back"
+      style={{
+        margin: '16px',
+        padding: '18px 18px 16px',
+        background: T.white,
+        border: `3px solid ${T.green}`,
+        borderRadius: 24,
+        boxShadow: `6px 6px 0 ${T.green}`,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        animation: 'slide-up-fade 360ms cubic-bezier(.34,1.56,.64,1) both',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ flexShrink: 0 }}>
+          <Momo mood="excited" avatarOnly instant size={48} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              color: T.pink,
+              letterSpacing: '.06em',
+              textTransform: 'uppercase',
+              marginBottom: 4,
+            }}
+          >
+            Welcome back!
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: T.green, lineHeight: 1.3 }}>
+            Did you try {missionTitle}?
+          </div>
+          <div style={{ fontSize: 12, color: T.green, marginTop: 4, fontWeight: 600 }}>
+            You accepted this mission {ago}. Tell me how it went!
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          onClick={onReflect}
+          style={{
+            flex: 1,
+            minWidth: 140,
+            background: T.green,
+            color: T.white,
+            border: 'none',
+            borderRadius: 999,
+            padding: '12px 18px',
+            fontFamily: 'inherit',
+            fontWeight: 800,
+            fontSize: 14,
+            cursor: 'pointer',
+            boxShadow: `3px 3px 0 #1a6b48`,
+          }}
+        >
+          ✏️ Yes — let me reflect
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          style={{
+            flex: 1,
+            minWidth: 120,
+            background: T.white,
+            color: T.green,
+            border: `2px solid ${T.green}`,
+            borderRadius: 999,
+            padding: '12px 18px',
+            fontFamily: 'inherit',
+            fontWeight: 800,
+            fontSize: 14,
+            cursor: 'pointer',
+          }}
+        >
+          Not yet — keep learning
+        </button>
+      </div>
+    </div>
+  );
+}
+
