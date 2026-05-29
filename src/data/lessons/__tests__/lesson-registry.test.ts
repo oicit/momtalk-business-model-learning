@@ -40,7 +40,7 @@ import startupPitch from '../startup-pitch';
 import appMaker from '../app-maker';
 
 import { resolveText, type LessonDef, type AdaptiveText } from '../types';
-import { cardData, earnedCardFor } from '../../cards';
+import { cardData, earnedCardFor, milestoneCards, milestoneCardsEarned } from '../../cards';
 
 const ALL_LESSONS: LessonDef[] = [
   business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator,
@@ -118,6 +118,34 @@ describe('adaptive text resolution', () => {
     expect(resolveText(t, 'easy')).toBe('E');
     expect(resolveText(t, 'medium')).toBe('M');
     expect(resolveText(t, 'hard')).toBe('H');
+  });
+});
+
+describe('milestone cards', () => {
+  it('every milestone card has an unlockHint', () => {
+    for (const c of milestoneCards) {
+      expect(c.unlockHint, `card ${c.id}`).toBeTruthy();
+    }
+  });
+
+  it('milestoneCardsEarned monotonic in lesson count', () => {
+    const at0 = milestoneCardsEarned(0, 0);
+    const at5 = milestoneCardsEarned(5, 0);
+    const at15 = milestoneCardsEarned(15, 0);
+    expect(at5.length).toBeGreaterThanOrEqual(at0.length);
+    expect(at15.length).toBeGreaterThanOrEqual(at5.length);
+  });
+
+  it('milestone thresholds award the expected ids', () => {
+    // money-master earns at 1 lesson
+    expect(milestoneCardsEarned(1, 0)).toContain('money-master');
+    expect(milestoneCardsEarned(0, 0)).not.toContain('money-master');
+    // company-pro earns at 5 lessons
+    expect(milestoneCardsEarned(5, 0)).toContain('company-pro');
+    expect(milestoneCardsEarned(4, 0)).not.toContain('company-pro');
+    // budget-boss earns at 3 missions
+    expect(milestoneCardsEarned(0, 3)).toContain('budget-boss');
+    expect(milestoneCardsEarned(0, 2)).not.toContain('budget-boss');
   });
 });
 

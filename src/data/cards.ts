@@ -42,6 +42,14 @@ export interface CardDef {
   skill: Skill;
   /** Optional — lesson slug that awards this card. */
   awardedBy?: string;
+  /**
+   * Optional cross-lesson milestone — awarded automatically when the kid
+   * hits the threshold. E.g. "complete 5 lessons" earns Company Pro.
+   * Mutually exclusive with awardedBy in practice.
+   */
+  milestone?: { type: 'lessons-completed' | 'missions-completed'; n: number };
+  /** Optional one-line hint shown on locked milestone cards. */
+  unlockHint?: string;
 }
 
 export const RARITY_COLORS: Record<Rarity, string> = {
@@ -348,6 +356,8 @@ export const cardData: CardDef[] = [
     fact: 'Money replaced trading goods 2,600 years ago!',
     color: T.mint,
     rarity: 'Common',
+    milestone: { type: 'lessons-completed', n: 1 },
+    unlockHint: 'Finish your first lesson!',
   },
   {
     id: 'budget-boss',
@@ -357,6 +367,8 @@ export const cardData: CardDef[] = [
     fact: 'The 50/30/20 rule: needs, wants, savings!',
     color: '#FFFFF0',
     rarity: 'Common',
+    milestone: { type: 'missions-completed', n: 3 },
+    unlockHint: 'Finish 3 real-world missions!',
   },
   {
     id: 'company-pro',
@@ -366,6 +378,8 @@ export const cardData: CardDef[] = [
     fact: 'The oldest company in the world is from Japan, 578 AD!',
     color: '#E8F4FD',
     rarity: 'Uncommon',
+    milestone: { type: 'lessons-completed', n: 5 },
+    unlockHint: 'Finish 5 lessons!',
   },
   {
     id: 'bond-expert',
@@ -375,6 +389,8 @@ export const cardData: CardDef[] = [
     fact: 'US bonds have never missed a payment in 250 years!',
     color: '#F0E8FD',
     rarity: 'Uncommon',
+    milestone: { type: 'lessons-completed', n: 10 },
+    unlockHint: 'Finish 10 lessons!',
   },
   {
     id: 'tax-whiz',
@@ -394,6 +410,8 @@ export const cardData: CardDef[] = [
     fact: 'Scarce + popular = expensive. Supply & demand!',
     color: '#E8F0FF',
     rarity: 'Uncommon',
+    milestone: { type: 'lessons-completed', n: 15 },
+    unlockHint: 'Finish 15 lessons!',
   },
   {
     id: 'stock-trader',
@@ -423,8 +441,32 @@ export const cardData: CardDef[] = [
     fact: 'A movie ticket was 15¢ in 1920. Today? $12!',
     color: '#FFF0E8',
     rarity: 'Legendary',
+    milestone: { type: 'lessons-completed', n: 25 },
+    unlockHint: 'Finish 25 lessons — the Legendary milestone!',
   },
 ];
+
+/** All milestone cards (auto-earned via lesson/mission counts, not by lesson completion). */
+export const milestoneCards = cardData.filter((c) => c.milestone);
+
+/**
+ * Given current counts of completed lessons + missions, return the set of
+ * milestone card ids the kid SHOULD have. Use the difference with their
+ * currently-earned set to figure out what to auto-award.
+ */
+export function milestoneCardsEarned(
+  lessonsCompleted: number,
+  missionsCompleted: number,
+): string[] {
+  return milestoneCards
+    .filter((c) => {
+      if (!c.milestone) return false;
+      const count =
+        c.milestone.type === 'lessons-completed' ? lessonsCompleted : missionsCompleted;
+      return count >= c.milestone.n;
+    })
+    .map((c) => c.id);
+}
 
 /** Look up the card a given lesson awards. Returns null if no card mapped. */
 export function earnedCardFor(lessonId: string): CardDef | null {

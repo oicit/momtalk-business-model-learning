@@ -126,6 +126,23 @@ export default function CollectibleCard({
           {card.fact}
         </div>
       )}
+
+      {/* Unlock hint — shown only for locked milestone cards so the kid
+          knows the path. Earned cards show the fact instead. */}
+      {!earned && size !== 'sm' && card.unlockHint && (
+        <div
+          style={{
+            fontSize: s.fact,
+            color: T.green,
+            marginTop: 6,
+            lineHeight: 1.4,
+            fontWeight: 700,
+            fontStyle: 'italic',
+          }}
+        >
+          {card.unlockHint}
+        </div>
+      )}
     </div>
   );
 }

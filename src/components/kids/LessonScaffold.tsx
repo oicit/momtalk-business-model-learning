@@ -19,7 +19,7 @@ import { useChildContext } from '../../hooks/useChildContext';
 import { useAdaptive } from '../../hooks/useAdaptive';
 import { useEarnedCards } from '../../lib/cards';
 import { useMissions } from '../../lib/missions';
-import { earnedCardFor } from '../../data/cards';
+import { earnedCardFor, milestoneCardsEarned } from '../../data/cards';
 import CardEarnedToast from './CardEarnedToast';
 import LemonadeStand from '../games/LemonadeStand';
 import RealWorldMission from './RealWorldMission';
@@ -46,7 +46,7 @@ interface LessonScaffoldProps {
 export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const theme = themes[lesson.themeKey];
   const navigate = useNavigate();
-  const { isCompleted, getScore, completeLesson } = useProgress();
+  const { progress, isCompleted, getScore, completeLesson } = useProgress();
   const { scheduleReview } = useSpacedReview();
   const { child } = useChildContext();
   const { difficultyLevel, themeContext } = useAdaptive(child);
@@ -54,7 +54,27 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
   const previousScore = getScore(lesson.id);
   const alreadyDone = isCompleted(lesson.id);
   const { earnCard, hasCard } = useEarnedCards();
-  const { getMission } = useMissions();
+  const { getMission, completed: completedMissions } = useMissions();
+
+  /**
+   * After awarding a lesson card, check whether the kid has hit any
+   * cross-lesson milestone thresholds (e.g. 5 lessons → Company Pro)
+   * and auto-award those cards too. Called from both quiz + mini-game paths.
+   */
+  const awardMilestonesIfReady = useCallback(() => {
+    // +1 for the lesson just completed if it wasn't already in the count
+    const lessonsCompletedCount =
+      progress.lessonsCompleted.length + (isCompleted(lesson.id) ? 0 : 1);
+    const missionsCompletedCount = completedMissions.length;
+    const earnedIds = milestoneCardsEarned(lessonsCompletedCount, missionsCompletedCount);
+    for (const id of earnedIds) {
+      if (!hasCard(id)) {
+        earnCard(id);
+        // Show the FIRST new milestone in the toast — let later ones be discovered on /cards
+        setToastCardId((prev) => prev ?? id);
+      }
+    }
+  }, [progress.lessonsCompleted, isCompleted, lesson.id, completedMissions.length, hasCard, earnCard]);
   const [toastCardId, setToastCardId] = useState<string | null>(null);
 
   // Welcome-back nudge: if the kid accepted this lesson's mission on a
@@ -229,6 +249,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
               earnCard(reward.id);
               setToastCardId(reward.id);
             }
+            awardMilestonesIfReady();
             void score;
             // Don't auto-advance — let the kid read their score and tap Continue.
           }}
@@ -248,6 +269,7 @@ export default function LessonScaffold({ lesson }: LessonScaffoldProps) {
               earnCard(reward.id);
               setToastCardId(reward.id);
             }
+            awardMilestonesIfReady();
             window.setTimeout(() => goNext(), 600);
           }}
         />
