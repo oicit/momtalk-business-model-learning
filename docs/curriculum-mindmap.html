@@ -28,6 +28,7 @@
       --bg-foundation: #FFF5DB;
       --bg-money:      #E5F5EC;
       --bg-business:   #E0F2FE;
+      --bg-industries: #FFF0F5;
       --bg-hustles:    #FFE5EC;
       --bg-skills:     #EDE9FE;
       --bg-advanced:   #FFE8E0;
@@ -35,6 +36,7 @@
       --accent-foundation: var(--yellow);
       --accent-money:      var(--green);
       --accent-business:   var(--blue);
+      --accent-industries: var(--pink);
       --accent-hustles:    var(--pink);
       --accent-skills:     var(--lavender);
       --accent-advanced:   var(--coral);
@@ -102,6 +104,10 @@
       background: var(--white);
       border-style: dashed;
     }
+    .legend-swatch.kingdom {
+      background: var(--bg-industries);
+      border-color: var(--pink);
+    }
 
     /* ─── Root node + connector ─── */
     .center-stage {
@@ -168,11 +174,14 @@
     /* ─── Category columns ─── */
     .branches {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 14px;
       margin-top: 60px;
     }
-    @media (max-width: 1280px) {
+    @media (max-width: 1480px) {
+      .branches { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+    @media (max-width: 980px) {
       .branches { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
@@ -225,9 +234,30 @@
     .branch.foundation .branch-header { background: var(--bg-foundation); }
     .branch.money      .branch-header { background: var(--bg-money); }
     .branch.business   .branch-header { background: var(--bg-business); }
+    .branch.industries .branch-header { background: var(--bg-industries); }
     .branch.hustles    .branch-header { background: var(--bg-hustles); }
     .branch.skills     .branch-header { background: var(--bg-skills); }
     .branch.advanced   .branch-header { background: var(--bg-advanced); }
+
+    /* Industries lane uses 'kingdom' nodes: each card is a real-world
+       industry CATEGORY waiting for lessons, not a single lesson. */
+    .lesson.kingdom {
+      border-style: solid;
+      border-width: 2px;
+      border-color: var(--pink);
+      background: var(--white);
+    }
+    .lesson.kingdom .title { color: var(--pink); }
+    .lesson.kingdom .status {
+      background: var(--white);
+      color: var(--pink);
+      border: 2px solid var(--pink);
+      font-size: 11px;
+    }
+    .lesson.kingdom .concept {
+      font-style: italic;
+      color: var(--ink);
+    }
 
     /* ─── Lesson nodes ─── */
     .lesson {
@@ -298,12 +328,14 @@
     .branch.foundation .lesson { background: var(--white); }
     .branch.money      .lesson { background: var(--white); }
     .branch.business   .lesson { background: var(--white); }
+    .branch.industries .lesson { background: var(--white); }
     .branch.hustles    .lesson { background: var(--white); }
     .branch.skills     .lesson { background: var(--white); }
     .branch.advanced   .lesson { background: var(--white); }
     .branch.foundation .lesson.brainstormed { background: var(--bg-foundation); }
     .branch.money      .lesson.brainstormed { background: var(--bg-money); }
     .branch.business   .lesson.brainstormed { background: var(--bg-business); }
+    .branch.industries .lesson.kingdom { background: var(--bg-industries); }
     .branch.hustles    .lesson.brainstormed { background: var(--bg-hustles); }
     .branch.skills     .lesson.brainstormed { background: var(--bg-skills); }
     .branch.advanced   .lesson.brainstormed { background: var(--bg-advanced); }
@@ -358,16 +390,20 @@
   <header class="page">
     <h1>🃏 Business Model Learning — Curriculum Mind Map</h1>
     <p class="subtitle">
-      Every lesson, shipped and brainstormed, grouped into the 6 skill lanes
-      that define the curriculum. <strong>56 modules total</strong> — 29 live
-      on <code>main</code>, 27 on the table.
+      Every lesson, shipped and brainstormed, grouped into 6 skill lanes — plus
+      a 7th lane for the <strong>10 real-world industry kingdoms</strong> from
+      Momo's World (a separate category to build out, distinct from the
+      concept-based 6 lanes).
     </p>
     <div class="legend" role="region" aria-label="Legend">
       <span class="legend-item">
-        <span class="legend-swatch shipped" aria-hidden="true"></span> Shipped
+        <span class="legend-swatch shipped" aria-hidden="true"></span> Shipped lesson
       </span>
       <span class="legend-item">
-        <span class="legend-swatch brainstormed" aria-hidden="true"></span> Brainstormed
+        <span class="legend-swatch brainstormed" aria-hidden="true"></span> Brainstormed lesson
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch kingdom" aria-hidden="true"></span> Industry kingdom (to build)
       </span>
     </div>
   </header>
@@ -377,19 +413,20 @@
       <div class="root">
         <span class="label">The Lab</span>
         <span class="title">Business Model Learning</span>
-        <span class="count"><b>29</b> shipped &nbsp;·&nbsp; <b>27</b> brainstormed &nbsp;·&nbsp; <b>56</b> total</span>
+        <span class="count"><b>29</b> shipped &nbsp;·&nbsp; <b>27</b> brainstormed &nbsp;·&nbsp; <b>10</b> kingdoms</span>
       </div>
     </div>
 
     <!-- Connector lines from root down to each category header -->
     <svg class="connector" viewBox="0 0 1480 60" preserveAspectRatio="none">
-      <!-- Lines fan out from center top to 6 column tops -->
-      <path d="M 740 0 Q 740 30 123 60" />
-      <path d="M 740 0 Q 740 30 370 60" />
-      <path d="M 740 0 Q 740 30 617 60" />
-      <path d="M 740 0 Q 740 30 863 60" />
-      <path d="M 740 0 Q 740 30 1110 60" />
-      <path d="M 740 0 Q 740 30 1357 60" />
+      <!-- Lines fan out from center top to 7 column tops -->
+      <path d="M 740 0 Q 740 30 106 60" />
+      <path d="M 740 0 Q 740 30 317 60" />
+      <path d="M 740 0 Q 740 30 528 60" />
+      <path d="M 740 0 Q 740 30 740 60" />
+      <path d="M 740 0 Q 740 30 952 60" />
+      <path d="M 740 0 Q 740 30 1163 60" />
+      <path d="M 740 0 Q 740 30 1374 60" />
     </svg>
 
     <div class="branches">
@@ -644,6 +681,101 @@
             <div class="concept">IP across cards + games + media</div>
           </div>
           <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- REAL-WORLD INDUSTRIES — Momo's World 10 Kingdoms -->
+      <!-- Separate category. NOT yet mapped to existing lessons.       -->
+      <!-- Each kingdom is a real-world industry waiting for its own    -->
+      <!-- dedicated lessons to be written.                             -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch industries" aria-label="Real-World Industry Kingdoms">
+        <div class="branch-header">
+          <span class="emoji">🏰</span>
+          <div class="name">Real-World<br />Industries</div>
+          <span class="count">10 kingdoms · 0 lessons yet</span>
+        </div>
+
+        <div class="lesson kingdom">
+          <span class="emoji">🌍</span>
+          <div class="meta">
+            <div class="title">Wild Earth</div>
+            <div class="concept">Agriculture, mining, water, forestry, waste</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">⚡</span>
+          <div class="meta">
+            <div class="title">Power Core</div>
+            <div class="concept">Energy — oil, solar, wind, nuclear, grid, batteries</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">⚙️</span>
+          <div class="meta">
+            <div class="title">Machine Forge</div>
+            <div class="concept">Machinery, robotics, semiconductors, automation</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">🏗️</span>
+          <div class="meta">
+            <div class="title">Mega Build</div>
+            <div class="concept">Construction, infrastructure, cement, steel</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">💻</span>
+          <div class="meta">
+            <div class="title">Digital Universe</div>
+            <div class="concept">Software, cloud, AI, telecom, cybersecurity</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">🛒</span>
+          <div class="meta">
+            <div class="title">Trade Routes</div>
+            <div class="concept">Retail, ecommerce, logistics, shipping, restaurants</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">📚</span>
+          <div class="meta">
+            <div class="title">Wisdom Academy</div>
+            <div class="concept">Education, tutoring, universities, learning apps</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">🏛️</span>
+          <div class="meta">
+            <div class="title">Civilization Council</div>
+            <div class="concept">Government, public safety, courts, defense</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">💊</span>
+          <div class="meta">
+            <div class="title">Healing &amp; Life</div>
+            <div class="concept">Healthcare, biotech, medical devices, insurance</div>
+          </div>
+          <span class="status">🏰</span>
+        </div>
+        <div class="lesson kingdom">
+          <span class="emoji">🚀</span>
+          <div class="meta">
+            <div class="title">Future Frontier</div>
+            <div class="concept">Space, AI, fusion, climate tech, quantum</div>
+          </div>
+          <span class="status">🏰</span>
         </div>
       </section>
 
@@ -922,20 +1054,20 @@
     <!-- ─── Summary stats ─── -->
     <div class="summary">
       <div class="stat">
-        <span class="num-big">56</span>
-        <div class="label">Total Modules</div>
-      </div>
-      <div class="stat">
         <span class="num-big">29</span>
-        <div class="label">Shipped ✓</div>
+        <div class="label">Shipped Lessons ✓</div>
       </div>
       <div class="stat">
         <span class="num-big">27</span>
-        <div class="label">Brainstormed ✨</div>
+        <div class="label">Brainstormed Lessons ✨</div>
       </div>
       <div class="stat">
-        <span class="num-big">6</span>
-        <div class="label">Skill Lanes</div>
+        <span class="num-big">10</span>
+        <div class="label">Industry Kingdoms 🏰</div>
+      </div>
+      <div class="stat">
+        <span class="num-big">7</span>
+        <div class="label">Categories</div>
       </div>
     </div>
 
