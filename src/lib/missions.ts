@@ -9,14 +9,16 @@
  * - "reflected" means they came back, filled in the reflection, and
  *   optionally uploaded a photo.
  *
- * Storage: localStorage-first. Server sync can be added by mirroring
- * src/lib/cards.ts (the API is identical pattern — module_data with
- * data_key = `missions:${childId}`).
+ * Storage: localStorage-first with best-effort server sync. Mirrors
+ * src/lib/cards.ts. When the kid is logged in, /api/missions keeps a
+ * server copy keyed by `missions:${childId}`; otherwise just localStorage.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getStoredAuth } from './auth';
 
 const LS_KEY = 'bml.missions.v1';
+const API = '/api/missions';
 
 export type MissionStatus = 'accepted' | 'reflected';
 
@@ -61,11 +63,93 @@ function saveLocal(s: MissionsState): void {
   }
 }
 
+async function fetchServer(token: string): Promise<MissionsState | null> {
+  try {
+    const res = await fetch(API, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    const { missions } = await res.json();
+    if (!missions || !missions.byId) return null;
+    return { byId: { ...missions.byId } };
+  } catch {
+    return null;
+  }
+}
+
+async function pushServer(token: string, missions: MissionsState): Promise<void> {
+  try {
+    await fetch(API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ missions }),
+    });
+  } catch {
+    // Best-effort — localStorage is the fallback.
+  }
+}
+
+/**
+ * Merge local + server missions. Strategy: latest write wins per mission.
+ * - If a mission exists only on one side, take it.
+ * - If both sides have it: prefer 'reflected' over 'accepted' (later state),
+ *   else prefer the record with the later acceptedAt timestamp.
+ */
+function merge(local: MissionsState, server: MissionsState): MissionsState {
+  const byId: Record<string, MissionRecord> = { ...local.byId };
+  for (const [id, sRec] of Object.entries(server.byId)) {
+    const lRec = byId[id];
+    if (!lRec) {
+      byId[id] = sRec;
+      continue;
+    }
+    // Both sides have it — latest state wins.
+    const localIsReflected = lRec.status === 'reflected';
+    const serverIsReflected = sRec.status === 'reflected';
+    if (serverIsReflected && !localIsReflected) {
+      byId[id] = sRec;
+    } else if (localIsReflected && !serverIsReflected) {
+      // Keep local.
+    } else {
+      // Same state — prefer later acceptedAt (latest action wins).
+      byId[id] = (sRec.acceptedAt > lRec.acceptedAt) ? sRec : lRec;
+    }
+  }
+  return { byId };
+}
+
 export function useMissions() {
   const [state, setState] = useState<MissionsState>(loadLocal);
+  const initialSyncDone = useRef(false);
 
+  // On mount: pull server state if authenticated, merge with local
+  useEffect(() => {
+    const auth = getStoredAuth();
+    if (!auth?.sessionToken) {
+      initialSyncDone.current = true;
+      return;
+    }
+
+    fetchServer(auth.sessionToken).then((server) => {
+      if (server) {
+        setState((local) => {
+          const merged = merge(local, server);
+          saveLocal(merged);
+          return merged;
+        });
+      }
+      initialSyncDone.current = true;
+    });
+  }, []);
+
+  // Persist to localStorage + push to server on every change
   useEffect(() => {
     saveLocal(state);
+    const auth = getStoredAuth();
+    if (auth?.sessionToken) pushServer(auth.sessionToken, state);
   }, [state]);
 
   const acceptMission = useCallback((id: string) => {
