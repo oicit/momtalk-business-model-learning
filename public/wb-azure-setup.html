@@ -1,0 +1,52 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Word Battle · Voice setup</title>
+<style>
+  body { font: 16px -apple-system, sans-serif; background: #FAF8F0; color: #4A2511;
+         display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  .card { background: #FFF8E7; border: 3px solid #2D9B6E; border-radius: 22px;
+          padding: 28px 36px; max-width: 460px; text-align: center;
+          box-shadow: 0 12px 0 rgba(45,155,110,0.18); }
+  h1 { margin: 0 0 10px; font-size: 22px; }
+  p  { margin: 6px 0; }
+  .ok  { color: #1F7A52; font-weight: 700; }
+  .err { color: #B83232; font-weight: 700; }
+  a    { color: #2D9B6E; font-weight: 700; }
+</style>
+<div class="card">
+  <h1>🎙 Word Battle · Voice setup</h1>
+  <p id="status">Configuring…</p>
+  <p><a id="go" href="/word-battle">→ Open Word Battle</a></p>
+</div>
+<script>
+(function () {
+  // Single-purpose bootstrap: read ?key=...&region=...&voice=... from URL,
+  // write to localStorage (shared with /word-battle's iframe at same origin),
+  // strip query string so the key isn't sitting in the address bar, then
+  // redirect to the game after a short pause.
+  var qs = new URLSearchParams(location.search);
+  var key    = (qs.get("key")    || "").trim();
+  var region = (qs.get("region") || "eastus").trim();
+  var voice  = (qs.get("voice")  || "en-US-JaneNeural").trim();
+  var status = document.getElementById("status");
+  if (!key) {
+    status.className = "err";
+    status.textContent = "✗ No ?key=… in URL. Nothing changed.";
+    return;
+  }
+  try {
+    localStorage.setItem("azureKey",    key);
+    localStorage.setItem("azureRegion", region);
+    localStorage.setItem("azureVoice",  voice);
+  } catch (e) {
+    status.className = "err";
+    status.textContent = "✗ localStorage failed: " + e.message;
+    return;
+  }
+  // Scrub query string so the key isn't lingering in the URL bar / history
+  try { history.replaceState({}, "", location.pathname); } catch (e) {}
+  status.className = "ok";
+  status.innerHTML = "✓ Saved " + voice + " @ " + region + ". Redirecting to the game in 1.5s…";
+  setTimeout(function () { location.href = "/word-battle"; }, 1500);
+})();
+</script>

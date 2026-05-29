@@ -1228,6 +1228,87 @@
     .modes-modal { padding: 14px; }
   }
 
+  /* ===== Voice settings overlay ===== */
+  #voice-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 1000; padding: 16px;
+    overflow: auto;
+  }
+  #voice-overlay.show { display: flex; animation: fadeIn 250ms; }
+  .voice-modal {
+    background: #FAF8F0;
+    border: 3px solid #2D9B6E;
+    border-radius: 24px;
+    padding: 22px;
+    max-width: 440px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    font-family: 'Fredoka', sans-serif;
+  }
+  .voice-label {
+    display: block;
+    font-size: 13px; font-weight: 700;
+    color: #4A2511;
+    margin: 12px 0 6px;
+  }
+  .voice-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #4A2511;
+    background: #FFFFFF;
+    border: 2px solid #2D9B6E;
+    border-radius: 12px;
+    outline: none;
+  }
+  .voice-input:focus { border-color: #1F7A52; box-shadow: 0 0 0 3px rgba(45,155,110,0.18); }
+  select.voice-input { appearance: none; -webkit-appearance: none; padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%232D9B6E' d='M7 9 3 5h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; }
+  .voice-row { display: flex; gap: 10px; }
+  .voice-col { flex: 1 1 auto; min-width: 0; }
+  .voice-col-region { max-width: 130px; }
+  .voice-actions {
+    display: flex; gap: 10px; justify-content: flex-end;
+    margin-top: 18px;
+  }
+  .voice-btn {
+    padding: 10px 18px;
+    font-size: 15px; font-weight: 700;
+    font-family: inherit;
+    border-radius: 12px; cursor: pointer;
+    transition: transform 80ms;
+  }
+  .voice-btn:active { transform: translateY(1px); }
+  .voice-btn-primary {
+    background: #2D9B6E; color: #FFFFFF;
+    border: 2px solid #1F7A52;
+    box-shadow: 0 3px 0 #1F7A52;
+  }
+  .voice-btn-primary:disabled { opacity: 0.6; cursor: wait; }
+  .voice-btn-secondary {
+    background: #FFFFFF; color: #4A2511;
+    border: 2px solid #4A2511;
+  }
+  .voice-status {
+    margin-top: 14px;
+    font-size: 14px; font-weight: 700;
+    min-height: 20px;
+    text-align: center;
+    color: #4A2511;
+  }
+  .voice-status.ok    { color: #1F7A52; }
+  .voice-status.err   { color: #B83232; }
+  .voice-status.busy  { color: #4A2511; }
+  @media (max-width: 460px) {
+    .voice-row { flex-direction: column; }
+    .voice-col-region { max-width: 100%; }
+  }
+
   /* ===== Word Atlas overlay — colored-cube grid of all 2000 words ===== */
   #atlas-overlay {
     position: fixed; inset: 0;
@@ -1664,6 +1745,7 @@
   <button id="difficulty-toggle" class="sound-btn" style="top: 184px;" title="Choose difficulty">📚</button>
   <button id="atlas-toggle" class="sound-btn" style="top: 238px;" title="Browse all 2000 words by level">🌈</button>
   <button id="modes-toggle" class="sound-btn" style="top: 292px;" title="Pick a session mode">🎲</button>
+  <button id="voice-toggle" class="sound-btn" style="top: 346px;" title="Pick the read-aloud voice">🎙</button>
 
   <!-- Boss intro overlay -->
   <div id="boss-intro">
@@ -1752,6 +1834,57 @@
       </div>
       <div class="modes-subtitle">Skip the random rotation — choose what to play right now.</div>
       <div id="modes-grid" class="modes-grid"></div>
+    </div>
+  </div>
+
+  <!-- Voice settings overlay — pick + test the Azure Neural read-aloud voice -->
+  <div id="voice-overlay">
+    <div class="voice-modal">
+      <div class="modes-header">
+        <h2>🎙 Read-aloud Voice</h2>
+        <button id="voice-close" class="progress-x" aria-label="Close">×</button>
+      </div>
+      <div class="modes-subtitle">
+        Use Azure Neural voices (warm + natural) instead of the default Mac voice.
+        Same key as MyBuddy works here.
+      </div>
+
+      <label class="voice-label" for="voice-key-input">Azure Speech key</label>
+      <input id="voice-key-input" type="password" autocomplete="off"
+             placeholder="paste your AZURE_SPEECH_KEY"
+             class="voice-input" />
+
+      <div class="voice-row">
+        <div class="voice-col">
+          <label class="voice-label" for="voice-name-select">Voice</label>
+          <select id="voice-name-select" class="voice-input">
+            <option value="en-US-JaneNeural">Jane (US female, warm)</option>
+            <option value="en-US-JennyNeural">Jenny (US female, conversational)</option>
+            <option value="en-US-AvaNeural">Ava (US female, newer multimodal)</option>
+            <option value="en-US-EmmaNeural">Emma (US female, calm narrator)</option>
+            <option value="en-US-AriaNeural">Aria (US female, assistant)</option>
+            <option value="en-US-AndrewNeural">Andrew (US male, casual)</option>
+            <option value="en-US-BrianNeural">Brian (US male, warm)</option>
+            <option value="en-US-GuyNeural">Guy (US male, brisk)</option>
+            <option value="en-GB-SoniaNeural">Sonia (UK female)</option>
+            <option value="en-GB-LibbyNeural">Libby (UK female, friendly)</option>
+            <option value="en-GB-RyanNeural">Ryan (UK male, calm)</option>
+          </select>
+        </div>
+        <div class="voice-col voice-col-region">
+          <label class="voice-label" for="voice-region-input">Region</label>
+          <input id="voice-region-input" type="text"
+                 placeholder="eastus"
+                 class="voice-input" />
+        </div>
+      </div>
+
+      <div class="voice-actions">
+        <button id="voice-clear" class="voice-btn voice-btn-secondary">Clear key</button>
+        <button id="voice-save" class="voice-btn voice-btn-primary">Save &amp; Test</button>
+      </div>
+
+      <div id="voice-status" class="voice-status"></div>
     </div>
   </div>
 
@@ -2052,8 +2185,15 @@ function pickSessionWords(level, count) {
   } else {
     out[7] = pop("strong") || pop("learning") || pop("fresh") || pop("fragile");
   }
-  // Slot 9 (idx 8): Spaced review — REPEAT slot 3
-  out[8] = out[2];
+  // Slot 9 (idx 8): SMART spaced review — only repeat slot 3 when that word
+  // is FRAGILE (the kid actually needs reinforcement on it). Otherwise pick
+  // a fresh word for variety — repeats should serve the kid, not the schedule.
+  // Priority for the non-repeat case: fragile (drill) > fresh > learning > strong.
+  if (out[2] && classifyWord(out[2]) === "fragile") {
+    out[8] = out[2];
+  } else {
+    out[8] = pop("fragile") || pop("fresh") || pop("learning") || pop("strong") || out[2];
+  }
   // Slot 10 (idx 9): Finale — learning > strong > fresh > fragile
   out[9] = pop("learning") || pop("strong") || pop("fresh") || pop("fragile");
   // Fill slots 2, 4, 6 (idx 1, 3, 5) with KNOWN words
@@ -6267,322 +6407,2019 @@ const WONDER_MISSIONS = [
 ];
 
 // ---------------------------------------------------------------------------
-// WORD_SENTENCES — Each Fry-100 sight word in a warm, kid-sized sentence.
-// After the kid reads a word, we display + read aloud a sentence containing
-// it (with the target word highlighted) so the kid hears the word IN CONTEXT.
-// Keys are lowercase. Lookup is case-insensitive (see getSentenceForWord).
+// WORD_SENTENCES — picture-book-vivid sentence per Fry sight word.
+// 2000 entries covering Fry tiers 1-20 (kid age range 5-7 through advanced).
+// Voice: Mo Willems / Sandra Boynton / Jon Klassen — concrete nouns, sensory
+// detail, sometimes silly. Avoids warm-AI-bath defaults.
+//
+// Value format:
+//   "word": "sentence"                  — no skill tag (function words mostly)
+//   "word": ["sentence", "Skill"]      — skill tag bumps Sparked-today counter
+//
+// Skills mirror Wonder Card categories: Money/Character/Brain/Wonder/Animals/
+// Nature/Space/Body/Dinosaurs/Food/Bugs.
 // ---------------------------------------------------------------------------
 const WORD_SENTENCES = {
-  "a":       "Look, a tiny bunny!",
-  "about":   "Let's read about dinosaurs.",
-  "all":     "We laughed all afternoon.",
-  "am":      "I am so happy today.",
-  "an":      "Did you eat an apple?",
-  "and":     "Cats and dogs are friends.",
-  "are":     "We are going swimming today.",
-  "as":      "He is strong as an ox.",
-  "at":      "Meet me at the playground.",
-  "be":      "Try to be kind today.",
-  "been":    "It's been a wonderful day.",
-  "but":     "I like cookies, but prefer cake.",
-  "by":      "The book is by the lamp.",
-  "called":  ["She called the puppy 'Hope.'", "Character"],
-  "can":     "Yes, you can do it!",
-  "come":    "Come see the rainbow!",
-  "could":   "We could build a fort!",
-  "day":     "Today is a wonderful day!",
-  "did":     "What did you do today?",
-  "do":      "We can do anything we try.",
-  "down":    "Sit down for storytime.",
-  "each":    "Each kid gets a sticker.",
-  "find":    ["Can you find the cookie?", "Brain"],
-  "first":   "You came in first place!",
-  "for":     "This gift is for you.",
-  "from":    "A letter from my friend!",
-  "get":     "Let's get something yummy!",
-  "go":      "Ready, set, go!",
-  "had":     "She had a great idea.",
-  "has":     "She has a sweet puppy.",
-  "have":    "Do you have a pet?",
-  "he":      "He loves to read stories.",
-  "her":     "Give her a big smile.",
-  "him":     "Give him a big hug.",
-  "his":     "His smile is so warm.",
-  "how":     "How does the engine work?",
-  "i":       "I love adventure stories.",
-  "if":      "If you wish, you can.",
-  "in":      "The cat is in the box.",
-  "into":    "Jump into the warm pool!",
-  "is":      "Today is a great day.",
-  "it":      "It smells wonderful in here.",
-  "its":     "The cat lost its toy.",
-  "like":    "I really like rainy days.",
-  "long":    "What a long silly day!",
-  "look":    ["Look at the bright stars.", "Brain"],
-  "made":    "I made this just for you.",
-  "make":    ["Let's make a snowman!", "Brain"],
-  "many":    "Many stars fill the sky.",
-  "may":     "We may see a deer!",
-  "more":    "Just one more story, please!",
-  "my":      "My dog Momo is fluffy.",
-  "no":      "No worries, you got this.",
-  "not":     "It's not scary at all.",
-  "now":     "It's playtime right now!",
-  "number":  ["What's your favorite number?", "Brain"],
-  "of":      "A piece of cake, please.",
-  "on":      "The bird sits on a branch.",
-  "one":     "You are one brave kid!",
-  "or":      "Apple or orange juice?",
-  "other":   "Try the other door instead.",
-  "out":     "Let's go out and play.",
-  "part":    "You're a special part of us.",
-  "people":  ["Friendly people make me happy.", "Character"],
-  "said":    "Mom said dinner is ready.",
-  "see":     ["Can you see the unicorn?", "Brain"],
-  "she":     "She is my best friend.",
-  "so":      "I love you so much.",
-  "some":    "Can I have some water?",
-  "than":    "Stronger than a superhero!",
-  "that":    "That kite is so high!",
-  "the":     "The sun is shining bright.",
-  "their":   "Their dog is super friendly.",
-  "them":    "Help them find the way.",
-  "then":    "Then the magic began!",
-  "there":   "Look over there, a rainbow!",
-  "these":   "These cookies smell delicious.",
-  "they":    "They are good friends today.",
-  "this":    "This flower is gorgeous!",
-  "time":    "It's time to dance now!",
-  "to":      "Let's go to the park.",
-  "two":     "I have two loving parents.",
-  "up":      "Look up, the moon!",
-  "use":     "Please use your inside voice.",
-  "was":     "Yesterday was my best day.",
-  "water":   ["Splash in the water today!", "Nature"],
-  "way":     "There's always a way through.",
-  "we":      "We can do this!",
-  "were":    "Yesterday we were at home.",
-  "what":    "What an amazing day!",
-  "when":    "When you smile, I smile.",
-  "which":   "Which color do you like?",
-  "who":     "Who wants ice cream?",
-  "will":    "I will help you, friend.",
-  "with":    "Come play with me!",
-  "words":   "Big words can be fun!",
-  "would":   "Would you like to play?",
-  "write":   "Let's write a silly story.",
-  "you":     "You are very brave today.",
-  "your":    "Your drawing is beautiful!",
-
-  // ============================================================
-  //   Fry-2 (Levels ~4-6): tuple form [sentence, skill] tags the
-  //   word to a Curiosity Layer skill so reading it grows the
-  //   "Sparked today" counter (same skills as Wonder Cards).
-  // ============================================================
-  "after":     "Let's play after dinner!",
-  "again":     "Read me that story again!",
-  "air":       ["Take a deep breath of fresh air.", "Body"],
-  "also":      "I love cookies, also pancakes.",
-  "america":   "America has tall mountains.",
-  "animal":    ["What's your favorite animal?", "Animals"],
-  "another":   ["Want another giant hug?", "Character"],
-  "answer":    ["Try to answer with your heart.", "Brain"],
-  "any":       "You can pick any color!",
-  "around":    ["Look around for the hidden star!", "Brain"],
-  "ask":       ["Ask if you need a hug.", "Character"],
-  "away":      ["The clouds floated away slowly.", "Nature"],
-  "back":      ["Pat your friend on the back.", "Character"],
-  "because":   ["I smiled because you smiled.", "Character"],
-  "before":    ["Wash your hands before dinner.", "Body"],
-  "big":       ["What a big dinosaur roar!", "Dinosaurs"],
-  "boy":       "That boy made a sandcastle.",
-  "came":      ["A puppy came to visit!", "Animals"],
-  "change":    ["I can change the world with kindness.", "Character"],
-  "different": ["Every snowflake is different.", "Nature"],
-  "does":      ["Where does the river end?", "Nature"],
-  "end":       "The story has a happy end.",
-  "even":      ["Even tiny seeds grow tall trees.", "Nature"],
-  "follow":    "Follow me to the rainbow!",
-  "form":      ["Clouds form fluffy shapes today.", "Nature"],
-  "found":     ["I found a shiny rock!", "Brain"],
-  "give":      ["Give your dog a treat!", "Character"],
-  "good":      ["You did a good job today.", "Character"],
-  "great":     "What a great adventure!",
-  "hand":      ["Hold your friend's hand tight.", "Character"],
-  "help":      ["Can you help me find my socks?", "Character"],
-  "here":      ["Come here for a giant hug!", "Character"],
-  "home":      ["Our home is full of love.", "Character"],
-  "house":     "Build a fort house with pillows!",
-  "just":      "I just need one more cookie.",
-  "kind":      ["Be kind to every creature.", "Character"],
-  "know":      ["I know you can do it!", "Character"],
-  "land":      ["Astronauts will land on the moon.", "Space"],
-  "large":     ["That whale is so large!", "Animals"],
-  "learn":     ["Let's learn something new today!", "Brain"],
-  "letter":    ["Send Grandma a sweet letter.", "Character"],
-  "line":      "Stand in a wiggly line!",
-  "little":    ["Even little kids can be brave.", "Character"],
-  "live":      ["Bears live in cozy caves.", "Animals"],
-  "man":       ["That kind man helped us.", "Character"],
-  "me":        "Sing a song with me!",
-  "means":     ["A hug means 'I love you.'", "Character"],
-  "men":       "The men built a sandcastle.",
-  "most":      ["Most stars are far away.", "Space"],
-  "mother":    ["Mother hugs are the warmest.", "Character"],
-  "move":      ["Let's move our wiggle bodies!", "Body"],
-  "much":      ["I love you so much!", "Character"],
-  "must":      ["We must brush our teeth nightly.", "Body"],
-  "name":      ["Your name is wonderful.", "Character"],
-  "need":      ["I need a giant snuggle.", "Character"],
-  "new":       ["Try one new food today!", "Food"],
-  "off":       "Take your wet boots off.",
-  "old":       "My old teddy is my favorite.",
-  "only":      ["You are the only you!", "Character"],
-  "our":       ["This is our cozy home.", "Character"],
-  "over":      ["The rainbow arched over the field.", "Nature"],
-  "page":      ["Turn the page slowly.", "Brain"],
-  "picture":   ["Draw a happy family picture.", "Character"],
-  "place":     ["Your heart is a safe place.", "Character"],
-  "play":      ["Let's play outside today!", "Body"],
-  "point":     ["Point to the brightest star.", "Space"],
-  "put":       "Put your shoes by the door.",
-  "read":      ["Read me one more story!", "Brain"],
-  "right":     ["You did the right thing.", "Character"],
-  "same":      ["We have the same favorite color!", "Character"],
-  "say":       ["Say something kind today.", "Character"],
-  "sentence":  ["Make a sentence about your day.", "Brain"],
-  "set":       ["Set the table for dinner.", "Character"],
-  "should":    ["We should help each other.", "Character"],
-  "show":      ["Show me your biggest smile.", "Character"],
-  "small":     ["Even small acts can be big.", "Character"],
-  "sound":     ["The waves make a soothing sound.", "Nature"],
-  "spell":     ["Let's spell our favorite word.", "Brain"],
-  "still":     ["Stand very still like a tree.", "Body"],
-  "study":     ["I love to study bugs in dirt.", "Bugs"],
-  "such":      "We had such a fun day!",
-  "take":      ["Take a deep, calm breath.", "Body"],
-  "tell":      ["Tell me your favorite story.", "Character"],
-  "things":    ["Tiny things bring big joy.", "Wonder"],
-  "think":     ["Think big, brave thoughts!", "Brain"],
-  "three":     ["Three little kittens lost their mittens.", "Animals"],
-  "through":   ["We walked through the magic forest.", "Nature"],
-  "too":       ["I love you too, dear.", "Character"],
-  "try":       ["Always try your best.", "Character"],
-  "turn":      ["It's your turn to lead!", "Character"],
-  "us":        ["There's a hug just for us.", "Character"],
-  "very":      ["You are very brave today.", "Character"],
-  "want":      "What do you want for breakfast?",
-  "well":      ["You did the job well!", "Character"],
-  "went":      "We went to the playground.",
-  "where":     ["Where does the rainbow end?", "Nature"],
-  "why":       ["Ask why and learn forever.", "Brain"],
-  "work":      ["Hard work grows strong hearts.", "Character"],
-  "world":     ["The world is full of wonder.", "Wonder"],
-  "years":     ["Two years pass between birthdays.", "Body"],
-
-  // ============================================================
-  //   Fry-3 (Levels ~7-9)
-  // ============================================================
-  "above":     ["Look at the clouds above!", "Nature"],
-  "add":       ["Let's add some sprinkles!", "Food"],
-  "almost":    "We are almost there!",
-  "along":     ["Let's walk along the beach.", "Nature"],
-  "always":    ["Always be your sweet self.", "Character"],
-  "began":     ["The story began with magic.", "Brain"],
-  "begin":     "Let's begin our adventure!",
-  "being":     ["Being kind makes us happy.", "Character"],
-  "below":     ["Look below for hidden shells!", "Nature"],
-  "between":   ["A friend between two best buds.", "Character"],
-  "book":      ["Read a brand-new book today!", "Brain"],
-  "both":      ["I love you both so much.", "Character"],
-  "car":       ["Buckle up in the car!", "Body"],
-  "carry":     ["Carry the groceries together!", "Character"],
-  "children":  ["Children dream big dreams.", "Wonder"],
-  "city":      "Our city has tall buildings.",
-  "close":     ["Hold me close, please.", "Character"],
-  "country":   "Our country has tall mountains.",
-  "cut":       ["Cut the cake into pieces.", "Food"],
-  "don't":     ["Don't worry, you got this!", "Character"],
-  "earth":     ["Our Earth is so beautiful.", "Nature"],
-  "eat":       ["Let's eat fresh strawberries!", "Food"],
-  "enough":    ["You are more than enough.", "Character"],
-  "every":     ["Every kid is special.", "Character"],
-  "example":   ["Set a kind example today.", "Character"],
-  "eyes":      ["Your eyes sparkle like stars!", "Body"],
-  "face":      ["Make your silliest face!", "Body"],
-  "family":    ["Family hugs are the best.", "Character"],
-  "far":       ["The stars are very far.", "Space"],
-  "father":    ["Father gives the best hugs.", "Character"],
-  "feet":      ["Wiggle your tiny feet!", "Body"],
-  "few":       ["Just a few cookies left.", "Food"],
-  "food":      ["What food makes you smile?", "Food"],
-  "four":      ["Four puppies bouncing around!", "Animals"],
-  "girl":      ["That girl built a treehouse!", "Character"],
-  "got":       ["You got this, brave kid!", "Character"],
-  "group":     ["Our group plays together.", "Character"],
-  "grow":      ["Plants grow toward the sunshine.", "Nature"],
-  "hard":      ["Try hard and you will shine.", "Character"],
-  "head":      ["Pat your head, then your knees!", "Body"],
-  "hear":      ["I hear birds singing outside.", "Nature"],
-  "high":      ["Jump as high as you can!", "Body"],
-  "idea":      ["What a wonderful idea!", "Brain"],
-  "important": ["You are so important to me.", "Character"],
-  "indian":    ["The Indian elephant is gentle.", "Animals"],
-  "it's":      "It's a brand-new day!",
-  "keep":      ["Keep being your sweet self.", "Character"],
-  "last":      ["Save the last cookie for me!", "Food"],
-  "late":      ["Don't stay up too late.", "Body"],
-  "leave":     ["Leave a little for tomorrow.", "Money"],
-  "left":      ["Wave with your left hand!", "Body"],
-  "let":       ["Let your imagination soar!", "Brain"],
-  "life":      ["Every life is a treasure.", "Character"],
-  "light":     "Turn on the cozy light.",
-  "list":      ["Let's make a fun list!", "Brain"],
-  "might":     "You might find a treasure!",
-  "mile":      ["We walked a whole mile!", "Body"],
-  "miss":      ["I miss you when you're gone.", "Character"],
-  "mountains": ["The mountains touch the clouds.", "Nature"],
-  "near":      ["Stay near so I can hug you!", "Character"],
-  "never":     ["Never stop being curious.", "Brain"],
-  "next":      ["Who's next for a hug?", "Character"],
-  "night":     ["Stars shine bright at night!", "Space"],
-  "often":     ["I often think about you.", "Character"],
-  "once":      ["Once upon a magical time…", "Brain"],
-  "open":      "Open the gift with care.",
-  "own":       "This is your very own teddy.",
-  "paper":     ["Fold paper into airplanes!", "Brain"],
-  "plant":     ["Let's plant a tiny seed!", "Nature"],
-  "real":      ["Your love is real magic.", "Character"],
-  "river":     ["The river sparkles in sunshine.", "Nature"],
-  "run":       ["Let's run through the sprinklers!", "Body"],
-  "saw":       ["I saw a rainbow today!", "Nature"],
-  "school":    ["School is full of friends.", "Character"],
-  "sea":       ["Sea waves crash on shore.", "Nature"],
-  "second":    ["You came in second place!", "Character"],
-  "seem":      ["You seem extra happy today.", "Character"],
-  "side":      ["Stand by my side, brave kid.", "Character"],
-  "something": ["Try something brand-new today!", "Brain"],
-  "sometimes": ["Sometimes hugs cure everything.", "Character"],
-  "song":      ["Sing me your favorite song!", "Wonder"],
-  "soon":      ["I'll be home very soon.", "Character"],
-  "start":     "Let's start a new game!",
-  "state":     "Our state has tall trees.",
-  "stop":      ["Stop and smell the flowers!", "Nature"],
-  "story":     ["Tell me your wildest story!", "Wonder"],
-  "talk":      ["Let's talk about your day.", "Character"],
-  "those":     ["Look at those fluffy clouds!", "Nature"],
-  "thought":   ["What a kind thought!", "Character"],
-  "together":  ["We grow stronger together.", "Character"],
-  "took":      ["I took a big, brave breath.", "Body"],
-  "tree":      ["That tree is taller than us!", "Nature"],
-  "under":     "Hide under the cozy blanket!",
-  "until":     ["Sing until the song ends.", "Wonder"],
-  "walk":      ["Walk slowly through the garden.", "Nature"],
-  "watch":     ["Watch the butterflies dance!", "Bugs"],
-  "while":     ["Read a while before bed.", "Brain"],
-  "white":     ["White clouds float by.", "Nature"],
-  "without":   ["Without you, my heart is small.", "Character"],
-  "young":     ["Stay young at heart forever.", "Character"],
+  "a": "A walrus moved into our bathtub last Tuesday.",
+  "abandon": ["The pirates had to abandon their leaky lemon boat.", "Wonder"],
+  "ability": ["His secret ability is whistling backward through a straw.", "Brain"],
+  "able": "The kitten is finally able to leap onto the couch.",
+  "about": ["Tell me about the day the goat ate Dad's hat.", "Animals"],
+  "above": "A pelican glided above the lighthouse with one big fish.",
+  "absurd": "It is absurd to wear flippers to the grocery store.",
+  "accent": ["That parrot speaks French with a fancy old accent.", "Animals"],
+  "accept": ["The duck will only accept payment in shiny pebbles.", "Money"],
+  "accord": "We reached an accord — one cookie each, no fighting.",
+  "acid": "The lemon's acid puckered every face at the picnic.",
+  "acorn": ["A squirrel hid one acorn inside Dad's slipper.", "Animals"],
+  "across": "A duck waddled across the kitchen with my pancake.",
+  "act": "The kitten did a juggling act with three loose grapes.",
+  "action": "The kitten's action movie includes one slow-motion couch jump.",
+  "actually": "The hamster actually opened the cereal box by himself.",
+  "add": "Add three plums and one toad to the cauldron.",
+  "addition": ["Addition is easy when you count squirming wiggle worms.", "Brain"],
+  "adjective": ["Pick an adjective — 'squishy,' 'sparkly,' or 'slightly grumpy.'", "Brain"],
+  "afraid": "Don't be afraid; the porch spider just wants chat.",
+  "africa": "In Africa, a baby elephant splashed into muddy puddles.",
+  "after": "After the storm, the toads threw a mud disco.",
+  "again": "The hiccupping hippo sneezed bubbles again.",
+  "against": "The kitten leaned against the lamp and snored softly.",
+  "age": "At her age, Grandma can still climb the apple tree.",
+  "ago": "Long ago, a dragon napped in this very cave.",
+  "agreed": "We all agreed: marshmallows belong in the hot cocoa.",
+  "ahead": "The duck waddled ahead, honking the parade tune.",
+  "air": ["Cold air swooshed in when the penguin opened the fridge.", "Nature"],
+  "alarm": "The rooster's alarm woke the grumpy neighbor's cat.",
+  "album": ["Grandma's album smells like old peppermints and dust.", "Character"],
+  "all": "All the spoons in the drawer wiggled at once.",
+  "allow": "Mom won't allow goats inside the kitchen anymore.",
+  "almost": "The badger almost finished knitting a striped sweater.",
+  "alone": "The cat alone knows where Dad's other slipper went.",
+  "along": "A snail crept along the windowsill with great dignity.",
+  "alphabet": ["The alphabet noodles spelled rude words in his soup.", "Food"],
+  "already": "The hamster already escaped — check inside Dad's shoe.",
+  "also": "Grandma also keeps spare cookies inside her boots.",
+  "although": "Although tiny, the mouse out-snored the family bulldog.",
+  "always": "The fox always tucks a fern behind one ear.",
+  "am": "I am secretly a wizard before breakfast.",
+  "ambulance": "The toy ambulance sirens woke up baby brother.",
+  "america": "America has a giant tree where eagles drop acorns.",
+  "among": "A unicorn hid among the daffodils, snoring quietly.",
+  "amount": "A startling amount of glitter ended up on the cat.",
+  "amuse": "Penguins amuse themselves by sliding down icy hills.",
+  "an": ["An octopus borrowed my umbrella again.", "Animals"],
+  "and": "The rabbit grabbed a carrot and bolted.",
+  "angle": ["The cat watched the bird from a sneaky angle.", "Brain"],
+  "animal": ["The strangest animal in our pond is a singing newt.", "Animals"],
+  "ankle": ["A tiny lizard licked his ankle in the garden.", "Body"],
+  "announce": "Owls announce the moon with one polite hoot.",
+  "another": "Another raccoon just slipped into the pizza kitchen.",
+  "answer": ["The wise owl's answer was 'eat more worms.'", "Brain"],
+  "any": "Are there any waffles left, or did the dog win?",
+  "anything": "Grandpa can fix anything with duct tape and humming.",
+  "apart": "The cookie split apart, raining crumbs on the dog.",
+  "apartment": "Mice rent a cozy apartment behind our toaster.",
+  "appear": "Bunnies appear in the garden the moment lettuce sprouts.",
+  "apple": ["The horse crunched the apple and asked for two more.", "Food"],
+  "apron": ["Grandpa's apron has jam stains older than me.", "Character"],
+  "are": "Why are the penguins lined up at our door?",
+  "area": "This area belongs to the dragon — please remove shoes.",
+  "arms": ["The octopus waved all eight arms hello at once.", "Body"],
+  "army": "An army of ants marched off with the picnic blanket.",
+  "around": "Bees buzz around Grandpa's bald head like a hat.",
+  "arrived": "The mail arrived chewed; blame the curious puppy.",
+  "art": "The kitten's art involved knocking over the paint cup.",
+  "as": "The puppy is as fluffy as a marshmallow cloud.",
+  "ask": "Ask the parrot what he thinks of your hat.",
+  "asleep": ["The dragon fell asleep clutching a charred marshmallow.", "Wonder"],
+  "at": "At midnight, the toaster sings opera.",
+  "athlete": ["That snail trains daily to be an Olympic athlete.", "Body"],
+  "attempt": "I will attempt to braid the cat's whiskers.",
+  "attend": "Three goats attend our weekly garden tea party.",
+  "attract": ["Magnets attract spoons, forks, and angry refrigerator notes.", "Brain"],
+  "audience": "The audience of crows clapped with their wings.",
+  "aunt": ["My aunt keeps a parrot named Spaghetti Sauce.", "Character"],
+  "autograph": "I asked the squirrel for his autograph in acorns.",
+  "awake": "The volcano stayed awake all night burping smoke.",
+  "away": "The mouse zoomed away with one entire cookie.",
+  "awful": "His pancakes tasted awful but the syrup forgave them.",
+  "axe": "The lumberjack's axe was friends with a polite tree.",
+  "baby": ["The baby penguin tripped over her own little flippers.", "Animals"],
+  "back": "A tiny crab clung to the back of my towel.",
+  "bad": "Bad news — the goose found the bag of marshmallows.",
+  "baker": ["Our baker hides riddles inside every cinnamon bun.", "Food"],
+  "bakery": ["The bakery owl delivers warm bread before sunrise.", "Food"],
+  "balance": "The flamingo can balance a teacup on his beak.",
+  "balcony": "A grumpy goat stood on the hotel balcony, judging us.",
+  "ball": "The puppy chased a ball straight into the bushes.",
+  "banana": ["A banana peel tripped the king of the kitchen.", "Food"],
+  "bandage": ["Mom wrapped a bandage around the teddy bear's elbow.", "Character"],
+  "bank": ["My piggy bank rattles louder than a maraca contest.", "Money"],
+  "banner": "The bumblebees flew a banner that said 'Free Pollen!'",
+  "barber": "The barber gave the poodle a mohawk by accident.",
+  "bargain": ["Dad called the leaky umbrella a tremendous bargain.", "Money"],
+  "barrel": "A raccoon was hiding in the pickle barrel again.",
+  "base": "A snail napped at the base of the sunflower stalk.",
+  "basement": ["Something hums very softly in our basement at night.", "Wonder"],
+  "basket": "The basket of kittens kept rolling down the hallway.",
+  "be": "Be very still — that hummingbird is watching you.",
+  "beach": ["Crabs ran a tiny library down at the beach.", "Nature"],
+  "bear": ["A bear shuffled past with three berry-stained whiskers.", "Animals"],
+  "beat": "The drum beat made the squirrels start dancing.",
+  "beautiful": "A beautiful blue beetle marched across my notebook.",
+  "beaver": ["A beaver chewed a chair leg into modern art.", "Animals"],
+  "became": "The caterpillar became a butterfly the color of plums.",
+  "because": "We tiptoed because the dragon was finally napping.",
+  "become": "Caterpillars become butterflies after a very long nap.",
+  "bed": "The cat made a bed of clean folded laundry.",
+  "been": ["The bears have been napping under our porch all winter.", "Animals"],
+  "before": "Before sunrise, the foxes practice their secret handshake.",
+  "beg": "Don't beg the goat for his last cabbage leaf.",
+  "began": "The kettle began to whistle like a tiny ghost.",
+  "begin": "Let the badger orchestra begin with the kazoo!",
+  "behind": "Behind the curtain, the cat was plotting again.",
+  "being": "Being a turtle means napping in seventeen sunny spots.",
+  "believe": "I believe the cat has a secret pancake stash.",
+  "bell": "The dinner bell rang and the dog beat us downstairs.",
+  "belong": ["These mittens belong to the rabbit family next door.", "Animals"],
+  "below": "Below the porch, the toads hold thumb wrestling tournaments.",
+  "beneath": ["Beneath the floorboards, a fox runs a jazz club.", "Wonder"],
+  "berry": ["One purple berry stained the dog's tongue lavender.", "Food"],
+  "beside": "A toad plopped down beside the watering can.",
+  "best": "The best part of pancakes is the syrupy puddle.",
+  "better": "Goats taste better than goats — wait, that's wrong.",
+  "between": "A nest sits between the chimney and the weather vane.",
+  "beware": "Beware — the broom in the closet bites toes.",
+  "bicycle": "His bicycle has a bell that quacks like a duck.",
+  "big": "That big spider knit himself a winter scarf.",
+  "bill": "The duck's orange bill dipped into the pond for snails.",
+  "billion": ["A billion ants moved into Grandpa's lawn chair.", "Bugs"],
+  "birds": ["Tiny birds built a nest inside Grandpa's old kettle.", "Animals"],
+  "bit": "One bit of pancake escaped and rolled under the fridge.",
+  "black": ["A black cat tiptoed across the piano keys.", "Animals"],
+  "blanket": "The blanket hid a snoring puppy and three socks.",
+  "blast": "One blast of the trumpet startled the sleeping ducks.",
+  "blaze": "The campfire blaze sang lullabies to the marshmallows.",
+  "blink": "Don't blink — the octopus just stole my sandwich.",
+  "block": "A block of cheese vanished from the kitchen counter.",
+  "blood": ["A drop of blood means the mosquito won this round.", "Bugs"],
+  "blossom": ["Each cherry blossom is a parachute for tiny bugs.", "Nature"],
+  "blow": "Blow the dandelion fluff and make seven wishes.",
+  "blue": "A blue jay stole the shiny button off my coat.",
+  "blush": "The shy tomato turned a deeper blush at dinner.",
+  "board": "The cat surfed across the kitchen on a cutting board.",
+  "boat": "A beetle paddled a leaf boat across the puddle.",
+  "body": ["Snails carry their whole body house up the wall.", "Body"],
+  "boil": ["Dad watched the spaghetti boil like it owed him money.", "Food"],
+  "bones": ["Dinosaur bones poked right out of the desert sand.", "Dinosaurs"],
+  "bonus": ["Every duck got a bonus crouton for swimming nicely.", "Money"],
+  "book": ["The book about dragons has scorch marks on page nine.", "Brain"],
+  "booth": "The fortune-teller booth was actually a hiding hedgehog.",
+  "border": "A line of ants marched along the cookie's border.",
+  "born": "The kittens were born in Grandma's slipper drawer.",
+  "both": "Both kittens fell asleep inside the empty pizza box.",
+  "bottom": "At the bottom of the cereal box hid a prize.",
+  "bought": ["Grandpa bought one pickle and called it a meal.", "Money"],
+  "bouquet": "The skunk gave Mom a bouquet of dandelion fluff.",
+  "box": "The cat moved into a tiny box and won't leave.",
+  "boy": "The boy stuffed a salamander into his rain boot.",
+  "bracelet": "Her bracelet jingled like a tiny galloping pony.",
+  "brain": ["My brain remembered the lyrics but forgot my lunch.", "Brain"],
+  "branches": ["Squirrels race along the branches like furry acrobats.", "Animals"],
+  "brass": "The brass tuba burped politely after every song.",
+  "bread": ["Warm bread smells better than any perfume bottle.", "Food"],
+  "break": "Don't break the egg — the chick is still asleep.",
+  "bride": "The frog bride wore a veil made of pond mist.",
+  "bridge": "A troll runs a sandwich shop under that bridge.",
+  "bright": "The bright sun made the dragon sneeze rainbow puffs.",
+  "brilliant": ["The fox had a brilliant plan involving cardboard wings.", "Brain"],
+  "bring": "Bring the umbrella — the squirrels are throwing acorns.",
+  "british": "The British bulldog snored loud enough to rattle teacups.",
+  "broadcast": "The rooster will broadcast the news at dawn sharp.",
+  "broken": "A broken eggshell held one fluffy yellow surprise.",
+  "brook": ["Tiny silver fish gossip in the noisy brook.", "Nature"],
+  "brother": ["My little brother hid spaghetti in his pajama pocket.", "Character"],
+  "brought": "The dog brought home one very confused turtle.",
+  "brown": "A brown bunny nibbled the tops of every clover.",
+  "brush": "The toothbrush became a brush for painting clouds.",
+  "bucket": "A bucket of stars spilled across grandma's porch.",
+  "buddy": ["My buddy the iguana hates pineapple but loves pickles.", "Character"],
+  "buffalo": ["A buffalo wandered into the donut shop last Tuesday.", "Animals"],
+  "build": ["Beavers build a dam stronger than the school bus.", "Animals"],
+  "building": "Pigeons are building a nest on the school sign.",
+  "built": "A beaver built a dam from twelve forgotten shoes.",
+  "bulb": "The light bulb told jokes until it burned out.",
+  "bullet": "The popcorn fired like a bullet across the kitchen.",
+  "bumblebee": ["A bumblebee delivered the mail wearing a tiny vest.", "Bugs"],
+  "bunch": "A bunch of grapes rolled away during the picnic.",
+  "burden": "The donkey carried a heavy burden of giggling children.",
+  "burning": "The toast was burning while Dad lectured the toaster.",
+  "business": "The raccoons opened a doughnut business behind the dumpster.",
+  "but": "I baked cookies, but the dog ate every one.",
+  "butter": ["The butter melted into a tiny golden swimming pool.", "Food"],
+  "butterfly": ["One butterfly landed and read my book over my shoulder.", "Bugs"],
+  "button": "Press this button and the cat begins to sing.",
+  "buy": ["I'll buy lemonade for a quarter and a smile.", "Money"],
+  "by": ["A tiny snail crept by my left shoe.", "Bugs"],
+  "cactus": ["That cactus has lived here longer than the mountain.", "Nature"],
+  "calendar": "The calendar told us Tuesday was actually a Wednesday.",
+  "called": ["My pet rock is called Sir Reginald Pebble.", "Wonder"],
+  "came": "A pelican came and stole my peanut butter sandwich.",
+  "camel": ["A camel asked politely for two scoops of vanilla.", "Animals"],
+  "camera": "My camera caught the raccoon eating Dad's birthday cake.",
+  "can": ["Can a kangaroo carry a sandwich in her pouch?", "Animals"],
+  "can't": "I can't find the hamster — check inside Dad's slipper.",
+  "candle": "The candle giggled when the cake was sliced wrong.",
+  "cannot": "I cannot find the moose who took my homework.",
+  "canoe": "A turtle steered the canoe better than my brother.",
+  "canyon": ["Echoes live inside the canyon and shout back rudely.", "Nature"],
+  "capital": ["The capital of catland is Grandma's warm sunny windowsill.", "Brain"],
+  "captain": "Captain Cat steered the cardboard boat across the rug sea.",
+  "capture": "It took six kids to capture one slippery noodle.",
+  "car": "A goose was driving the car in my dream.",
+  "cardinal": ["A cardinal scolded the squirrel for stealing his sunflower.", "Animals"],
+  "care": "Take care — the porch beetle has very tiny feelings.",
+  "carefully": "Carefully step over the line of marching ants.",
+  "carpet": "Crumbs build cities deep inside the living-room carpet.",
+  "carry": "I'll carry the watermelon if you carry the goat.",
+  "case": "Just in case, the squirrel packed seventeen extra acorns.",
+  "castle": "The castle has a moat full of grumpy rubber ducks.",
+  "cat": ["The cat opened the fridge and walked away smug.", "Animals"],
+  "catch": "Catch the firefly gently, then let her float away.",
+  "cattle": ["The cattle stood in a circle, sharing a secret moo.", "Animals"],
+  "caught": "The dog caught a snowflake on his pink tongue.",
+  "cause": "One fly can cause a kitten to backflip wildly.",
+  "cave": ["Inside the cave, bats run a tiny bakery.", "Wonder"],
+  "ceiling": "A spider painted swirls across the bedroom ceiling.",
+  "celebrate": ["We celebrate every full moon with pancake stacks.", "Character"],
+  "celery": ["The horse crunched celery louder than thunder claps.", "Food"],
+  "cells": ["Tiny cells inside a leaf turn sunshine into snacks.", "Nature"],
+  "center": "A snail sat in the center of Grandpa's reading book.",
+  "cents": ["My lemonade costs ten cents and one polite smile.", "Money"],
+  "century": "Once a century, the tortoise wins the village marathon.",
+  "cereal": ["My cereal escaped the bowl and ran for it.", "Food"],
+  "certain": "I'm certain the fridge just whispered my name.",
+  "chain": "The chain on the swing was rusted into knots.",
+  "chamber": ["A secret chamber hides behind the old grandfather clock.", "Wonder"],
+  "champion": "The thumb-wrestling champion was a five-year-old named Pip.",
+  "chance": "There's a tiny chance the parrot ate Dad's wallet.",
+  "change": "Watch the chameleon change to match my polka-dot socks.",
+  "channel": "Our TV channel only shows raccoons doing yoga lately.",
+  "chapter": ["This chapter ended with a dragon eating the narrator.", "Brain"],
+  "chart": ["My chart of pets is mostly stickers of one cat.", "Brain"],
+  "chase": "Don't chase the goose — she remembers every face.",
+  "check": "Check Grandpa's slippers — a frog moved in again.",
+  "cheek": ["Grandma's lipstick smudged a kiss on my cheek.", "Character"],
+  "cheese": ["The cheese rolled off the table and made friends.", "Food"],
+  "chief": "The chief beaver inspected the dam with great seriousness.",
+  "child": ["Every child in the class adopted a different leaf.", "Character"],
+  "children": "The children built a fort from forty-two pillows.",
+  "chimney": "An owl built her library inside our brick chimney.",
+  "chin": ["Spaghetti sauce decorated his chin like a clown.", "Body"],
+  "chocolate": ["The chocolate melted into a small brown lake.", "Food"],
+  "choice": "His only choice was pickles or more pickles.",
+  "choose": "Choose carefully — the goose remembers everything.",
+  "chunk": "A chunk of moon cheese fell into my soup.",
+  "church": "The church bell rang and the pigeons all woke up.",
+  "circle": "Draw a circle around the dragon's nap spot.",
+  "circus": "The circus elephants moved into our backyard pool.",
+  "citizen": "Every citizen of Frog Pond votes with one ribbit.",
+  "city": "In the city, raccoons run a midnight bakery.",
+  "claim": "I claim this puddle as my private kingdom!",
+  "clap": "Don't clap — the napping bat has terrible mornings.",
+  "class": ["Our class adopted a snail named Sir Slimington.", "Character"],
+  "classic": "Pickle juice on pancakes is a classic family recipe.",
+  "clean": "After his bath, the puppy rolled in mud, clean again.",
+  "cleanup": "The cleanup crew was three squirrels and one bossy mouse.",
+  "clear": "The lake was so clear we counted twelve tiny fish.",
+  "clever": ["That clever crow figured out how to unlock fridges.", "Brain"],
+  "climbed": "The kitten climbed the curtain, then meowed for help.",
+  "clinic": "The toy clinic patched up Bear's missing ear.",
+  "clip": "A clip held the lizard's tiny bow tie in place.",
+  "cloak": ["Momo's cloak shimmered with little drifting stars.", "Wonder"],
+  "close": "Close the door — the squirrels heard you say 'almonds.'",
+  "clothes": "The goat ate every clothes pin off the line.",
+  "cloud": ["That cloud is shaped exactly like a snoring walrus.", "Nature"],
+  "coach": ["The hamster coach blew his whistle at the kittens.", "Animals"],
+  "coal": "One lump of coal sat shyly in Santa's pocket.",
+  "coast": ["Along the coast, pelicans dive-bomb for silvery sardines.", "Nature"],
+  "coin": ["I tossed a coin into the wishing snail's hat.", "Money"],
+  "cold": ["Cold winds rattled the windows and the napping owl.", "Nature"],
+  "collar": "His collar jingled with seven tiny stolen keys.",
+  "collect": ["Beetles collect dewdrops in their little blue helmets.", "Bugs"],
+  "college": "The owls go to college to study midnight noises.",
+  "colonel": "Colonel Pickle the pug salutes only on Saturdays.",
+  "color": "The chameleon changed color to match my orange socks.",
+  "column": "A column of ants marched off with the entire cupcake.",
+  "comb": ["Use this comb on the unicorn's tangled mane.", "Body"],
+  "come": "Come quick — the cake just sneezed glitter!",
+  "comet": ["A comet whooshed past with a tail of glitter.", "Space"],
+  "command": "One command from the cat and the dogs sat.",
+  "commit": "I commit to never feeding broccoli to my goldfish.",
+  "common": "Pigeons are common, but talking ones are rare.",
+  "company": "The badger's company is mostly tea and quiet humming.",
+  "compare": "Compare your sock to the dog's pink tongue.",
+  "complete": "The puzzle is complete, except the dog ate one piece.",
+  "compound": ["'Mooncake' is a compound word made of moon and cake.", "Brain"],
+  "comrade": ["My comrade the parrot whispers secrets in pirate code.", "Character"],
+  "conditions": ["Perfect conditions — sunny sky, warm sand, sleeping crab.", "Nature"],
+  "conduct": "Watch the frog conduct the cricket orchestra tonight.",
+  "confess": "I must confess — I ate the last waffle.",
+  "confirm": "Please confirm the squirrel really stole the entire bagel.",
+  "connect": "Two giggling cousins connect their juice boxes with a straw.",
+  "consider": "Consider this: the cat might be a tiny ghost.",
+  "consonant": ["Tap each consonant like a tiny drumstick.", "Brain"],
+  "contain": "This jar can contain exactly one mighty firefly.",
+  "contest": "He won the staring contest against an unimpressed cow.",
+  "continued": "The parrot continued singing even after we left the room.",
+  "control": "Nobody can control where a kitten decides to nap.",
+  "convert": "Wizards convert pumpkins into carriages with one sneeze.",
+  "convince": "Try to convince that goat to give back the hat.",
+  "cook": ["The bear can cook scrambled eggs over a campfire.", "Animals"],
+  "cool": "The cool grass tickled my bare summer toes.",
+  "copper": "One copper penny shone like a tiny sunrise.",
+  "copy": "The parrot can copy Dad's sneezes perfectly.",
+  "corn": ["The corn crackled and popped into fluffy little clouds.", "Food"],
+  "corner": "In the corner, a tiny spider knitted herself a hat.",
+  "correct": "The owl gave the correct answer in three slow hoots.",
+  "cost": ["One pickle pop will cost you a shiny quarter.", "Money"],
+  "cottage": ["A cottage of mushrooms hides three mice and one teapot.", "Wonder"],
+  "cotton": "The bunny's tail looked like a fluff of cotton.",
+  "cough": "The dragon's cough set the curtains on fire.",
+  "could": "Could a goose really pilot a tiny airplane?",
+  "couldn't": "The puppy couldn't believe his nose found the bacon.",
+  "count": ["Count the ducklings — one is hiding in Grandpa's boot.", "Brain"],
+  "country": "In the country, even the cows tell quiet jokes.",
+  "courage": ["It takes courage to taste Grandma's beet pancakes.", "Character"],
+  "course": "Of course the parrot ordered pizza on speaker.",
+  "cousin": ["My cousin claims she can juggle two angry geese.", "Character"],
+  "cover": "Cover your nose — the skunk is feeling chatty.",
+  "covered": ["The pond was covered in lily pads and frog hats.", "Nature"],
+  "cows": ["The cows hummed a low tune all summer evening.", "Animals"],
+  "coyote": ["A coyote sang opera at the moon all night.", "Animals"],
+  "crab": ["The crab carried a sandwich sideways across the beach.", "Animals"],
+  "crack": "One crack in the egg and out tumbled a triceratops.",
+  "crackle": "Hear the leaves crackle under the fox's paws.",
+  "cradle": "A baby dragon snored softly inside the rocking cradle.",
+  "crane": ["The crane folded the river into a paper boat.", "Wonder"],
+  "crash": "Crash! The cat discovered gravity for the eighth time.",
+  "crawl": "Watch the worm crawl across the cookie crumb highway.",
+  "crayon": "His green crayon was missing the entire week.",
+  "cream": ["The cream slid down the spoon like a snowy slide.", "Food"],
+  "create": "Let's create a robot that hands out free cookies.",
+  "credit": ["The clever crow took credit for finding the key.", "Money"],
+  "creek": ["Tadpoles giggle in the creek behind Grandma's house.", "Nature"],
+  "crew": "The pirate crew was three kittens and one parrot.",
+  "crib": "Baby brother stuffed seven socks beneath his crib.",
+  "cricket": ["A cricket plays violin under the porch steps nightly.", "Bugs"],
+  "cried": "The onion cried before we even chopped it.",
+  "crime": "The biggest crime was stealing my chocolate pudding.",
+  "crisp": ["One crisp apple snapped like a tiny firework.", "Food"],
+  "crocodile": ["The crocodile flossed his teeth with old shoelaces.", "Animals"],
+  "crooked": "His crooked smile made even the moon laugh.",
+  "crop": ["The farmer's strangest crop was singing purple turnips.", "Nature"],
+  "crops": ["The crops grew tall enough to hide a sneaky pony.", "Nature"],
+  "cross": "Help the snail cross the sidewalk before the rain.",
+  "crow": ["A crow swapped a shiny button for my acorn.", "Animals"],
+  "crowd": "A crowd of pigeons gathered for one dropped pretzel.",
+  "crown": "The crown was too big and slid over his eyes.",
+  "crumb": "A single crumb fed the ant village for weeks.",
+  "crunch": ["One loud crunch and the carrot was history.", "Food"],
+  "crush": "Don't crush the snail's tiny commute to work.",
+  "crystal": ["A crystal lit the cave with soft pink magic.", "Wonder"],
+  "cube": "The ice cube wore sunglasses on the kitchen counter.",
+  "cuckoo": "The cuckoo clock shouted at three in the morning.",
+  "cuddle": ["The bear wanted to cuddle but smelled like fish.", "Animals"],
+  "cunning": ["That cunning fox traded my mitten for a feather.", "Animals"],
+  "cupboard": "Three mice held a tea party inside the cupboard.",
+  "curious": ["The curious otter unzipped Dad's backpack again.", "Brain"],
+  "current": ["The river current swept the leaf boat past the snail.", "Nature"],
+  "curtain": "The curtain hid a yawning cat and one shoe.",
+  "cushion": "The lost remote was sleeping under the cushion.",
+  "custard": ["Grandpa's custard wobbled and waved like a tiny ghost.", "Food"],
+  "custom": "It is our custom to howl at the porch light.",
+  "cut": "Cut the cake quickly before the dragon smells it.",
+  "cycle": ["The cycle of moths around the lamp never ends.", "Bugs"],
+  "cymbal": "One loud cymbal made the goldfish jump.",
+  "dagger": "The pirate's dagger was actually a butter knife.",
+  "daily": "A raccoon visits our trashcan daily for fancy snacks.",
+  "dairy": ["The dairy cow gave milk that smelled like vanilla.", "Food"],
+  "daisy": ["One daisy bowed politely as we walked past.", "Nature"],
+  "damage": "The puppy's damage included two slippers and Dad's pride.",
+  "damp": "His damp socks squelched a song down the hall.",
+  "dance": "The peacock will dance if you whistle his favorite tune.",
+  "danger": "Danger! A squirrel is operating the toaster again.",
+  "daring": "The daring mouse rode the cat like a horse.",
+  "dark": "In the dark, the fireflies threw a sparkly disco.",
+  "dawn": ["At dawn, the rooster blamed the sun for everything.", "Nature"],
+  "day": "On rainy day mornings, frogs throw umbrella parties.",
+  "dazzle": "Fireflies dazzle the meadow with green winks.",
+  "dead": "Play dead — the kitten knows this game very well.",
+  "deaf": "The deaf owl signed her dinner order with one wing.",
+  "deal": "The squirrels made a deal: half the acorns each.",
+  "death": "The cat plotted the slow death of one loose sock.",
+  "debate": ["The squirrels debate which acorn is the chubbiest.", "Brain"],
+  "debt": ["Dad's debt to the ice cream man grew daily.", "Money"],
+  "decay": ["The old log slowly began to decay into beetle apartments.", "Bugs"],
+  "deceive": "Don't let the magician deceive you with that hat.",
+  "decent": "His pancakes were decent but his syrup was suspicious.",
+  "decided": "The goat decided that hats are for chewing.",
+  "decimal": ["Move the decimal — the answer just slid sideways.", "Brain"],
+  "declare": "I declare this Tuesday officially Pajama Day forever.",
+  "decoy": "The hunter set a rubber duck as a decoy.",
+  "deduce": ["Detective Mouse can deduce who ate the cheese.", "Brain"],
+  "deep": ["Deep in the ocean, a jellyfish glows pink at midnight.", "Nature"],
+  "delay": "A turtle traffic jam caused the picnic's delay.",
+  "delete": "Please delete the photo of my bedhead hair.",
+  "delicate": ["The delicate snowflake landed on my warm pink nose.", "Nature"],
+  "delight": "Pure delight is finding socks straight from the dryer.",
+  "deliver": "The pelican will deliver your sandwich by sunset.",
+  "demand": "The cat will demand breakfast at exactly 4:03 AM.",
+  "describe": "Try to describe a moose wearing fuzzy bunny slippers.",
+  "desert": ["In the desert, the lizard wore tiny sunglasses.", "Nature"],
+  "design": "The spider's design includes seventeen sparkly dewdrops.",
+  "details": "Tiny details: the snail wore a captain's stripe.",
+  "detect": ["Bloodhounds detect bacon from over twelve miles away.", "Animals"],
+  "detergent": "The detergent foam grew into a kitchen-sized monster.",
+  "determine": ["Determine where the cookie crumbs lead — to the puppy.", "Brain"],
+  "detour": "Our detour led straight into a herd of goats.",
+  "develop": "Tadpoles develop into frogs while we eat lunch.",
+  "developed": "The tadpole developed long legs and a serious frown.",
+  "device": "Grandpa's device beeps when he forgets his keys.",
+  "devour": ["Hippos devour watermelons whole, rind and all.", "Animals"],
+  "diary": "My diary knows where I hid the chocolate.",
+  "dictionary": ["My dictionary fell open right on 'whirlybird.'", "Brain"],
+  "did": "Did the parrot really order pizza on the phone?",
+  "didn't": "We didn't see the moose hiding behind the maple.",
+  "died": "The candle died, but the fireflies took over.",
+  "difference": "The difference between cats: one purrs, one plots.",
+  "different": "Every snowflake is wearing a different sparkly outfit.",
+  "difficult": "It's difficult to nap when the parrot is reading aloud.",
+  "digest": ["Snakes digest meals slowly, sometimes for entire weekends.", "Animals"],
+  "digit": ["Each digit on the squid's tentacle counts perfectly.", "Brain"],
+  "dignified": "The dignified cat refused to wear the tiny hat.",
+  "dilemma": "His dilemma was syrup or hot fudge on waffles.",
+  "dim": "The dim lamp painted shadow puppets on the wall.",
+  "diner": ["The diner serves pancakes shaped like sleepy elephants.", "Food"],
+  "dinner": ["Dinner tonight is whatever the dog hasn't licked yet.", "Food"],
+  "dinosaur": ["A dinosaur peeked through my window during math class.", "Dinosaurs"],
+  "dip": "Don't dip your cookie that long — it'll drown.",
+  "diploma": "The frog earned his diploma in advanced puddle-splashing.",
+  "direct": "The parrot gave a direct order: 'bring more crackers.'",
+  "direction": "The squirrel zigzagged in every direction at once.",
+  "dirty": "My dirty boots tracked moon dust through the kitchen.",
+  "disagree": "The twins disagree about which goose is funnier.",
+  "disappear": "Socks disappear, but only the left one always.",
+  "discover": ["We discover beetles wear tiny boots if you look closely.", "Brain"],
+  "discovered": ["We discovered a tiny crab living inside Dad's left shoe.", "Brain"],
+  "disgrace": "Stealing the cat's nap spot is a true disgrace.",
+  "dish": "The dish ran away with a confused spoon.",
+  "dislike": "Owls strongly dislike loud, sneezy alarm clocks.",
+  "dispose": "Carefully dispose of the dragon's leftover toothpicks.",
+  "dispute": "The pigeons settled the dispute with a dance-off.",
+  "distance": "From a distance, the haystack looked like a sleeping bear.",
+  "disturb": "Do not disturb — the kitten is plotting something.",
+  "ditch": "A frog hosted a tiny concert inside the ditch.",
+  "dive": "Penguins dive faster than I run for ice cream.",
+  "divide": ["We divide the last cookie into three crumbly thirds.", "Brain"],
+  "divided": "We divided the last cookie three sneaky ways.",
+  "division": ["Long division is easier with one chocolate motivator.", "Brain"],
+  "do": "What do skunks dream about under the moon?",
+  "doctor": "The doctor checked the parrot's pulse with one tiny stopwatch.",
+  "dodge": "Try to dodge the rain that lives in our gutter.",
+  "does": "Does the goat really eat tin cans for dessert?",
+  "doesn't": "The cat doesn't care about your important phone call.",
+  "dog": ["The dog stole the sandwich and ran for the swing.", "Animals"],
+  "dollars": ["Three dollars buys two scoops and one sprinkle handful.", "Money"],
+  "dolphin": ["A dolphin nudged my sandcastle and then giggled.", "Animals"],
+  "don't": "Don't poke the porcupine — he is grumpy today.",
+  "donate": ["I donate my old socks to the sock museum.", "Character"],
+  "done": "Once the spider is done, the web sparkles like beads.",
+  "donkey": ["The donkey hee-hawed when the goat told a joke.", "Animals"],
+  "door": "A frog knocked on the door and demanded tea.",
+  "dose": "One dose of giggles cured Grandpa's grumpy mood.",
+  "double": "The pancake had a double yolk hidden inside.",
+  "doubt": "Without doubt, that hamster is plotting world breakfast.",
+  "dough": ["The dough rose so high it touched the ceiling.", "Food"],
+  "down": "The squirrel ran down the tree with both cheeks stuffed.",
+  "downtown": "Pigeons rule downtown after the bagel shops close.",
+  "dozen": "A dozen ducks ordered tea with extra crumbs.",
+  "drag": "The dog tried to drag the whole couch outside.",
+  "dragon": ["The dragon hid one shiny tooth under the rug.", "Wonder"],
+  "drain": "Something hummed sadly inside the bathtub drain.",
+  "drama": "The cat's morning drama involves an empty food bowl.",
+  "draw": "Draw a dragon riding a unicycle through the kitchen.",
+  "drawing": "My drawing shows a dragon eating buttered toast.",
+  "dread": "Spiders dread the loud roar of our vacuum.",
+  "dream": ["Last night I had a dream about waffle mountains.", "Wonder"],
+  "dress": "The goat ate the bottom half of Grandma's dress.",
+  "drift": "The paper boats drift past, full of tiny ants.",
+  "drill": "The woodpecker's drill woke up the entire forest.",
+  "drink": "The giraffe needs a tall straw to drink soup.",
+  "drip": "One drip of honey landed on the snoring bear.",
+  "drive": "Can a goose really drive a tiny tractor?",
+  "driver": "Our taxi driver was a parrot in a vest.",
+  "droop": "The flowers droop until Mom whispers a sweet song.",
+  "drop": "One drop of rain landed on the snail's nose.",
+  "drown": "Don't drown the pancakes in syrup — pause sometimes.",
+  "drowsy": "The drowsy turtle pulled his hat over his eyes.",
+  "drug": "The drug store gave Bear a fresh bandage and lollipop.",
+  "drum": "Grandpa's heart sounded like a tiny happy drum.",
+  "dry": "The puddle went dry before the worm finished swimming.",
+  "dune": "A camel napped on the warmest sand dune.",
+  "dungeon": "The dungeon hosts a weekly poetry slam for bats.",
+  "during": "During recess, a goose chased the principal home.",
+  "dusk": ["At dusk, the bats clock in for the night shift.", "Nature"],
+  "duty": "It is the cat's duty to knock pens off desks.",
+  "dwell": "Tiny pixies dwell beneath the mossy garden stones.",
+  "dwindle": "Our cookies dwindle whenever Dad walks past the jar.",
+  "each": ["Each ant carried a crumb bigger than its hat.", "Bugs"],
+  "eager": "The puppy is too eager to greet the mailman.",
+  "eagle": ["An eagle dropped a fish onto the picnic blanket.", "Animals"],
+  "early": "Early birds get the worm, but the worm got away.",
+  "earn": ["I earn one shiny quarter for feeding the goldfish.", "Money"],
+  "ears": ["The puppy's ears flapped like two soft pancakes.", "Body"],
+  "earth": ["From space, Earth looks like a swirly blue marble.", "Space"],
+  "easel": "The easel held a painting of a singing potato.",
+  "east": "The sun rose east, right behind the rooster's head.",
+  "easy": "It's easy to spot a hippo in a tutu.",
+  "eat": "Owls eat mice for breakfast, but never the tails.",
+  "echo": "Her echo answered back in a slightly grumpier voice.",
+  "eclipse": ["During the eclipse, owls thought it was bedtime again.", "Space"],
+  "economic": ["My economic plan: trade gum wrappers for marbles.", "Money"],
+  "edge": "A beetle balanced on the edge of the muffin tin.",
+  "edible": ["Are dandelions edible? The goat says definitely yes.", "Food"],
+  "educate": ["Books can educate, but pigeons teach the best dances.", "Brain"],
+  "effect": "The effect of catnip is a kitten doing backflips.",
+  "effort": "It took real effort to unstick the gum cat.",
+  "egg": "One blue egg wobbled and out hatched a tiny hat.",
+  "eggs": ["Three speckled eggs sat warm in the robin's nest.", "Animals"],
+  "eight": "Eight chipmunks lined up at the cracker buffet.",
+  "either": "Either the cat ate the cake or plotted it.",
+  "elbow": ["She painted a smiley face on her left elbow.", "Body"],
+  "elder": "The elder turtle remembers when the pond was bigger.",
+  "electric": "The eel gave one electric handshake and zoomed off.",
+  "elements": ["All the elements together made a fizzing rainbow puddle.", "Brain"],
+  "elephant": ["An elephant tiptoed past, balancing one tiny teacup.", "Animals"],
+  "eleventh": "On the eleventh hop, the bunny tripped over moss.",
+  "elite": "The elite ducks only quack at fancy bread.",
+  "else": "Who else heard the kettle whistle a tune?",
+  "emerald": "An emerald rolled out of the grumpy goose's nest.",
+  "emotion": "The puppy's emotion was clearly 'where is the cheese?'",
+  "empire": "Ants built an empire under the picnic table overnight.",
+  "employ": "We employ a cat as our official sock guard.",
+  "empty": "His empty pocket grew louder with every step home.",
+  "enchant": ["Old keys enchant the lock with a tiny click.", "Wonder"],
+  "enclose": "Please enclose one carrot with your bunny letter.",
+  "encounter": "Our encounter with the moose lasted exactly four blinks.",
+  "encourage": ["We encourage the snail to finish his marathon.", "Character"],
+  "end": "At the end of the rainbow lives a grumpy goose.",
+  "endure": "Even ants endure long lines for sugar at picnics.",
+  "enemy": "The cat's biggest enemy is the red laser dot.",
+  "energy": "The puppy has more energy than a popcorn machine.",
+  "engage": "Don't engage the parrot — he loves long arguments.",
+  "engine": "The tiny train engine puffed past the napping cat.",
+  "engineer": ["The beaver engineer designed a dam with sliding doors.", "Brain"],
+  "england": "In England, a duck once waddled into Buckingham Palace.",
+  "english": "Our English bulldog snores louder than the lawnmower.",
+  "enjoy": "Cats enjoy boxes more than the toys inside them.",
+  "enormous": "An enormous pancake covered the entire breakfast table.",
+  "enough": "Five waffles is barely enough for one hungry badger.",
+  "enroll": "We enroll the puppy in good-manners school next Monday.",
+  "entered": "A goose entered the library and demanded a quiet book.",
+  "entire": "The entire cookie disappeared in one giant slobbery bite.",
+  "envelope": "Her envelope smelled faintly of lemon drops and glue.",
+  "envy": "The cat watched the squirrel with quiet envy.",
+  "episode": "Each episode of cat TV ends with knocked-over plants.",
+  "equal": "Two cookies equal one very happy puppy.",
+  "equation": ["The wizard's equation made the cupcake float away.", "Brain"],
+  "equip": "We equip the explorers with snacks and tiny hats.",
+  "era": "This era of breakfast involves entirely too many muffins.",
+  "erase": "Try to erase mustard stains from your bear's chin.",
+  "escape": "The hamster's escape involved one straw and pure determination.",
+  "especially": "Pigs love mud, especially the deep slurpy kind.",
+  "estate": "The bunny's estate included three burrows and one carrot patch.",
+  "eternal": "The cat's nap felt eternal and slightly judgmental.",
+  "ethics": ["Ethics class taught the raccoons not to steal pies.", "Character"],
+  "europe": "In Europe, a duck once nested inside a cathedral bell.",
+  "evade": "Squirrels evade my dog like they were born for it.",
+  "evaluate": ["Owls evaluate every twig before building tidy nests.", "Brain"],
+  "even": "Even the spiders gasped when the chandelier wobbled.",
+  "evening": ["In the evening, the fireflies open their tiny lanterns.", "Nature"],
+  "event": "The big event was Grandma's hat fashion show.",
+  "ever": "Have you ever seen a hedgehog dance the cha-cha?",
+  "evergreen": ["An evergreen kept its needles tidy all winter long.", "Nature"],
+  "every": "Every snail in our garden has a different shell pattern.",
+  "everyone": "Everyone gasped when the cake floated off the table.",
+  "everything": "The raccoon tested everything, even the rubber duck.",
+  "evict": "We had to evict the raccoon family from the chimney.",
+  "evidence": ["The evidence pointed to a cookie-loving puppy named Doug.", "Brain"],
+  "evil": "The evil broccoli plotted its takeover of the dinner plate.",
+  "evolve": ["Tadpoles evolve into frogs that hate broccoli, too.", "Brain"],
+  "exact": "I need the exact recipe for invisible pancakes.",
+  "exactly": "That cloud looks exactly like a grumpy pickle.",
+  "examine": ["Examine the leaf — a beetle is reading on top.", "Bugs"],
+  "example": ["For example, the parrot can quote the entire menu.", "Animals"],
+  "excellent": "Her excellent painting was actually a wet sneeze.",
+  "except": "Everyone clapped except the grumpy old garden toad.",
+  "exchange": ["I exchange one cookie for two of your grapes.", "Money"],
+  "exciting": "Most exciting thing today: the toaster sneezed glitter.",
+  "exclaim": "I had to exclaim when the cat used the toilet.",
+  "exclude": "Don't exclude the snail just because he's slow.",
+  "excuse": "His excuse was that the dog ate his pajamas.",
+  "exempt": "Babies are exempt from cleaning up their squashed peas.",
+  "exercise": ["Frogs exercise by leaping over surprised garden snails.", "Body"],
+  "exhaust": "Long swing sessions exhaust even the chattiest squirrel.",
+  "exhibit": "The museum exhibit was one pickle in a hat.",
+  "exit": "The mouse used the cheese hole as an exit.",
+  "expand": "Bread will expand if the oven hums it a song.",
+  "expect": "Expect the unexpected — the cat brought a marshmallow.",
+  "expense": ["The greatest expense was the cat's tuna addiction.", "Money"],
+  "experience": "The puppy had a wet experience involving the lawn sprinkler.",
+  "experiment": ["Our experiment turned the vinegar into a fizzing volcano.", "Brain"],
+  "expert": ["The duck is an expert at stealing crackers smoothly.", "Animals"],
+  "expire": "Even the mustard's patience can finally expire.",
+  "explain": "Explain why the goose is wearing your reading glasses.",
+  "explore": ["Astronauts explore moons made entirely of marshmallow goo.", "Space"],
+  "export": ["Their main export is hand-knit scarves for crickets.", "Bugs"],
+  "expose": "Lift the rock to expose the slug's tiny mansion.",
+  "express": "Try to express your hiccups using only spoons.",
+  "extend": "The giraffe will extend her neck for one cookie.",
+  "extinct": ["Dinosaurs are extinct, but pigeons remember everything anyway.", "Dinosaurs"],
+  "extract": "Watch the dentist extract the dragon's wobbly molar.",
+  "extreme": "Extreme sock-folding takes years of patient practice.",
+  "eyebrow": ["She raised one eyebrow at the talking watermelon.", "Body"],
+  "eyes": ["The owl's enormous eyes blinked one slow time.", "Body"],
+  "fable": "The fable starred a clever turtle and a baffled fox.",
+  "fabric": "The fabric of the cape glowed faintly at midnight.",
+  "face": ["Wash your face — there's pancake on your eyebrow.", "Body"],
+  "fact": ["Fact: a snail can sleep for three whole years.", "Brain"],
+  "factories": "Bee factories are inside flowers — and very buzzy.",
+  "factors": ["Three factors decided dinner: hungry cat, open door, fish.", "Brain"],
+  "fade": "Watch the rainbow fade behind the snoring hill.",
+  "fair": "At the fair, a pig won blue ribbons for napping.",
+  "fairy": ["A fairy left ten gold buttons under the pillow.", "Wonder"],
+  "faith": ["Have faith — the muffins will rise eventually.", "Character"],
+  "falcon": ["The falcon dropped my hat from the cloudy roof.", "Animals"],
+  "fall": ["In fall, the maple leaves spin like little ballerinas.", "Nature"],
+  "family": ["The fox family built a den under the swing.", "Animals"],
+  "famine": "Our cookie famine ended when Grandma brought a tin.",
+  "famous": "The famous porch frog signs autographs in slime.",
+  "fancy": "The pig wore a fancy bow tie to dinner.",
+  "fantastic": "His fantastic burp shook the apple from the tree.",
+  "far": "The kite flew far past the church steeple.",
+  "farewell": "We waved farewell as the snail rounded the corner.",
+  "farm": "On the farm, the rooster wakes up the moon.",
+  "farmers": "The farmers waved as the geese flew over the field.",
+  "fascinate": ["Bugs fascinate me — they wear armor and tiny boots.", "Bugs"],
+  "fast": "The cheetah ate breakfast fast — even for a cheetah.",
+  "father": "Father chipmunk taught the babies to stuff their cheeks.",
+  "fatigue": "Cookie-making fatigue can be cured by eating dough.",
+  "favor": "Please do me a favor and untangle this kitten.",
+  "fear": "The only fear of cats is the cucumber sneak attack.",
+  "feast": ["The raccoon feast included pie crusts and old napkins.", "Food"],
+  "feather": ["One blue feather tickled the sleeping bear's nose.", "Animals"],
+  "feature": "His best feature is his very loud sneeze.",
+  "feeble": "His feeble whistle attracted only one polite squirrel.",
+  "feel": "Feel the moss — it's softer than a kitten's belly.",
+  "feeling": "The kitten is feeling tip-top after stealing the salmon.",
+  "feet": ["Wash your muddy feet before tracking the carpet.", "Body"],
+  "fell": "An acorn fell and bonked the napping fox.",
+  "fellow": "That fellow over there is teaching pigeons to bowl.",
+  "felt": "The kitten's paws felt softer than warm bread.",
+  "ferment": ["Cabbages ferment in the jar until they sing loudly.", "Food"],
+  "ferry": "A turtle ferry carried us across the puddle.",
+  "festival": "The pickle festival had a parade of giggling jars.",
+  "fever": ["His fever made the room dance like jelly.", "Body"],
+  "few": "A few raccoons rearranged our entire recycling bin.",
+  "fibre": "Each fibre of the carpet hid a secret crumb.",
+  "fiction": "Pure fiction — the cat did not eat the homework.",
+  "field": "A whole field of daisies waved at the bumblebee.",
+  "fierce": "The fierce kitten attacked a single rolling pea.",
+  "fiery": "The dragon sneezed a fiery sneeze on the marshmallows.",
+  "fifth": "On the fifth try, she finally yodeled correctly.",
+  "fig": ["One ripe fig fell and bonked the napping squirrel.", "Food"],
+  "fight": "Two squirrels had a tiny fight over one acorn.",
+  "figure": "I can figure out where the cookies went — squirrels.",
+  "filled": "The bathtub filled with bubbles and one floating duck.",
+  "filter": "The fish-tank filter hums lullabies to the goldfish.",
+  "finally": "The turtle finally crossed the driveway by sunset.",
+  "financial": ["His financial plan: hide pennies inside his stuffed dragon.", "Money"],
+  "find": ["Help me find the hamster — he stole my socks.", "Animals"],
+  "fine": "The puppy's fine — he just ate Dad's slipper.",
+  "fingerprint": ["Every fingerprint is a tiny map nobody else has.", "Body"],
+  "fingers": ["Sticky fingers grabbed the last pancake straight off the stack.", "Body"],
+  "finished": "The badger finished knitting his very first scarf.",
+  "fire": "The fire crackled like popcorn in a tin can.",
+  "firework": "One firework startled the moon into hiding briefly.",
+  "first": "The first pancake always looks like a moose.",
+  "fish": ["A purple fish blew bubbles shaped like little stars.", "Animals"],
+  "fit": "The puppy can fit perfectly inside Dad's empty boot.",
+  "five": "Five porcupines lined up at the lemonade stand.",
+  "fixture": "The bathtub fixture leaked enough to start a pond.",
+  "flame": "A tiny flame danced on the birthday candle's tip.",
+  "flap": "Watch the penguin flap his wings, then sneeze.",
+  "flask": "The wizard's flask bubbled and squeaked all morning.",
+  "flat": "The pancake fell flat — and the dog cheered.",
+  "flatten": "Don't flatten the sandwich — the cheese needs space.",
+  "flavor": ["This soup has the flavor of a confused mushroom.", "Food"],
+  "flawless": "The flawless egg balanced on Dad's bald spot.",
+  "fleck": "One fleck of glitter glued itself to the dog's nose.",
+  "flicker": "Lantern bugs flicker like nightclubs in the swamp.",
+  "flimsy": "His flimsy boat sank under one heavy raindrop.",
+  "flippant": "The flippant parrot mocked the dog's serious sneeze.",
+  "flit": "Dragonflies flit above the pond like tiny taxis.",
+  "flock": ["A flock of geese honked our school bus stopped.", "Animals"],
+  "flood": "A flood of marbles raced down the staircase.",
+  "floor": "The kitten chased a sunbeam across the kitchen floor.",
+  "florist": "The florist's puppy chewed every rose by lunchtime.",
+  "flounder": ["A flounder wore one googly eye higher than the other.", "Animals"],
+  "flour": ["White flour exploded across Mom's apron and the dog.", "Food"],
+  "flow": ["Watch the maple syrup flow over the warm pancake stack.", "Food"],
+  "flowers": ["Bees danced from flowers to flowers all afternoon.", "Nature"],
+  "fluent": "Our parrot is fluent in mumbling and snack requests.",
+  "fluffy": "The fluffy cloud looked like an enormous sneezed bunny.",
+  "fluid": "The mystery fluid in his cup was probably pickle juice.",
+  "flute": "The flute giggled when the snail walked past.",
+  "flutter": "Butterflies flutter inside my belly when cake appears.",
+  "fly": "Watch the dragonfly fly through the porch light.",
+  "foam": "The foam mustache made Dad look like a walrus.",
+  "folder": "The folder held one drawing of a dancing pickle.",
+  "follow": "Follow the duck — she knows where the muffins are.",
+  "fond": "Grandma is fond of frogs and forgetting umbrellas.",
+  "fondle": "Don't fondle the cactus — it bites back hard.",
+  "food": "The food on his plate built a little fort.",
+  "foot": ["A snail balanced on my big toe foot all afternoon.", "Body"],
+  "for": ["These acorns are for the chipmunk's birthday party.", "Animals"],
+  "force": "It took serious force to pry the cat down.",
+  "foreign": "The foreign coin had a duck wearing a crown.",
+  "foresight": ["Squirrels have foresight — they hide acorns everywhere.", "Brain"],
+  "forest": ["In the forest, an owl reads bedtime stories to fawns.", "Nature"],
+  "forge": "The dwarves forge tiny pots for visiting bumblebees.",
+  "forgive": ["Please forgive the puppy for unweaving Grandma's sweater.", "Character"],
+  "form": ["The clouds form a shape just like a wobbly elephant.", "Nature"],
+  "formal": "His formal hat had a small turtle on top.",
+  "former": "Our former goldfish now lives in a sparkly pond.",
+  "formula": ["The formula for slime is glue, water, and pure mischief.", "Brain"],
+  "fortify": "We fortify the pillow fort with extra blankets.",
+  "forty": "Forty ladybugs landed on Grandpa's shiny new hat.",
+  "forward": "Step forward carefully; the goose still has your hat.",
+  "found": "Grandpa found a beetle wearing a tiny top hat.",
+  "four": "Four ducks waddled into the library, demanding storytime.",
+  "fraction": ["Only a fraction of the cake survived the dog.", "Brain"],
+  "france": "In France, a baker kneaded dough beside her cat.",
+  "free": "Set the moth free before bedtime, gently and quietly.",
+  "french": "The French bulldog snored loud enough to rattle plates.",
+  "fresh": ["Fresh bread smells better than any bottled perfume.", "Food"],
+  "friends": ["Two snails are best friends, sliding everywhere together.", "Character"],
+  "fright": "The fright made my eyebrows leap up to my hair.",
+  "frock": "Her frock was sewn from a hundred candy wrappers.",
+  "from": "A note from the gerbil said: 'Bring more lettuce.'",
+  "front": "A toad sat at the front of our welcome mat.",
+  "frontier": "The sock drawer is the final frontier of laundry.",
+  "frost": ["Frost drew tiny ferns across the morning window.", "Nature"],
+  "frown": ["Even the moon wore a frown after losing its hat.", "Space"],
+  "frugal": ["The frugal mouse saved each crumb for winter.", "Money"],
+  "fruit": ["Each fruit on the tree held a sleeping ladybug.", "Bugs"],
+  "fuel": "Pancakes are the fuel of a true Saturday.",
+  "fugitive": "The fugitive hamster hid behind the dictionary again.",
+  "fulfill": "The wizard will fulfill one wish per Tuesday only.",
+  "full": "The hamster cheeks were full of sixteen sunflower seeds.",
+  "fun": "Mud puddles are fun until your boots disappear.",
+  "function": "Our toaster's main function now is launching bagels.",
+  "fund": ["Our snack fund only has fourteen sticky pennies.", "Money"],
+  "furious": "The furious goose chased the mailman down the lane.",
+  "furnace": "The furnace burped warmth like a sleepy old dragon.",
+  "furniture": "The cat reclaimed all furniture as her royal property.",
+  "fuss": "Don't fuss — the goldfish enjoys polka music daily.",
+  "future": ["In the future, dogs will drive ice cream trucks.", "Wonder"],
+  "galaxy": ["A whole galaxy hides inside the marble jar.", "Space"],
+  "gallery": "The mouse art gallery only shows tiny cheese paintings.",
+  "gallop": ["The pony's gallop sounded like coconuts knocking.", "Animals"],
+  "game": "We invented a game where the cat is the goalie.",
+  "gangster": "The pigeon gangster demanded crumbs as monthly rent.",
+  "garage": "Inside the garage, raccoons run a quiet jazz band.",
+  "garbage": "The garbage can hosted a possum dinner party Tuesday.",
+  "garden": ["In the garden, the snails hold midnight tea parties.", "Nature"],
+  "garlic": ["One clove of garlic scared every vampire away tonight.", "Food"],
+  "gas": "The balloon filled with gas and bonked the ceiling.",
+  "gasp": "I let out a gasp when the snail winked.",
+  "gather": "We gather pinecones for the squirrel's birthday parade.",
+  "gauge": ["The gauge said the marshmallow pressure was finally critical.", "Brain"],
+  "gave": "The parrot gave Dad a stern lecture about whistling.",
+  "gear": "Each gear in the clock turns with a polite squeak.",
+  "gem": ["One tiny gem glittered inside the dragon's earwax.", "Wonder"],
+  "general": "The general of the chickens crowed at sunrise sharp.",
+  "generous": ["The generous baker slipped one extra cookie into the bag.", "Character"],
+  "genius": ["Pure genius — she taught the goldfish to fetch.", "Brain"],
+  "gentle": "Be gentle with the snail's brand-new bowtie.",
+  "genuine": "His smile was genuine, mostly missing two front teeth.",
+  "geography": ["Pigeons know geography better than any GPS device.", "Brain"],
+  "get": "Quick, get the broom! A duck invaded the kitchen!",
+  "ghost": "The ghost just wanted to borrow our blender quietly.",
+  "giant": "The giant tripped over a tiny but stubborn pebble.",
+  "gift": "My gift was a jar of carefully labeled clouds.",
+  "giggle": "Even the moon let out a small silver giggle.",
+  "ginger": "The ginger cookie ran straight off the cooling rack.",
+  "giraffe": ["A giraffe peeked into the second-floor window politely.", "Animals"],
+  "girl": "The girl rescued a worm from the sidewalk puddle.",
+  "give": "Give the parrot one cracker and run.",
+  "glance": "One glance at the cake and the dog drooled.",
+  "glass": "Through the glass, the goldfish blew bubble hellos.",
+  "gleam": "The polished spoon had a sneaky little gleam.",
+  "glide": "Swans glide across the lake like silent white kites.",
+  "glimpse": "I caught a glimpse of a fox wearing slippers.",
+  "glitter": "The glitter has now joined our family forever.",
+  "global": "Our global pigeon postal service runs surprisingly on time.",
+  "glorify": "We glorify the cat with hourly snack tributes.",
+  "glory": "All glory to the toaster that never burns bread.",
+  "glue": "The glue stuck my fingers into a polite handshake.",
+  "gnaw": "Beavers gnaw on logs while humming work songs.",
+  "go": "Go ask the rooster why he is wearing boots.",
+  "gobble": "Watch the turkey gobble down a whole pumpkin pie.",
+  "goblet": "The dragon sipped tea from a golden, dented goblet.",
+  "god": "The ancient god of pancakes lives inside our toaster.",
+  "goddess": "A goddess of pancakes blessed our Sunday breakfast.",
+  "goggle": "His swim goggle was full of one tiny fish.",
+  "gold": "A goldfish wore one tiny gold crown of bubbles.",
+  "golden": "The golden retriever stole a whole loaf of bread.",
+  "gondola": "A grumpy duck rowed our gondola through the puddle.",
+  "gone": "The cupcakes are gone, leaving crumbs and one guilty cat.",
+  "good": "The cookie was so good the dog danced sideways.",
+  "goodbye": "We waved goodbye to the parade of marching cucumbers.",
+  "gorilla": ["The gorilla ordered a banana smoothie with two straws.", "Animals"],
+  "gossip": "The pigeons gossip loudest right above the bakery.",
+  "got": "The hamster got into the cracker box again.",
+  "gourmet": ["The gourmet cat refused anything below tuna prime grade.", "Food"],
+  "govern": "Three ducks govern our pond with strict bread laws.",
+  "government": "In our backyard, the squirrels formed a tiny government.",
+  "grace": ["The hippo danced with surprising grace and one flipper.", "Animals"],
+  "gracious": ["Be gracious when the badger compliments your sock collection.", "Character"],
+  "grade": "Each grade of marble had its own special shelf.",
+  "grain": "One grain of rice plotted a tiny escape route.",
+  "grant": "I grant you one wish — but not for broccoli.",
+  "grape": ["A grape rolled into the dog's snoring open mouth.", "Food"],
+  "grasp": "The baby's grasp on Grandpa's beard was permanent.",
+  "grass": ["Tiny grasshoppers spring through the tall grass like popcorn.", "Nature"],
+  "grateful": ["The puppy was grateful for the half-eaten waffle.", "Character"],
+  "gratitude": ["My gratitude jar overflowed with pebbles and feathers.", "Character"],
+  "gravel": "The gravel crunched like a thousand tiny grumpy mice.",
+  "gravity": ["Gravity lost the wrestling match with my bouncing ball.", "Brain"],
+  "graze": ["Cows graze peacefully in the field of sleepy daisies.", "Animals"],
+  "grease": "Bacon grease painted Dad's mustache extra shiny.",
+  "great": "A great big walrus moved into Aunt Petunia's pool.",
+  "greedy": "The greedy squirrel stuffed seven acorns in his cheeks.",
+  "greek": "Old Greek statues hide secret family of garden mice.",
+  "green": "A green frog plopped right onto Grandpa's bald spot.",
+  "grew": "The pumpkin grew bigger than Grandpa's reading chair.",
+  "grim": "His grim face cracked when the puppy tripped on cheese.",
+  "grimace": "Her grimace meant the lemon was way too sour.",
+  "grin": "The fox wore a grin full of tiny secrets.",
+  "grip": "Tighten your grip — the kite wants to escape.",
+  "groan": "Dad's groan after pancakes sounded like a tired walrus.",
+  "groove": "The record's groove sang an old, scratchy lullaby.",
+  "ground": ["The ground rumbled when the elephant tiptoed by.", "Nature"],
+  "group": "A group of frogs sang barbershop down at the pond.",
+  "grow": ["Plant the seed — sunflowers grow taller than houses.", "Nature"],
+  "growl": "The puppy's growl rattled like a tiny lawn mower.",
+  "guard": "One stuffed lion stands guard over the cookie jar.",
+  "guess": "Guess which sock the kitten has been hiding.",
+  "guide": "A friendly snail will guide us to the puddle.",
+  "guilt": ["The cat's guilt was written all over her whiskered face.", "Character"],
+  "guitar": "The guitar twanged when the kitten tiptoed across it.",
+  "gun": "The squirt gun made the cat zoom across three rooms.",
+  "gutter": "A duck family moved into the rain gutter today.",
+  "gymnastic": ["That squirrel's gymnastic routine deserves a gold medal.", "Body"],
+  "habit": "Her habit is humming softly when the kettle boils.",
+  "habitat": ["The frog's habitat is wherever Mom drops her hat.", "Nature"],
+  "had": "The dragon had hiccups that puffed little smoke rings.",
+  "haggle": ["We haggle with the parrot over each sunflower seed.", "Money"],
+  "hair": ["Grandpa combed his hair with a fork, just for laughs.", "Body"],
+  "half": "Half the cookie went to me, half to the dog.",
+  "halfway": "The snail's halfway point was still last Tuesday.",
+  "halt": "Halt! The goose has demanded our entire baguette.",
+  "hamburger": ["One hamburger flew sideways off the wobbly table.", "Food"],
+  "hammer": "The hammer made friends with the wobbly nail.",
+  "hammock": "Three squirrels lounged in Grandpa's swinging garden hammock.",
+  "hand": ["Hold out your hand — the firefly wants to land.", "Bugs"],
+  "handicap": "His golfing handicap was a parrot stealing his ball.",
+  "handle": "Don't handle the teapot — it gets very shy.",
+  "handshake": "The fox's handshake left jelly on my left mitten.",
+  "handsome": "The handsome rooster strutted past the giggling hens.",
+  "happened": "Something silly happened — the toaster grew legs!",
+  "happy": "A pug in a tiny sweater is plain happy.",
+  "harbor": ["Tiny boats nap in the harbor at twilight.", "Nature"],
+  "hard": "A turtle's shell feels hard as a polished stone.",
+  "harsh": "Her harsh whisper still woke the sleeping baby dragon.",
+  "harvest": ["We harvest pumpkins and one suspiciously orange chicken.", "Nature"],
+  "has": ["The owl has a tiny library in his tree.", "Animals"],
+  "hash": ["The hash on Grandpa's plate winked at the eggs.", "Food"],
+  "hat": "Grandpa's hat is also a nap spot for the cat.",
+  "hatchet": "The hatchet rested politely beside the stack of logs.",
+  "hatred": "His hatred of broccoli rivaled the cat's of baths.",
+  "haunt": ["Ghost cats haunt our pantry but only for tuna.", "Wonder"],
+  "have": "Spiders have eight knees and zero kneecaps.",
+  "hazard": "Wet pancake batter is a serious kitchen hazard.",
+  "hazel": "Her hazel eyes lit up at the candy display.",
+  "he": "He stuffed seven crackers into one chipmunk cheek.",
+  "head": ["A snail balanced an acorn on her tiny head.", "Animals"],
+  "headache": ["The cat's loud purring gave the goldfish a headache.", "Body"],
+  "heap": "A heap of socks moved — it was the puppy.",
+  "hear": "Can you hear the crickets tuning up their fiddles?",
+  "heard": "I heard a turtle humming inside the tall grass.",
+  "heart": ["My heart thumped when the firefly landed on my finger.", "Body"],
+  "hearty": "A hearty stew warmed our toes after the snowball fight.",
+  "heat": ["The desert heat made the lizard wear sunglasses.", "Nature"],
+  "heaven": ["Pancake heaven smells like syrup and warm butter clouds.", "Wonder"],
+  "heavy": "That snail carries a heavy shell with surprising grace.",
+  "hectic": "Mornings get hectic when the cat unfolds laundry.",
+  "hedge": "A hedgehog runs a hat shop inside that hedge.",
+  "heirloom": ["This silver spoon is an heirloom from Great Aunt Pickle.", "Character"],
+  "held": "He held his breath as the butterfly tasted his thumb.",
+  "helicopter": "The toy helicopter knocked Grandpa's reading glasses sideways.",
+  "helmet": "Her bike helmet had a unicorn horn poking out.",
+  "help": "Help! My sandwich is escaping from the table!",
+  "hemisphere": ["Each hemisphere of the orange tastes slightly different.", "Brain"],
+  "hen": ["One brave hen sat on a confused turtle's shell.", "Animals"],
+  "her": "Grandma keeps her hearing aid in a teacup.",
+  "herald": "A rooster will herald the sunrise with mighty pride.",
+  "here": "Here comes the goose with the pizza menu again.",
+  "heritage": ["Our pancake heritage goes back fifteen sticky generations.", "Character"],
+  "hermit": "The hermit crab carried a tiny library on his back.",
+  "hero": ["The hero of the day was Mom's giant umbrella.", "Character"],
+  "hesitate": "Don't hesitate when offered the very last brownie.",
+  "hibernate": ["Bears hibernate but my cat practices all year round.", "Animals"],
+  "hiccup": "The dragon's hiccup melted the kitchen ice tray.",
+  "hideous": "His hideous mask was actually Grandpa's morning face.",
+  "high": "The kite soared high above the napping cows.",
+  "highway": "A turtle started a slow highway across the patio.",
+  "hike": "Our hike was led by one confused but happy goat.",
+  "hilarious": "The hilarious raccoon wore Dad's slippers backwards yesterday.",
+  "hill": "We rolled down the hill and lost two shoes.",
+  "him": ["Give him the bone — that's Bruno the bulldog.", "Animals"],
+  "himself": "The cat poured himself a saucer of moonlight.",
+  "his": "The walrus combed his mustache with a tiny fork.",
+  "historian": ["The old parrot is the historian of our backyard.", "Brain"],
+  "history": "The cat has a history of shoving cups off shelves.",
+  "hit": "The acorn hit the squirrel's head — twice.",
+  "hobby": "His hobby is collecting tiny rocks that look annoyed.",
+  "hoe": ["Grandma's hoe turned up one fat sleepy earthworm.", "Bugs"],
+  "hold": "Hold the lantern up; the moths are dancing.",
+  "hole": "A mouse popped out of a hole in the cheese.",
+  "holiday": "Every Tuesday is now a goldfish appreciation holiday.",
+  "hollow": "Inside the hollow tree lives a librarian beetle.",
+  "holy": ["The holy pancake had three perfect butter pools.", "Food"],
+  "home": "A snail's home is curled up on her back.",
+  "honey": ["Honey dripped slowly down the bear's confused chin.", "Food"],
+  "honor": ["It is an honor to taste Grandma's secret jam.", "Character"],
+  "hood": "She tucked her hood low and disappeared into mist.",
+  "hoof": "One hoof print led straight into the empty fridge.",
+  "hope": "I hope the parrot doesn't quote me at school.",
+  "horizon": ["The horizon glowed like a slice of melted peach.", "Nature"],
+  "hornet": ["A hornet buzzed angrily near the lemonade stand.", "Bugs"],
+  "horrible": "His horrible singing scared the cat into the closet.",
+  "horse": ["The horse ate Dad's straw hat in three crunchy bites.", "Animals"],
+  "hostile": "The hostile goose refused to share even one cracker.",
+  "hot": "The hot cocoa grew a mustache of whipped cream.",
+  "hotel": "Our hotel was actually a fancy treehouse for owls.",
+  "hours": "We waited hours for the snail to cross the path.",
+  "house": "A tiny door in our house hides a beetle library.",
+  "how": "How does a snail carry a whole house?",
+  "however": "Goats love tin cans; however, foil is much better.",
+  "howl": ["The wolves howl whenever Dad attempts his banjo.", "Animals"],
+  "hub": "The kitchen hub of our house smells like cinnamon.",
+  "huddle": "Penguins huddle when the wind starts gossiping loudly.",
+  "hug": "One slow turtle hug is worth waiting all day.",
+  "huge": "A huge pumpkin grew taller than my baby brother.",
+  "human": "Every human in the room watched the cake float away.",
+  "humid": ["On humid days, frogs throw the loudest pool parties.", "Nature"],
+  "humor": "The walrus has a strange humor about toothbrushes.",
+  "hundred": "A hundred fireflies lit up the back porch railing.",
+  "hungry": "The hungry hippo ate the entire watermelon, seeds included.",
+  "hunting": ["The fox is hunting field mice in slow, careful steps.", "Animals"],
+  "hurdle": "Each laundry pile is a hurdle for sleepy puppies.",
+  "hurricane": ["A hurricane of bubbles erupted from the bathtub today.", "Nature"],
+  "hurry": "Hurry — the popcorn is staging an escape!",
+  "hustle": "Pigeons hustle for breadcrumbs like tiny gray taxis.",
+  "hyena": ["A hyena giggled at his own terrible joke again.", "Animals"],
+  "hymn": "The whales sang a hymn that rocked the boat.",
+  "hypothesis": ["My hypothesis: socks vanish into a parallel kitten dimension.", "Brain"],
+  "i": "I once met a crab who taught violin.",
+  "i'll": "I'll trade you one cookie for that shiny pebble.",
+  "ice": ["Ice skaters glide while the polar bear watches.", "Nature"],
+  "icicle": ["One icicle dripped politely onto the snoring squirrel below.", "Nature"],
+  "iconic": "His iconic hat had three tiny squirrels living inside.",
+  "idea": "I have an idea — let's hide Grandpa's slippers.",
+  "ideal": "An ideal Sunday includes pancakes and zero shoes worn.",
+  "identify": ["Can you identify the bug wearing a pink raincoat?", "Bugs"],
+  "idle": "The idle wheelbarrow filled slowly with curious frogs.",
+  "idol": "My idol is the cat who fetches her own treats.",
+  "if": "If you whisper to bees, they whisper back.",
+  "igloo": "The penguins built an igloo with one fish doorbell.",
+  "ignite": "One tiny spark will ignite Grandpa's birthday cake fire.",
+  "ignore": "The cat will ignore me until I open tuna.",
+  "illegal": "It is illegal to nap in the cookie aisle.",
+  "illustrate": ["Bunnies illustrate stories using only their twitchy noses.", "Brain"],
+  "image": ["The image showed a duck driving a tiny tractor.", "Wonder"],
+  "imagine": ["Imagine a kingdom ruled by giggling jelly beans.", "Wonder"],
+  "imitate": "Parrots imitate Mom's sneeze better than my brother.",
+  "immense": "The immense pumpkin became our autumn family carriage.",
+  "immigrate": "The geese immigrate south every chilly October morning.",
+  "impact": "The pancake's impact left syrup on Dad's eyebrow.",
+  "impatient": "The impatient puppy unwrapped his birthday gift early.",
+  "implore": "I implore you — please feed the hungry hamster.",
+  "import": ["We import sunshine from the cat's favorite napping window.", "Money"],
+  "important": "An important raccoon is knocking on the kitchen window.",
+  "impose": "Don't impose extra carrots on the picky bunny.",
+  "impress": "His tricks did not impress the unblinking goldfish.",
+  "imprint": "One muddy imprint marked the puppy's surprise visit.",
+  "improve": ["Practice will improve your snail-racing technique greatly.", "Brain"],
+  "impulse": "On impulse, I painted the kitchen ceiling cloudy blue.",
+  "in": ["Splash in the puddle and watch the worms swim.", "Bugs"],
+  "incentive": ["Cookies are a strong incentive for cleaning bedrooms.", "Money"],
+  "inches": ["The worm stretched two inches longer after his lunch.", "Bugs"],
+  "include": "Please include the goldfish in the family portrait.",
+  "incognito": "The cat sneaks around incognito in Dad's sunglasses.",
+  "increase": "The puppy's barks increase every time the toaster pops.",
+  "indeed": "Indeed, the squirrel did steal the porch pumpkin.",
+  "independent": ["The independent goldfish operates her own bubble factory.", "Character"],
+  "index": ["Check the index — page seven hides the dragon recipe.", "Brain"],
+  "indian": "An old Indian elephant balanced a teacup on her trunk.",
+  "indicate": ["Two paw prints indicate the cat was in the flour.", "Brain"],
+  "indignant": "The indignant duck quacked his complaint to the bread.",
+  "industrial": "The industrial mixer turned pancake batter into a tornado.",
+  "industry": "The bee industry is mostly buzzing and stealing thyme.",
+  "infant": "The infant kangaroo peeked from his cozy pouch home.",
+  "inflate": "We inflate the pool while the cat watches suspiciously.",
+  "influence": "The cat's influence kept the dog off the couch.",
+  "information": ["The owl gathers information by quietly judging everyone.", "Brain"],
+  "ingredient": ["The secret ingredient is always one tiny pinch of mischief.", "Food"],
+  "inhabit": ["Pixies inhabit the lavender bushes during full moons.", "Wonder"],
+  "inherit": ["I hope to inherit Grandma's recipe for snail soup.", "Character"],
+  "inject": "Don't inject hot sauce into Grandma's strawberry jam.",
+  "injure": "Don't injure the snail with that bouncing tennis ball.",
+  "innocent": "His innocent eyes hid the crumbs in his pockets.",
+  "insect": ["Each insect carried one tiny umbrella in the rain.", "Bugs"],
+  "insects": ["All the insects on the porch held a tiny meeting.", "Bugs"],
+  "inside": "Inside the pumpkin, a tiny mouse had moved in.",
+  "instead": "Instead of cake, the cat batted around a marshmallow.",
+  "institute": ["The Institute of Snail Studies meets every very slow Tuesday.", "Brain"],
+  "instrument": "His favorite instrument is a kazoo wrapped in foil.",
+  "instruments": "The frogs play instruments made of reeds and pond water.",
+  "insure": ["We insure the cookie jar with three sleeping kittens.", "Money"],
+  "intelligent": ["Crows are so intelligent they remember every grumpy face.", "Brain"],
+  "intense": "Her intense stare melted the chocolate on the counter.",
+  "interest": "The cat showed great interest in the tipping fishbowl.",
+  "interesting": "Most interesting thing this week: parrot ordered Chinese food.",
+  "interfere": "Don't interfere with the squirrel's nut-burying schedule.",
+  "interior": "The interior of the cookie jar smelled of cinnamon ghosts.",
+  "internal": "His internal clock screams 'snack time' every twenty minutes.",
+  "interpret": ["Only the parrot can interpret the puppy's barks.", "Brain"],
+  "intersect": ["Two ant trails intersect right at the picnic basket.", "Bugs"],
+  "interval": "Each interval between sneezes lasted exactly one cookie.",
+  "interview": "The penguin's job interview involved sliding on tummy first.",
+  "intimate": ["Frogs share intimate puddle gossip every rainy night.", "Character"],
+  "into": ["The kitten dove into the laundry basket headfirst.", "Animals"],
+  "intricate": "The spider wove an intricate web with tiny doors.",
+  "introduce": "Let me introduce you to my pet rock named Steve.",
+  "intrude": "Don't intrude on the cat's serious midmorning loaf time.",
+  "invade": "Squirrels invade our porch every time pumpkins appear.",
+  "invent": ["I will invent a fork that catches its own crumbs.", "Brain"],
+  "invest": ["Always invest in extra chocolate before family movie nights.", "Money"],
+  "invisible": ["My invisible dragon ate the last waffle, probably.", "Wonder"],
+  "invite": ["We invite the moon to our backyard tea party.", "Wonder"],
+  "involve": "Most plans involve too many cookies and zero broccoli.",
+  "iris": ["One purple iris bowed gracefully when Grandma walked past.", "Nature"],
+  "iron": "The iron beetle sat shiny and stubborn on the porch.",
+  "is": "There is a frog living in the watering can.",
+  "island": "A turtle floated by on his own grassy island.",
+  "isn't": "Isn't that the duck who stole my pancake yesterday?",
+  "isolate": "We isolate the smelly socks in their own fortress.",
+  "issue": "The latest issue of Bug Weekly arrived in dewdrops.",
+  "it": "It hopped across the table and stole the toast.",
+  "it's": "It's raining — the worms are hosting a parade.",
+  "its": ["The hedgehog rolled into its prickly little ball.", "Animals"],
+  "itself": "The kitten washed itself behind both fluffy ears.",
+  "ivory": "His ivory chess piece had a tiny crown carved on.",
+  "ivy": ["Ivy crept across the wall like a slow green river.", "Nature"],
+  "jacket": "His jacket pocket held one acorn and three pebbles.",
+  "jagged": "The jagged rock made an excellent throne for the toad.",
+  "jaguar": ["A jaguar tiptoed past the napping flamingo flock.", "Animals"],
+  "jail": "The cat sent the mouse to a jail of yarn.",
+  "janitor": "Our janitor mouse polishes the floorboards with his tail.",
+  "january": ["Every January, our snowman family grows by exactly two.", "Nature"],
+  "japanese": "A Japanese carp swam slow circles in the koi pond.",
+  "javelin": ["She tossed a javelin made of one straight breadstick.", "Body"],
+  "jazz": "The jazz cat played saxophone for tips and tuna.",
+  "jealous": "The kitten was jealous of the bowl of cream.",
+  "jelly": ["The jelly wobbled like a tiny purple ghost.", "Food"],
+  "jellyfish": ["A jellyfish floated past like a small glowing parachute.", "Animals"],
+  "jerk": "The jerk of the train sent biscuits everywhere.",
+  "jester": "The jester juggled three pickles and one shocked frog.",
+  "jet": "A paper jet landed safely on Dad's bald spot.",
+  "jewel": ["One tiny jewel rolled into the dragon's belly button.", "Wonder"],
+  "jingle": "The jingle of keys made every dog perk up.",
+  "job": "The rooster's job is bossing the sunrise into starting.",
+  "jockey": "The hamster jockey rode his cousin around the track.",
+  "jog": ["We jog with the goose because she sets the pace.", "Body"],
+  "joined": "A duckling joined our picnic and stole a grape.",
+  "jolly": "His jolly laugh shook every leaf off the maple.",
+  "journey": "The snail's journey across the porch took all summer.",
+  "joyful": ["The joyful puppy spun in three sticky circles.", "Character"],
+  "judge": "Don't judge the bear by his messy fur day.",
+  "juggle": "Try to juggle three eggs and one annoyed chicken.",
+  "juice": ["Apple juice fountains erupted from his loose straw.", "Food"],
+  "jumped": "The kitten jumped after a snowflake and missed.",
+  "junction": "The squirrels meet at the tree-branch junction for gossip.",
+  "june": ["In June, fireflies host glowing concerts in the meadow.", "Nature"],
+  "jungle": ["Deep in the jungle, monkeys run a tiny barbershop.", "Nature"],
+  "junior": "Junior raccoon learned to open lids by Wednesday.",
+  "junk": "His junk drawer held one button and seven mysteries.",
+  "jury": "The jury of pigeons voted: extra crumbs for everyone.",
+  "just": "The cat just opened the fridge with one paw.",
+  "justice": "Justice for the squashed peas and forgotten broccoli!",
+  "justify": "Try to justify why the cat shredded my homework.",
+  "kayak": "We rowed our kayak past one polite napping otter.",
+  "keen": "Her keen nose smelled cookies from three blocks away.",
+  "keep": "Keep one cookie for the squirrel who guards the steps.",
+  "kennel": "The kennel dog's nightly howling concert never sells tickets.",
+  "kept": "Grandma kept a beetle in a matchbox for company.",
+  "kernel": ["One stubborn kernel popped at the very last second.", "Food"],
+  "kettle": "The kettle whistled like an excited tiny train.",
+  "key": "The key to the cookie jar lives under the cat.",
+  "keyboard": "The cat played one tune on the kitchen keyboard.",
+  "kidnap": "Don't kidnap my socks — they have a family!",
+  "killed": "The frost killed the tomato plants overnight.",
+  "kilogram": "One kilogram of pumpkin pie left no leftovers tonight.",
+  "kind": ["The dragon was kind, even to the spiders.", "Character"],
+  "kindergarten": ["In kindergarten, we learned how to high-five a frog.", "Brain"],
+  "king": "The king of the squirrels wears an acorn crown.",
+  "kingdom": ["The kingdom of ants ruled the picnic blanket completely.", "Bugs"],
+  "kiosk": "The kiosk sold pickles and tiny knitted hats.",
+  "knapsack": "His knapsack hid one sandwich and a sleeping mouse.",
+  "knead": ["Watch Grandma knead the dough into a happy lump.", "Food"],
+  "knew": "The owl knew exactly where the missing sock was.",
+  "knife": "Use the butter knife — the bread is fragile.",
+  "knight": "The knight's helmet kept slipping over his eyes.",
+  "knit": "Grandma can knit a sock during one tea bag.",
+  "knot": "His shoelace knot was tied by the mischievous puppy.",
+  "know": ["I know a frog who plays the kazoo.", "Animals"],
+  "known": "The fox is known to steal exactly one sock.",
+  "knuckle": ["She bumped her knuckle gently against the tortoise shell.", "Body"],
+  "koala": ["The koala napped, hugging the eucalyptus branch tightly.", "Animals"],
+  "label": "The pickle jar label said 'Handle with extreme caution.'",
+  "laboratory": ["In her laboratory, slime bubbles into rainbow puddles.", "Brain"],
+  "lace": "Her lace collar tickled the cat's curious nose.",
+  "ladder": "The ladder leaned against the cloud Mom was painting.",
+  "lady": "The lady next door grows pumpkins as big as wheelbarrows.",
+  "lagoon": ["Flamingos run a yoga studio inside the pink lagoon.", "Animals"],
+  "lake": ["A loon laughed across the silver lake at dusk.", "Nature"],
+  "land": "The astronaut tried to land on a cookie planet.",
+  "landmark": ["The wonky scarecrow is our farm's official landmark.", "Nature"],
+  "landscape": ["The landscape glowed orange like a giant pumpkin.", "Nature"],
+  "language": "Bees speak a wiggly language with their busy little hips.",
+  "lantern": "One paper lantern guided the fireflies safely home.",
+  "lapse": "In one lapse of attention, the dog ate cake.",
+  "large": "A large badger is asleep in the laundry basket.",
+  "lash": "One lash floated down like a black feather.",
+  "lasso": "The cowgirl's lasso caught one very confused chicken.",
+  "last": "The last firefly winked and disappeared into the maple.",
+  "late": "The moose is always late and never apologizes.",
+  "latitude": ["Every latitude line crosses one snoring whale.", "Brain"],
+  "laughed": "The wind laughed and tossed everyone's hats sky-high.",
+  "laughter": "Her laughter rolled across the meadow like marbles.",
+  "launder": "We launder the cape after every dragon adventure.",
+  "laundry": "The laundry basket grew legs and walked to bed.",
+  "lavender": ["Lavender bushes hum with bees writing tiny love poems.", "Bugs"],
+  "law": "Squirrel law states: all acorns belong to all squirrels.",
+  "lawyer": "The lawyer for cats wears a fancy little bowtie.",
+  "lay": "The lazy hen lay one perfect speckled egg.",
+  "layer": "Each layer of cake hid a different secret berry.",
+  "lazy": "The lazy lizard sunbathed on Dad's favorite reading chair.",
+  "lead": "The duckling will lead, whether you follow or not.",
+  "league": "The league of squirrels declared war on bird feeders.",
+  "leak": "The leak in the roof watered our indoor mushrooms.",
+  "leaning": "The leaning tower of pancakes finally toppled over.",
+  "learn": ["Today the kittens learn to pounce on yarn.", "Brain"],
+  "least": "The least scary monster lives inside the toaster.",
+  "leave": "Leave the door open — the cat brought a friend.",
+  "led": "The duckling led her siblings across the busy driveway.",
+  "left": "He left a soggy crouton on the cat's nose.",
+  "legs": ["A centipede's legs sound like a tiny tap-dance team.", "Bugs"],
+  "length": ["The worm's length doubled after a long stretchy nap.", "Bugs"],
+  "less": "Less syrup, more pancake — said no one ever.",
+  "lesson": ["Today's lesson — don't argue with hungry geese.", "Brain"],
+  "let": "Let the porcupine pick the slow song this time.",
+  "let's": "Let's bake bread shaped like a sleeping snail.",
+  "letter": "A letter arrived for the goose, sealed with butter.",
+  "level": "Water rose to the level of the napping frog's nose.",
+  "lever": "Pull this lever and the toaster sings opera.",
+  "liability": ["The puppy is our greatest liability and our greatest joy.", "Character"],
+  "liberty": "Liberty for the goldfish — open the tiny tank gate!",
+  "library": ["Inside the library, mice read all night long.", "Brain"],
+  "license": "His pirate license expired right after lunch yesterday.",
+  "lie": "Don't lie about the cookies — the dog already squealed.",
+  "lieutenant": "Lieutenant Whiskers commanded the kitten patrol with authority.",
+  "life": "A snail's life is mostly quiet leaves and silver trails.",
+  "lift": "Try to lift the cat without waking her royal majesty.",
+  "lifted": "The ant lifted a crumb three times her tiny size.",
+  "ligament": ["Each ligament in the frog's leg helped him jump high.", "Body"],
+  "light": "One firefly light glowed inside Grandma's pickle jar.",
+  "lightning": ["Lightning split the sky like a crooked silver crack.", "Nature"],
+  "like": "Bears like honey, but they LOVE peanut butter.",
+  "likewise": "The cat ignored me, and likewise, I ignored her.",
+  "lilac": ["Lilac petals fell like tiny purple snowflakes today.", "Nature"],
+  "limp": "The lettuce went limp by the time Dad noticed.",
+  "line": "A line of ants marched off with the birthday cake.",
+  "linear": ["Ants march in a linear line across my sandwich.", "Bugs"],
+  "linger": "Don't linger by the cookie jar — it knows.",
+  "lipstick": "Grandma's lipstick left kisses on every grandchild's forehead.",
+  "liquid": "The mystery liquid bubbled and grew a tiny mustache.",
+  "list": "My list of pets includes one turtle named Doug.",
+  "listen": "Listen — the crickets are tuning their evening violins.",
+  "literate": ["Even the goldfish is literate — she read the menu.", "Brain"],
+  "litter": "A litter of puppies wiggled like one huge sock.",
+  "little": "A little mouse rolled the marble across the floor.",
+  "live": ["Three frogs live in Grandma's watering can each summer.", "Animals"],
+  "local": "Our local raccoon delivers gossip with the morning paper.",
+  "located": "The cookie jar is located on the highest shelf.",
+  "locker": "His locker smelled faintly of socks and ancient bananas.",
+  "logic": ["The cat's logic suggests every box belongs to her.", "Brain"],
+  "loiter": "Don't loiter by the cookies — Mom has eyes.",
+  "lonely": "One lonely sock waited patiently inside the dryer.",
+  "long": "A long noodle hung from Grandpa's mustache.",
+  "longitude": ["Every longitude crosses one yawning camel at midnight.", "Brain"],
+  "look": "Look — that snail is wearing a tiny crown!",
+  "loose": "His loose tooth wobbled like a tiny piano key.",
+  "lord": "The lord of the pantry was an enormous gray cat.",
+  "lost": "The dog lost his bone, then found my sock.",
+  "lot": "A lot of frogs hid inside Grandma's watering can.",
+  "lottery": ["Winning the snack lottery means extra chocolate at recess.", "Money"],
+  "loud": "A loud honk meant the goose had spotted my breakfast.",
+  "lounge": "Cats lounge across the warmest patch of Sunday sun.",
+  "lovable": "Even the grumpy goose is secretly very lovable.",
+  "love": "Cats love empty boxes more than expensive cat beds.",
+  "low": "A low foghorn made the bay otters all stop chewing.",
+  "lullaby": "The whale sang a lullaby that rocked our boat.",
+  "luminous": ["Luminous jellyfish glowed like floating lamps below.", "Animals"],
+  "lunatic": "The lunatic squirrel waged war on the bird feeder.",
+  "lunch": ["Lunch was a sandwich shaped like a sleepy elephant.", "Food"],
+  "luxury": "Pure luxury is two pillows and zero alarm clocks.",
+  "macabre": "The macabre puppet smiled with too many wooden teeth.",
+  "machine": "Grandpa's washing machine sings to the laundry.",
+  "machinist": ["The machinist mouse fixed our broken cuckoo clock perfectly.", "Brain"],
+  "madam": "Madam Pickle the parrot demands her breakfast at seven.",
+  "made": "The mice made a hammock out of one sock.",
+  "magazine": "The cat lounged on the magazine, blocking every page.",
+  "maggot": ["One curious maggot wiggled into Dad's old apple.", "Bugs"],
+  "magnet": ["The fridge magnet held one sticky drawing of Mom.", "Brain"],
+  "magnify": "Use this glass to magnify the ant's tiny hat.",
+  "magnitude": ["The magnitude of the puppy's mess shocked the entire family.", "Brain"],
+  "maiden": "The maiden voyage of our paper boat ended quickly.",
+  "main": "The main thing missing from breakfast was the syrup.",
+  "majestic": ["The majestic moose stared down our tiny picnic.", "Animals"],
+  "major": "The major problem is the goose now has the keys.",
+  "majority": "The majority of the cookies vanished by lunchtime.",
+  "make": "We will make slime that bounces off ceilings.",
+  "malice": "There was no malice — just one curious raccoon.",
+  "mall": "At the mall, a sparrow stole one whole french fry.",
+  "mammoth": "A mammoth pumpkin grew right into the front porch.",
+  "man": "An old man fed peanuts to the chattering jays.",
+  "manage": "Can you manage seven puppies and one giggling baby?",
+  "maneuver": "The cat's sneaky maneuver landed her in the cookie jar.",
+  "mango": ["The mango juice dripped down his elbow into a puddle.", "Food"],
+  "mansion": "The mouse mansion had seventeen tiny rocking chairs inside.",
+  "manual": ["Read the manual — the toaster might bite back.", "Brain"],
+  "manuscript": ["The owl's manuscript was written in small inky footprints.", "Brain"],
+  "many": "How many feet does a centipede actually need?",
+  "map": ["The treasure map led straight to Grandpa's cookie jar.", "Wonder"],
+  "marble": "A glass marble rolled into the puppy's curious mouth.",
+  "march": "The ants march in a tidy line toward the picnic.",
+  "marigold": ["Each marigold opened like a tiny orange sunrise.", "Nature"],
+  "mariner": "The mariner cat steered our bathtub through bubble seas.",
+  "mark": "The wet dog left a mark on the kitchen ceiling.",
+  "marvel": ["Children marvel at fireflies forming letters in the dark.", "Wonder"],
+  "mascot": "Our team mascot is a sock puppet named Carl.",
+  "massive": "One massive pancake covered the entire kitchen table.",
+  "masterpiece": "His masterpiece was a portrait of Dad sneezing peas.",
+  "match": "Your sock does not match your shoe; kitten approves.",
+  "material": "The spider's web material is stronger than steel ribbon.",
+  "maternal": ["The maternal hen tucked her chicks under fluffy wings.", "Animals"],
+  "matter": "No matter how, the cat reached the rooftop.",
+  "mattress": "The mattress hides one secret cookie from last Tuesday.",
+  "maverick": "The maverick chicken refused to lay eggs in the henhouse.",
+  "may": "You may pet the goat, but not the goose.",
+  "maybe": "Maybe the goose really did write that grocery list.",
+  "mayor": "Our mayor is a bullfrog wearing a tiny sash.",
+  "maze": "The corn maze trapped Dad for three giggling hours.",
+  "me": "Pass me the jar — I caught the firefly!",
+  "meadow": ["In the meadow, foxes hold whisper meetings at dawn.", "Nature"],
+  "meager": "His meager lunch was one cracker and one raisin.",
+  "means": "When the rooster crows twice, it means breakfast is burned.",
+  "measure": ["Measure the worm before he stretches even longer.", "Brain"],
+  "meat": ["The bear stuffed his cheeks with smoked salmon meat.", "Animals"],
+  "mechanic": ["The mechanic squirrel fixed our wagon with two acorns.", "Brain"],
+  "medicine": ["The medicine tasted like syrup mixed with sadness.", "Body"],
+  "meditation": ["Cats invented meditation while pretending to be furry pillows.", "Brain"],
+  "medium": "The medium pancake hid behind two giant siblings.",
+  "meet": "Come meet Doug, the chicken who runs our recess.",
+  "melody": "The bullfrog hummed a melody nobody could place.",
+  "members": "The members of the squirrel club voted for more acorns.",
+  "memorable": "That memorable picnic ended in a squirrel war.",
+  "men": "Three men in tall hats chased one runaway duck.",
+  "mend": "Grandma can mend a sock and a broken heart.",
+  "mention": "Did anyone mention the pony in the bathtub?",
+  "menu": "The menu had one item: spaghetti with extra spaghetti.",
+  "mercy": ["Show mercy to the spider — she just paid rent.", "Character"],
+  "merit": "Her gold merit badge was for outstanding puddle jumping.",
+  "mermaid": ["A mermaid taught the dolphins how to braid kelp.", "Wonder"],
+  "merry": "The merry frogs threw a parade in the puddle.",
+  "message": ["The message was carried by one polite carrier pigeon.", "Animals"],
+  "metal": "A metal spoon clinked against the cookie tin.",
+  "metaphor": "Dad calls breakfast 'fuel' — a confusing breakfast metaphor.",
+  "method": ["The cat's method involves staring until tuna appears.", "Brain"],
+  "metropolis": "Beneath the rug grows a tiny ant metropolis.",
+  "microscope": ["Under the microscope, the snowflake had purple polka dots.", "Brain"],
+  "middle": "Right in the middle of the cookie was a raspberry.",
+  "might": "We might find a salamander in the watering can.",
+  "migrate": ["Geese migrate south, honking like grumpy tiny taxis.", "Animals"],
+  "mild": "The mild salsa still made Dad's eyes water.",
+  "mile": "The fox trotted a mile before he found the moon.",
+  "military": "The military of ants marched off with my cracker.",
+  "milk": ["A spilled glass of milk became a tiny ocean.", "Food"],
+  "million": "A million tiny stars blinked over the campfire.",
+  "mimic": "The lyrebird can mimic a chainsaw and three sneezes.",
+  "mind": "Make up your mind — strawberry or pickle ice cream?",
+  "mine": "That last cupcake is officially mine, says the dog.",
+  "mineral": ["Every shiny mineral has a story tucked inside.", "Nature"],
+  "minor": "A minor cookie incident occurred behind the couch today.",
+  "minority": "Cats are the loud minority at most dog parks.",
+  "minute": "Every minute, the cat plotted three new schemes.",
+  "minutes": "Three minutes later, the cookies were mysteriously gone.",
+  "miracle": ["It was a true miracle the cake survived the puppy.", "Wonder"],
+  "mirror": "The mirror told her she looked like a queen.",
+  "mischief": "Pure mischief glittered in the kitten's narrowed eyes.",
+  "miser": ["The miser hid his pennies inside three sock fortresses.", "Money"],
+  "misery": "His misery ended when Mom found the missing snail.",
+  "mislead": "Don't mislead the puppy with a fake squeaky toy.",
+  "miss": "I miss the duck who used to ring our doorbell.",
+  "missile": "The pillow missile knocked Dad's reading glasses askew.",
+  "mister": "Mister Whiskers refuses to wear his tiny bow tie.",
+  "moderate": "Show moderate caution near the cake — Dad is hungry.",
+  "modern": "Our modern toaster can write its name in toast.",
+  "modest": "Her modest crown had only seventeen rhinestones glued on.",
+  "modular": "Our modular blanket fort had three secret crawl tunnels.",
+  "molasses": ["Molasses oozed slower than my brother on a Monday.", "Food"],
+  "molecules": ["Tiny molecules wiggle inside every drop of orange juice.", "Brain"],
+  "moment": "For one moment, the firefly landed on her nose.",
+  "monarch": ["A monarch butterfly landed on my pancake politely.", "Bugs"],
+  "money": ["My piggy bank holds three dollars of jingly money.", "Money"],
+  "monkey": ["The monkey juggled three bananas and one annoyed parrot.", "Animals"],
+  "monsoon": ["The monsoon turned our garden into a happy frog pool.", "Nature"],
+  "months": "For months the badger has been knitting a long scarf.",
+  "monument": "The cat built her monument from stacked socks.",
+  "moon": ["A baker is up on the moon kneading cloud bread.", "Space"],
+  "moral": ["The moral of the tale: don't trust grinning foxes.", "Character"],
+  "morale": "The team's morale rose after Mom delivered warm muffins.",
+  "more": "Give the parrot more crackers — he's writing a poem.",
+  "morning": "Every morning, the rooster argues with the alarm clock.",
+  "mortal": "Even mortal cookies cannot survive Grandpa's snack attacks.",
+  "mosque": "The mosque dome glowed like a polished gold marble.",
+  "most": "Most owls hate Mondays and refuse to hoot.",
+  "motel": "Our motel room had one cat already napping inside.",
+  "mother": ["Mother fox tucked her kits into a leafy bed.", "Animals"],
+  "motion": ["One small motion sent the marbles racing downstairs.", "Body"],
+  "motivate": ["Cookies motivate me far more than vegetable lectures.", "Brain"],
+  "motor": "The motor of his toy car coughed like Grandpa.",
+  "motorcycle": "The motorcycle mouse zoomed past with a tiny helmet.",
+  "mountainous": ["The mountainous pancakes towered above the syrup ocean below.", "Food"],
+  "mountains": ["In the mountains, the goats run a tiny ski resort.", "Nature"],
+  "mourn": "We mourn the cookies that crumbled before lunchtime.",
+  "mouth": ["Open your mouth — there's a marshmallow with your name.", "Body"],
+  "movable": "Our movable fort traveled from couch to closet hourly.",
+  "move": "Don't move — that beetle is parading across your foot.",
+  "movement": "One tiny movement, and the rabbit darted into the bush.",
+  "much": "How much pickle juice did the parrot actually drink?",
+  "mucus": ["Snail mucus draws shiny trails on every leaf.", "Bugs"],
+  "muffin": ["One blueberry muffin winked from inside the lunchbox.", "Food"],
+  "multiply": ["Rabbits multiply faster than crumbs at a picnic.", "Brain"],
+  "mumble": "Don't mumble — the goldfish can't read your lips.",
+  "municipal": "The municipal duck refused to leave the city fountain.",
+  "mural": "The mural showed three foxes painting with their tails.",
+  "murmur": "The brook's murmur lulled the fishermen straight to sleep.",
+  "muscle": ["Each muscle stretched as the cat performed her morning yoga.", "Body"],
+  "museum": "The museum displayed one polite ancient sock.",
+  "mushroom": ["A red mushroom became a tiny umbrella for the frog.", "Nature"],
+  "music": "The frogs played music on tiny lily-pad drums.",
+  "musical": "The musical kettle whistled the alphabet song every morning.",
+  "must": "You must whisper near the sleeping baby porcupine.",
+  "mute": "The mute button broke during Dad's loudest opera moment.",
+  "mutual": "Their mutual love of cheese sealed their lasting friendship.",
+  "muzzle": "The puppy's muzzle was covered in birthday cake frosting.",
+  "my": "My pet snail finished the marathon last Thursday.",
+  "mystery": ["The mystery of the missing waffle haunts us forever.", "Wonder"],
+  "mystic": ["The mystic owl read fortunes inside walnut shells.", "Wonder"],
+  "mythical": ["A mythical raccoon lives behind the bakery dumpster.", "Wonder"],
+  "name": "We voted to name the goldfish 'Captain Wiggles.'",
+  "nanny": "Our nanny is a polite goat named Persimmon.",
+  "nape": ["She kissed the kitten's nape and he purred louder.", "Body"],
+  "narrate": "Grandpa will narrate every snail race in slow detail.",
+  "nasty": "The nasty puddle hid one very smug worm.",
+  "nation": "A nation of ants rebuilt their hill before sunset.",
+  "natural": ["The natural smell of pine needles made the dog sneeze.", "Nature"],
+  "navy": "His navy jacket was the exact shade of midnight.",
+  "near": "A whole rabbit family lives near the broken fence.",
+  "neat": "His neat room lasted exactly twelve and a half minutes.",
+  "necessary": "Sprinkles are absolutely necessary for any decent cupcake.",
+  "nectar": ["Bees gather nectar like tiny golden delivery trucks.", "Bugs"],
+  "need": "I need a bigger jar — this caterpillar is mighty.",
+  "needle": "The needle stitched a smile on the bear's belly.",
+  "negative": "His negative review of broccoli surprised exactly nobody.",
+  "neglect": "Don't neglect the cactus — it remembers everything.",
+  "negotiate": "We negotiate snack hours with the very strict parakeet.",
+  "neighbor": ["Our neighbor is a goose who delivers Sunday newspapers.", "Character"],
+  "neighborhood": "The whole neighborhood gathered for the cake parade Saturday.",
+  "neon": "The neon sign blinked 'Open' in cheerful pink waves.",
+  "nephew": "My nephew sneezed and the parrot fell off.",
+  "nerve": "She had the nerve to put pickles on ice cream.",
+  "nestle": "Three kittens nestle inside Dad's largest snow boot.",
+  "network": "The ant network passed cookie crumbs in perfect rhythm.",
+  "neutral": "The judge's neutral face hid one tiny secret smile.",
+  "never": "Never feed a goose your last buttered roll.",
+  "new": "The badger got new boots and won't stop dancing.",
+  "newcomer": "The newcomer raccoon won the pie-eating contest by Wednesday.",
+  "next": "The next pancake came out shaped like a cat.",
+  "nibble": "Watch the hamster nibble one cracker for entire hours.",
+  "niche": "Inside that tree niche, a wren keeps tiny treasures.",
+  "night": "At night, the raccoons run a tiny pizza shop.",
+  "nightingale": ["The nightingale's song made the moon stop scrolling.", "Animals"],
+  "nightmare": "His nightmare involved broccoli with tiny galloping legs.",
+  "nimble": "The nimble squirrel danced across the wobbly fence top.",
+  "no": "No, the raccoon may not borrow the toaster.",
+  "noble": "The noble cat declined the offered piece of broccoli.",
+  "nocturnal": ["Nocturnal owls run the nighttime soup kitchen for bats.", "Animals"],
+  "nominate": "I nominate the goldfish for President of Bubbles.",
+  "noodle": ["One escaped noodle slid down Grandpa's striped tie.", "Food"],
+  "north": "The compass spun, then pointed north toward the cookies.",
+  "northern": ["In northern forests, the moose grow antlers taller than chairs.", "Animals"],
+  "nose": ["A snowflake landed right on the puppy's pink nose.", "Body"],
+  "nostalgia": "Mom's pancakes filled the kitchen with sweet nostalgia.",
+  "nostril": ["A bee landed on his left nostril and napped.", "Body"],
+  "not": "That is not your sock — it's the cat's bed.",
+  "notable": "The most notable squirrel hid acorns in Dad's slippers.",
+  "note": "A tiny note in the birdhouse read: 'Out for lunch.'",
+  "notebook": "Her notebook was full of doodled, dancing potatoes.",
+  "nothing": "There's nothing in the cookie jar but crumbs and regret.",
+  "notice": "Did you notice the spider redecorated the porch corner?",
+  "noun": ["Pick a noun like 'snail,' then write it huge.", "Brain"],
+  "nourish": ["Pancakes nourish the soul and also the puppy.", "Food"],
+  "novel": "His novel idea was a sandwich made of waffles.",
+  "novelist": ["The novelist mouse writes with the world's tiniest pencil.", "Brain"],
+  "now": "Now the duck is wearing your reading glasses.",
+  "nuclear": "The nuclear pickle glowed faintly in the dim fridge.",
+  "nudge": "One gentle nudge and the dominoes started dancing.",
+  "nuisance": "The cricket was a nuisance, but his songs charmed us.",
+  "number": ["The number on the dragon's mailbox is twenty-two.", "Brain"],
+  "numeral": ["The wizard wrote a Roman numeral on the dragon's lunch.", "Brain"],
+  "nurture": ["Grandma will nurture even the saddest rescued radish.", "Nature"],
+  "obedient": "The obedient goldfish swam in perfectly polite circles.",
+  "obese": "The obese pumpkin sat heavily upon Grandpa's poor wagon.",
+  "object": "A mysterious object glowed inside the cereal box.",
+  "oblige": "I am happy to oblige your request for cookies.",
+  "oblivious": "The cat sat oblivious to the duck behind her.",
+  "obscure": "An obscure mushroom grew behind Dad's old garden boots.",
+  "observe": ["Observe the ant lifting a crumb three times her size.", "Bugs"],
+  "obsess": "Squirrels obsess over acorns shaped like tiny crowns.",
+  "obstacle": "The biggest obstacle was Mom's strict snack curfew rule.",
+  "obtain": "I will obtain one cookie before bedtime tonight.",
+  "obvious": "It was obvious the cat broke the vase, again.",
+  "occasion": "Every Tuesday is an occasion for waffle celebrations.",
+  "occupy": "Three kittens occupy Mom's favorite reading chair daily.",
+  "ocean": ["In the ocean, a whale hums a low rumbly tune.", "Nature"],
+  "octopus": ["The octopus juggled eight teacups without spilling once.", "Animals"],
+  "odor": "A mysterious odor drifted from the basement laundry pile.",
+  "of": "She found a nest of three blue eggs.",
+  "off": "A grasshopper sprang off the page of my book.",
+  "offer": "Don't offer pickles to the very picky goose.",
+  "office": "The cat napped on the office desk all morning.",
+  "often": "The owl often forgets where she parked her broom.",
+  "oh": "Oh no — the goose found the maple syrup jug!",
+  "old": "An old turtle lives in the cracked teapot outside.",
+  "omelet": ["Dad's omelet contained one surprise piece of green crayon.", "Food"],
+  "omit": "Don't omit the sprinkles — the cupcake demands them.",
+  "on": "A ladybug is sleeping on my pencil.",
+  "once": "Once, a baby skunk climbed into Grandpa's slipper.",
+  "one": "The dragon hid one shiny tooth under the rug.",
+  "ongoing": "The ongoing cat-versus-vacuum war shows no signs of ending.",
+  "onion": ["Each onion layer made Mom cry tiny silver tears.", "Food"],
+  "only": "Only the moose knows where the maple syrup hides.",
+  "opal": "An opal glittered like a frozen splash of rainbow.",
+  "open": "Open the cookie tin — the badger heard it click.",
+  "opera": "The opera cat hit a note that cracked Dad's mug.",
+  "operate": "Babies can operate any remote within three sneaky seconds.",
+  "opinion": "The parrot's opinion on crackers is always very loud.",
+  "opportunity": "Every nap is an opportunity for the cat's mischief.",
+  "opposite": "The opposite of grumpy is a puppy in a sweater.",
+  "optimist": "An optimist sees a pancake even in spilled batter.",
+  "option": "His only option was sliding sideways down the muddy hill.",
+  "or": "Will the goose nap, or steal Grandpa's hat again?",
+  "oracle": ["The oracle frog predicts rain by burping bubbles.", "Wonder"],
+  "orchard": ["In the orchard, apples whisper secrets to the wind.", "Nature"],
+  "orchestra": "The cricket orchestra tuned up beneath the porch tonight.",
+  "orchid": ["One orchid bloomed inside the abandoned teapot.", "Nature"],
+  "ordeal": "Bath time was an ordeal involving suds and shrieks.",
+  "order": "The pelican placed his order: 'one bucket of sardines.'",
+  "ordinary": "Today felt ordinary until the goat rang the doorbell.",
+  "organ": "The organ grinder's monkey stole my hat at noon.",
+  "organic": ["The organic carrot tasted like sunshine and dirt cake.", "Food"],
+  "organize": "We organize our marbles by color, mood, and shininess.",
+  "origin": ["The origin of the cookie crumbs led straight to Dad.", "Brain"],
+  "original": "His original idea was pickles inside the birthday cake.",
+  "ornament": "One tiny ornament fell into the cat's open mouth.",
+  "orphan": "The orphan duckling adopted the entire goose family.",
+  "ostrich": ["An ostrich peeked over the fence to inspect the picnic.", "Animals"],
+  "other": "One sock is striped, the other is polka-dotted.",
+  "our": ["Our garden grew a pumpkin shaped like Grandpa.", "Nature"],
+  "out": "A turtle poked out of Grandpa's tall boot.",
+  "outage": "The outage forced us to read books by candle glow.",
+  "outburst": "The puppy's outburst startled the napping goldfish completely.",
+  "outcast": "Even the outcast spider got invited to the picnic.",
+  "outdoor": "Our outdoor cat thinks she owns the entire neighborhood.",
+  "outfit": "His outfit included one polka dot tie and slippers.",
+  "outgrow": "Soon you will outgrow these tiny dragon-print pajamas.",
+  "outline": ["She drew the outline of a sleeping comet in chalk.", "Space"],
+  "output": "The chicken's daily output was three eggs and excuses.",
+  "outrage": "The cat's outrage at empty bowls echoed down the hall.",
+  "outreach": ["Our outreach program teaches squirrels to share acorns.", "Character"],
+  "outset": "From the outset, the goose ruled the entire picnic.",
+  "outside": "Outside, a possum carried a doughnut down the steps.",
+  "outstanding": "Her outstanding cartwheel ended in one polite puddle splash.",
+  "over": "A bumblebee buzzed over the picnic and stole a grape.",
+  "overcoat": "His overcoat hid one sleeping mouse in each pocket.",
+  "overcome": ["Brave Bear will overcome his fear of the vacuum.", "Character"],
+  "overflow": "The bathtub overflow rescued the sleeping rubber duck navy.",
+  "overhaul": "Our treehouse needs an overhaul before raccoons move in.",
+  "overhead": ["A flock of geese passed overhead, honking morning gossip.", "Animals"],
+  "overlap": "Their stripes overlap like a tangled pile of zebras.",
+  "overrule": "Mom will overrule any plan involving sprinkles for breakfast.",
+  "own": "Each squirrel guards her own private acorn vault.",
+  "oxygen": ["Trees breathe out oxygen so we can breathe right back.", "Nature"],
+  "oxygenate": "The bubbles oxygenate the tank for one curious eel.",
+  "paddle": "Use this paddle to steer past the napping frog.",
+  "page": ["Turn the page — the dragon is about to sneeze.", "Brain"],
+  "pagoda": "The pagoda glowed like a stack of golden teacups.",
+  "paint": "The kitten dipped her tail in the paint by accident.",
+  "pair": "A pair of mittens hopped off the heater alone.",
+  "pamphlet": "His pamphlet explained why pigeons deserve more park benches.",
+  "panel": "One panel of the fence hid a tiny hedgehog door.",
+  "panic": "Don't panic — the squirrel just discovered the kitchen.",
+  "panorama": ["The panorama from the hill made the goats sing.", "Nature"],
+  "paper": "The hamster shredded paper into a confetti bed.",
+  "parachute": "His parachute was actually Grandma's polka dot umbrella.",
+  "paragraph": ["Each paragraph in the dragon's book had scorch marks.", "Brain"],
+  "parallel": ["Two parallel ant lines marched along the kitchen counter.", "Bugs"],
+  "paralyze": "Cold pancakes paralyze Dad with deep, dramatic disappointment.",
+  "parasite": ["The parasite plant grew sneakily on a wise old oak.", "Nature"],
+  "parchment": "The dragon's recipe was scrawled on crinkled parchment.",
+  "park": "At the park, a pug rolled down the hill yelping.",
+  "parka": "Her pink parka was stuffed with three sleeping kittens.",
+  "parlor": "The fancy parlor had a chair only the cat used.",
+  "parole": "The cookie thief was released on parole by Mom.",
+  "parsley": ["One sprig of parsley waved goodbye from the soup.", "Food"],
+  "part": "The best part of the muffin is the crumbly top.",
+  "participate": "Even the goldfish wanted to participate in the dance-off.",
+  "particle": "Each glitter particle joined our family forever last March.",
+  "particular": "This particular goose refuses to share the swimming pool.",
+  "party": "The hamsters threw a party with eight crumbs of cheese.",
+  "passed": "A flock of geese passed honking over the school.",
+  "past": "A snail crept past the porch in stately slow motion.",
+  "pasture": ["The cows in the pasture moo a slow lullaby.", "Animals"],
+  "patent": "His patent invention: a fork that catches escaping noodles.",
+  "paternal": ["The paternal penguin warmed the egg with his belly.", "Animals"],
+  "pathetic": "His pathetic whining ended when the cookies appeared.",
+  "patience": ["Patience makes the slowest snail eventually finish the race.", "Character"],
+  "patriot": "The patriot rooster crowed at exactly six AM daily.",
+  "patrol": "The kittens patrol the kitchen for any falling crumbs.",
+  "pattern": "The ladybug's pattern is polka dots and surprise.",
+  "pavement": "A tiny puddle on the pavement reflected the entire sky.",
+  "pay": ["I'll pay one penny for the smallest dandelion.", "Money"],
+  "pearl": ["One pink pearl glimmered inside the giggling oyster.", "Animals"],
+  "peasant": "The peasant frog became king of the smallest puddle.",
+  "pedal": "Pedal faster — the goose is gaining on us!",
+  "pedestrian": "Every pedestrian stopped to admire the dancing pigeon.",
+  "pelican": ["The pelican's beak held a sandwich and surprised crab.", "Animals"],
+  "penalty": "The penalty for stealing cookies is three extra kisses.",
+  "pendulum": ["The pendulum tick-tocked like a sleepy metal heart.", "Brain"],
+  "penguin": ["A penguin slid past on his belly, very pleased.", "Animals"],
+  "peninsula": ["That little peninsula is home to one wise old turtle.", "Nature"],
+  "pension": ["Grandpa's pension pays for puzzles and peppermint candies.", "Money"],
+  "people": ["All the people gasped when the bear sneezed.", "Character"],
+  "pepper": ["Pepper made the cat sneeze across three kitchen tiles.", "Food"],
+  "per": "One snail crosses the porch per slow Tuesday afternoon.",
+  "perceive": ["Bees perceive colors humans cannot even dream about.", "Bugs"],
+  "perch": "The parrot's perch was actually Dad's reading lamp.",
+  "perfect": "His perfect cartwheel ended in a puddle, perfectly.",
+  "perform": "The kittens will perform a play about lost socks.",
+  "perfume": "Grandma's perfume could be smelled three blocks away easily.",
+  "perhaps": "Perhaps the goose really is reading the newspaper.",
+  "period": "Put a period after the cat's name: 'Mr. Whiskers.'",
+  "perish": "Cookies perish quickly whenever Dad walks through the kitchen.",
+  "permanent": "The marker was permanent — Mom's couch is now art.",
+  "permit": "We permit only one snail in the bathtub at once.",
+  "perplex": ["Magic tricks perplex even the cleverest puppy.", "Brain"],
+  "persecute": "Don't persecute the spider — she pays rent in webs.",
+  "persistent": "The persistent woodpecker drilled until the tree finally yawned.",
+  "person": "The only person who can wake Dad is the parrot.",
+  "personality": ["Each chicken has her own personality and favorite hat.", "Animals"],
+  "perspective": ["From the mouse's perspective, the cookie was a mountain.", "Brain"],
+  "pesticide": "Skip the pesticide — the ladybugs are tiny farmers.",
+  "pewter": "The pewter mug held one sleepy tea-sipping frog.",
+  "pharaoh": "The pharaoh cat ruled the pyramid of stacked cushions.",
+  "pharmacy": "The pharmacy mouse counted pills with his tiny paws.",
+  "pheasant": ["A pheasant strutted past, more dressed up than Grandpa.", "Animals"],
+  "phenomenon": ["The phenomenon of vanishing socks remains scientifically unsolved.", "Wonder"],
+  "philosophy": ["The cat's philosophy: if it fits, the box is mine.", "Brain"],
+  "phoenix": ["A phoenix nested in the chimney and toasted marshmallows.", "Wonder"],
+  "phrase": ["The parrot learned one phrase: 'where is my cracker?'", "Brain"],
+  "picked": "She picked one perfect dandelion for the napping bee.",
+  "picture": "Draw a picture of the goose driving a school bus.",
+  "piece": "One piece of cake vanished; blame the cat.",
+  "place": "This place smells like cinnamon and wet hamster.",
+  "plains": ["Across the plains, a herd of buffalo rumbled slowly.", "Nature"],
+  "plan": "The plan was simple: outsmart one very clever raccoon.",
+  "plane": "A paper plane glided onto the sleeping cat's nose.",
+  "planets": ["Tiny moons orbit the giant planets like silver freckles.", "Space"],
+  "plant": ["Plant one bean and a beanstalk might grow tonight.", "Nature"],
+  "play": "The kittens play a game called 'knock everything over.'",
+  "please": "Please don't feed the goose any more cupcakes.",
+  "plural": ["The plural of goose is geese, not gooses.", "Brain"],
+  "poem": ["The parrot wrote a poem about missing pickles.", "Brain"],
+  "point": "Point at the stars and a comet might wink.",
+  "pole": "A flag flew at the pole that the bear climbed.",
+  "poor": "Poor turtle — his hat blew off down the river.",
+  "position": "The cat picked a strange position right on my homework.",
+  "possible": "It's possible the goose really is reading the news.",
+  "pounds": "The bear weighed seven hundred pounds of berry stains.",
+  "power": "Dragons have the power to toast bread instantly.",
+  "practice": "The parrot needs practice singing the alphabet song.",
+  "prepared": "The squirrel prepared seventeen secret acorn stashes.",
+  "present": "The cat brought a present: one slightly damp leaf.",
+  "president": "The president of the squirrel club wears an acorn crown.",
+  "pretty": "Pretty butterflies landed on Grandma's tomato plants.",
+  "printed": "Tiny pawprints printed across the wet kitchen floor.",
+  "probably": "The hamster is probably hiding inside the cereal box.",
+  "problem": "There's a problem — the goldfish wants pizza for dinner.",
+  "process": ["Watch the slow process of a snail crossing the porch.", "Bugs"],
+  "produce": "Bees produce honey, beeswax, and very strong opinions.",
+  "products": "Bees make products like honey, beeswax, and very loud buzzing.",
+  "property": "This property is patrolled by one extremely fluffy goose.",
+  "provide": "The bees provide honey, and the foxes provide chaos.",
+  "pulled": "The puppy pulled the entire blanket off the bed.",
+  "pushed": "He pushed the wagon up, then rolled down inside.",
+  "put": "Don't put the hedgehog in your sleeping bag again.",
+  "questions": ["The owl has questions about Tuesday's missing sandwich.", "Brain"],
+  "quickly": "Quickly grab the cake — the dog has spotted it.",
+  "quiet": "Quiet — that owl is judging your sock choices.",
+  "quite": "The goose is quite serious about her morning swim.",
+  "race": "The snail won the race by simply not stopping.",
+  "radio": "Grandpa's radio plays bluegrass to the napping cat.",
+  "rain": ["Worms came up to dance in the warm rain.", "Nature"],
+  "raised": "The parrot raised one foot and squawked for crackers.",
+  "ran": "The squirrel ran zigzag, peanut clutched in tiny paws.",
+  "rather": "I'd rather hug a hedgehog than wash the dishes.",
+  "reached": "The giraffe reached the top leaf and grinned wide.",
+  "read": "The bookworm can read three books before breakfast.",
+  "ready": "Ready — the marshmallow is sliding off the stick!",
+  "real": "Is the dragon real, or just my brother in pajamas?",
+  "reason": "The reason the dog is wet rhymes with 'sprinkler.'",
+  "received": "The badger received a postcard signed 'love, the moose.'",
+  "record": "She set a record for hopping on one foot.",
+  "red": "A red ladybug landed on Grandpa's nose and stayed.",
+  "region": "In this region, the badgers run the post office.",
+  "remain": "Three cookies remain — the cat will fix that soon.",
+  "remember": "Remember to feed the snail before bedtime tonight.",
+  "repeated": "The parrot repeated everything Dad said at breakfast — loudly.",
+  "report": "My book report is about a squid who knits scarves.",
+  "represent": "Let this acorn represent the wise old oak tree.",
+  "rest": "The rest of the pie disappeared while we napped.",
+  "result": ["The result of mixing all colors is a swampy brown.", "Brain"],
+  "return": "The geese return every spring, honking the news.",
+  "rhythm": ["The frog drummed a perfect rhythm on a tin can.", "Animals"],
+  "rich": "The squirrel feels rich with seventeen hidden acorns.",
+  "ride": "Want to ride the pony made of giggles and hay?",
+  "right": "Turn right at the tree where the squirrels sing.",
+  "ring": "The bell will ring when the muffins finish singing.",
+  "rise": "The dough will rise into a fluffy pillow overnight.",
+  "river": ["A fish wearing a top hat lives in this river.", "Nature"],
+  "road": "A possum waddled across the road with great confidence.",
+  "rock": "Under the rock, three roly-polies were having a meeting.",
+  "rolled": "The hedgehog rolled into a prickly little ball.",
+  "room": "My room smells like crayons and old peanut butter.",
+  "root": "A tiny mole napped under the gnarled tree root.",
+  "rope": "The puppy tugged the rope toy across three rooms.",
+  "rose": ["A bee napped right inside the velvety pink rose.", "Bugs"],
+  "round": "The round full moon looked like a glowing pancake.",
+  "row": "A row of ducklings followed Mother across the road.",
+  "rule": "Rule one: never let the goose drive the wagon.",
+  "run": "The piglets run circles around their grumpy mother.",
+  "safe": "Safe inside the burrow, the bunnies giggled together.",
+  "said": "The owl said 'whoo?' and rolled his enormous eyes.",
+  "sail": "A beetle rigged a leaf sail and floated off.",
+  "same": "Two ducks waddled by in the same polka-dot pants.",
+  "sand": ["A crab drew loopy circles in the warm wet sand.", "Nature"],
+  "sat": "The cat sat on the keyboard mid-sentence agai—",
+  "save": ["Save the last cracker for the brave porch parrot.", "Money"],
+  "saw": "I saw a parrot read the morning newspaper aloud.",
+  "say": "The parrot will say 'banana!' for one cracker.",
+  "scale": ["Weigh the puppy: three squirms tip the scale.", "Brain"],
+  "school": ["At school, our class hatched a chicken named Doug.", "Character"],
+  "science": ["My science project hatched into a noisy little chick.", "Brain"],
+  "scientists": ["Scientists discovered a beetle that smells like buttered popcorn.", "Brain"],
+  "score": "The score is cat: seven, vacuum cleaner: zero.",
+  "sea": ["Deep in the sea, the jellyfish hold glowing parades.", "Nature"],
+  "seat": "The cat picked the warmest seat — Dad's laptop.",
+  "second": "The second cookie always tastes a little crumblier.",
+  "section": ["Each section of the worm has a tiny squishy heart.", "Bugs"],
+  "see": "I can see a beetle wearing a bow tie.",
+  "seeds": ["Pumpkin seeds are tiny treasures for the hungry chipmunks.", "Nature"],
+  "seem": "The cats seem to know exactly when tuna opens.",
+  "seen": "Have you seen the parrot wearing pirate boots?",
+  "sell": ["We sell lemonade and one slightly stale cookie.", "Money"],
+  "send": "Send a postcard to the snail in apartment three.",
+  "sense": ["The kitten's sense of smell led straight to tuna.", "Body"],
+  "sent": "The fox sent a thank-you note for the leftover pie.",
+  "sentence": ["Every sentence the wizard speaks ends in 'abracadabra!'", "Brain"],
+  "separate": "Separate the cookies, or the dog gets two at once.",
+  "serve": "The waiter penguin will serve fish sticks at noon.",
+  "set": "We set the picnic, and the raccoons set up theirs.",
+  "settled": "The puppy settled into the laundry basket and snored.",
+  "seven": "Seven mice held a meeting under the cheese plate.",
+  "several": "Several mice argued over the last crumb of cheddar.",
+  "shall": "Shall we waltz with the goose at sunset?",
+  "shape": "The cloud was the exact shape of a sneezing camel.",
+  "sharp": "Sharp claws kept the kitten clinging to the curtain.",
+  "she": "She tucked the firefly under a thimble for the night.",
+  "ship": "A cat captain steered the cardboard ship across the rug.",
+  "shoes": "The puppy hid one of Dad's shoes inside the bathtub.",
+  "shop": ["At the shop, a chipmunk sells acorns by the dozen.", "Money"],
+  "short": "Short legs are perfect for chasing wiggly worms.",
+  "should": "Should we tell Mom the cat is wearing her hat?",
+  "shoulder": ["A parrot landed right on Grandpa's shoulder, demanding crackers.", "Animals"],
+  "shouted": "Grandpa shouted 'pancakes!' and the whole house ran downstairs.",
+  "show": "Show the goose your new sparkly rain boots.",
+  "shown": "She shown the puppy how to roll over backwards.",
+  "side": "A grasshopper hopped onto my side of the picnic blanket.",
+  "sight": ["The sight of pancakes makes the dog flip backwards.", "Body"],
+  "sign": "A small sign read: 'Beware of grumpy goose.'",
+  "silent": "The silent owl drifted past the moon without a sound.",
+  "similar": "Two snails wore similar shells but different polka dots.",
+  "simple": "The simple cookie recipe needs one secret pinch of glitter.",
+  "since": "Since Tuesday, the badger has lived in our hat box.",
+  "sing": "Whales sing songs that travel a hundred ocean miles.",
+  "single": "A single firefly lit the entire jar like a lantern.",
+  "sir": "Sir Squirrel demands one peanut before any conversation.",
+  "sister": ["My sister found a beetle and named him Wendell.", "Character"],
+  "site": "This is the site of a famous squirrel acorn battle.",
+  "six": "Six pigeons argued over one soggy french fry.",
+  "size": "The size of that pumpkin could fit a hippopotamus.",
+  "skin": ["Lizard skin feels like sandpaper warmed by the sun.", "Body"],
+  "sky": ["The sky turned cotton-candy pink at sunset.", "Nature"],
+  "sleep": ["Snails sleep for three years if no one wakes them.", "Body"],
+  "slowly": "Slowly the turtle climbed the steepest grass blade.",
+  "small": "A small snail wears the world on her back.",
+  "smell": ["The smell of bacon made the puppy do a flip.", "Body"],
+  "smiled": "The walrus smiled and showed all four of his teeth.",
+  "snow": ["Snow fell like sugar on the sleeping puppy's nose.", "Nature"],
+  "so": "The kitten yawned so wide her ears flopped.",
+  "soft": "The kitten's belly feels soft as warm marshmallows.",
+  "soil": ["Worms tunnel through the dark soil all night long.", "Bugs"],
+  "soldiers": "The ant soldiers marched off with the entire sandwich.",
+  "solution": ["The solution involved one cat, one box, and patience.", "Brain"],
+  "solve": ["Help me solve why the dog smells like syrup.", "Brain"],
+  "some": "Some clouds look exactly like sleeping pigs.",
+  "someone": "Someone left a frog on the kitchen counter again.",
+  "something": "Something furry just bounced across the bathroom rug.",
+  "sometimes": "Sometimes the moon looks like a slice of melon.",
+  "son": ["Father bear taught his son how to fish for salmon.", "Animals"],
+  "song": "The frog sang a song so silly the mud laughed.",
+  "soon": "Soon the dragons will arrive for their tea.",
+  "sound": "A sound like maracas — the baby rattlesnake is awake.",
+  "south": "Geese fly south, honking loudly the whole long way.",
+  "southern": ["In southern swamps, the alligators sunbathe like grumpy logs.", "Animals"],
+  "space": ["In space, astronauts squeeze ketchup like a tube of paint.", "Space"],
+  "speak": "Speak softly — the porch spider is napping.",
+  "special": "The owl has a special branch reserved for moonwatching.",
+  "speed": "The snail picked up speed and broke his record.",
+  "spell": "Try to spell 'rhinoceros' before the cookies vanish.",
+  "spot": "There's a spot of jelly on Grandpa's nose tip.",
+  "spread": "Spread peanut butter thick enough to hide a marshmallow.",
+  "spring": ["In spring, the daffodils pop up like sleepy yellow ducks.", "Nature"],
+  "square": "A square pancake makes everyone tilt their head.",
+  "stand": "Stand back — the volcano cupcake is about to erupt.",
+  "stars": ["The stars winked above the sleeping campfire.", "Space"],
+  "start": "We start each morning by greeting the porch spider.",
+  "state": "The toad sat in a state of total grumpiness.",
+  "statement": "Mom's statement: 'no more goats in the bathtub.'",
+  "stay": "Stay still — that ladybug is napping on your finger.",
+  "steel": "A steel kettle whistled like a tiny choo-choo train.",
+  "step": "One careful step, two — don't squish the snail!",
+  "stick": "The puppy fetched one stick bigger than Dad's umbrella.",
+  "still": "Stay still — that owl is judging your haircut.",
+  "stone": "A frog perched on the warm flat garden stone.",
+  "stood": "The flamingo stood on one leg for the entire parade.",
+  "stop": "Stop — that snail is crossing the sidewalk!",
+  "store": "Squirrels store acorns in places they always forget.",
+  "story": ["The whale told a story about losing his tooth.", "Animals"],
+  "straight": "The arrow flew straight into the strawberry pie.",
+  "strange": "A strange beetle waltzed across the kitchen counter.",
+  "stream": ["A tiny stream tickled the toes of the napping deer.", "Nature"],
+  "street": "Down our street, the raccoons run a tiny bakery.",
+  "stretched": "The cat stretched longer than Grandpa's reading glasses.",
+  "string": "The kitten attacked one harmless piece of red string.",
+  "strong": "Ants are so strong they can carry tiny pianos.",
+  "students": ["All the students gasped when the volcano erupted blueberry jam.", "Brain"],
+  "study": ["The bugs study every crumb under the table.", "Bugs"],
+  "subject": ["My favorite subject involves dragons and long division.", "Brain"],
+  "substances": ["Mix the substances and watch the volcano erupt grape jelly.", "Brain"],
+  "such": "She has such enormous shoes for a small mouse.",
+  "suddenly": "Suddenly the toaster popped out a perfectly toasted moth.",
+  "suffix": ["Add the suffix 'y' — now it's snail-y and silly.", "Brain"],
+  "sugar": ["One spoon of sugar makes the lemonade sing.", "Food"],
+  "suggested": "The parrot suggested we order pizza for breakfast.",
+  "sum": ["Add the cookies, subtract the dog — that's the sum.", "Brain"],
+  "summer": ["In summer, the porch toad hosts moonlight concerts.", "Nature"],
+  "sun": ["The sun winked behind a hippo-shaped cloud.", "Nature"],
+  "supply": "The squirrel's supply of acorns rivals a small bakery.",
+  "suppose": "I suppose the dog ate the last cupcake again.",
+  "sure": "I'm sure the fridge is hiding one more cupcake.",
+  "surface": "A dragonfly skimmed the surface of the glassy pond.",
+  "surprise": "Surprise! The cat dropped a leaf on the table!",
+  "swim": ["Otters swim on their backs, holding hands and snacks.", "Animals"],
+  "syllables": ["Clap the syllables of 'hip-po-pot-a-mus' very slowly.", "Brain"],
+  "symbols": ["Tiny symbols on the map pointed to a buried biscuit.", "Brain"],
+  "system": ["Our solar system has a planet that wears icy rings.", "Space"],
+  "table": "A squirrel sat right on the dinner table, chewing.",
+  "take": "Take this acorn to the chipmunk in apartment three.",
+  "talk": "The parrot can talk, but only about pickles.",
+  "tall": "The giraffe stood tall enough to lick second-story windows.",
+  "teacher": ["Our teacher keeps a singing canary inside her desk drawer.", "Character"],
+  "team": "Our team mascot is a goose in tiny boots.",
+  "tell": "Tell the goose nicely that the pool is closed.",
+  "temperature": ["The temperature drops when the polar bear naps nearby.", "Nature"],
+  "ten": "Ten ducklings waddled in a perfect wobbly line.",
+  "terms": ["In simple terms — the cat ate Mom's tuna sandwich.", "Brain"],
+  "test": "The kitten will test gravity with every full glass.",
+  "than": "This pancake is taller than my baby brother.",
+  "that": "That spider knit himself a tiny green scarf.",
+  "the": "The dragon hid one shiny tooth under the rug.",
+  "their": ["The ducklings paddled with their bright orange feet.", "Animals"],
+  "them": "Feed them — the goldfish are tapping the glass.",
+  "themselves": "The kittens groomed themselves into shiny little puffballs.",
+  "then": "First we ate cake, then the cake ate us.",
+  "there": "There is a beetle living in my left rain boot.",
+  "these": "These shoes belonged to a tap-dancing flamingo.",
+  "they": "They tiptoed past the snoring grandma bear.",
+  "thick": "The fog rolled in thick, fooling the rooster.",
+  "thin": "A thin frost dusted the pumpkins like powdered sugar.",
+  "things": "Three things wiggled inside Grandpa's coat pocket.",
+  "think": "Bees think very loudly when they are working.",
+  "third": "The third pancake came out exactly hippo-shaped.",
+  "this": "This crayon smells exactly like burnt pancake.",
+  "those": "Those mittens belonged to a daring trapeze monkey.",
+  "though": "Though tiny, the mouse outran the surprised cat.",
+  "thought": "I thought the kettle was whispering Grandma's name.",
+  "thousands": "Thousands of fireflies turned the forest into a galaxy.",
+  "three": "Three pelicans showed up uninvited to the picnic.",
+  "through": "The mouse zipped through a button-sized hole.",
+  "thus": "Thus, the cat became the new mayor of the kitchen.",
+  "tied": "He tied a ribbon to the snail's shell — gently.",
+  "time": "It's time the goldfish learned to play chess.",
+  "tiny": "A tiny crab carried a sequin across the wet sand.",
+  "to": "She whispered a secret to the sleeping turtle.",
+  "today": "Today the hamster invented a brand-new dance move.",
+  "together": "Two raccoons washed grapes together at the birdbath.",
+  "told": "The owl told the moon her very best joke.",
+  "tone": "The bullfrog has a tone deeper than a foghorn.",
+  "too": "The hippo wore tutus that were two sizes too small.",
+  "took": "The crow took my shiny button and flew away.",
+  "tools": "Grandpa's tools include duct tape and one good idea.",
+  "top": "On top of the bookshelf, the cat plotted chaos.",
+  "total": ["Add the cookies: the total is zero, thanks dog.", "Brain"],
+  "touch": "Don't touch the porcupine — admire him from afar.",
+  "toward": "The duck waddled toward the pond, honking insults.",
+  "town": "In our town, a fox runs the doughnut shop.",
+  "track": "Muddy paw track led right to Dad's clean sofa.",
+  "trade": ["I'll trade two stickers for one bouncy ball.", "Money"],
+  "train": "Toot! The train of toy ducks rolled past.",
+  "travel": "Snails travel the entire backyard in a single year.",
+  "tree": ["An owl wearing glasses lives in that tree.", "Animals"],
+  "triangle": ["Cut the sandwich into one neat triangle for the dog.", "Brain"],
+  "trip": "Our trip to the pond ended with three soaked socks.",
+  "trouble": "Trouble — the cat opened the cookie jar by herself.",
+  "truck": "A toy truck rolled over the cat's sleeping tail.",
+  "true": "It's true: a beetle drove off in my toy car.",
+  "try": "Try to catch a moonbeam in your butterfly net.",
+  "tube": "A worm wiggled out of the toothpaste tube — kidding!",
+  "turn": "Watch the chameleon turn the exact pink of bubblegum.",
+  "two": "Two penguins waddled into the bakery for cupcakes.",
+  "type": "What type of duck wears tiny rain boots?",
+  "uncle": ["My uncle keeps a parrot who reviews his cooking.", "Character"],
+  "under": "A tiny door under the stairs hides a beetle library.",
+  "underline": ["Underline the word 'snail' on the chalkboard, slowly.", "Brain"],
+  "understand": "I finally understand why cats love empty boxes.",
+  "unit": ["Our science unit hatched a chicken named Crackers.", "Brain"],
+  "until": "We waited until the moonsnail finally made it across.",
+  "up": "The kitten climbed up the curtain and got stuck.",
+  "upon": "Once upon a porch, a goose taught yoga.",
+  "us": "The raccoons invited us to their midnight donut party.",
+  "use": "Use a spoon to free the worm from the muffin.",
+  "usually": "Usually the parrot eats peanuts, but Tuesdays are mango day.",
+  "valley": ["Down in the valley, the foxes hold moonlit dance parties.", "Nature"],
+  "value": ["The true value of a cookie is friendship.", "Character"],
+  "various": "The cat sampled various pillows before picking the loudest.",
+  "verb": ["Pick a verb like 'pounce,' and the kitten obeys.", "Brain"],
+  "very": "That beetle has very fancy little knee socks.",
+  "view": ["The view from the treehouse includes one nosy squirrel.", "Nature"],
+  "village": "In our village, a fox runs the doughnut shop.",
+  "visit": "Let's visit the toad who lives under the porch.",
+  "voice": "The bullfrog's voice rattled the picnic plates.",
+  "vowel": ["Each vowel sang its own silly little song.", "Brain"],
+  "wait": "Wait — the goose still has Grandpa's reading glasses!",
+  "walk": ["Walk softly past the henhouse — the chicks are dreaming.", "Animals"],
+  "wall": "A snail climbed the wall in slow silver motion.",
+  "want": "I want a sandwich the size of my dad.",
+  "war": "The squirrels declared war over one walnut.",
+  "warm": "A warm puppy is the best winter blanket.",
+  "was": "There was a frog reading the newspaper this morning.",
+  "wash": ["Cats wash themselves before, during, and after every nap.", "Animals"],
+  "washington": "In Washington, a cherry tree dropped blossoms on a duck.",
+  "wasn't": "It wasn't me — the cat opened the cookie jar.",
+  "watch": "Watch — the cat just opened the fridge!",
+  "water": ["The water turned pink when the squid swam by.", "Nature"],
+  "waves": ["Big ocean waves crashed and tickled the puffin's toes.", "Nature"],
+  "way": "The crab walked a sideways way past the rocks.",
+  "we": "We taught the parrot to say 'pickle juice!'",
+  "we'll": "We'll bake muffins shaped like sleeping turtles tonight.",
+  "wear": "Penguins wear tuxedos to every single occasion.",
+  "weather": ["The weather forecast called for cats, dogs, and frogs.", "Nature"],
+  "week": "All week, the parrot has been writing a secret song.",
+  "weight": "The kitten's weight is mostly fluff and pure mischief.",
+  "well": "A talking frog lives at the bottom of that well.",
+  "went": "The mouse went sledding down the cereal bowl.",
+  "were": "The mittens were stolen by mischievous winter foxes.",
+  "west": "The pony trotted west toward the giant pumpkin patch.",
+  "western": ["Out in the western canyon, coyotes howl at the moon.", "Animals"],
+  "what": "What is that hedgehog doing in my lunchbox?",
+  "wheels": "The wagon's wheels squeaked like grumpy old mice.",
+  "when": "When does the moose stop knocking on our door?",
+  "where": "Where did the moose hide my homework this time?",
+  "whether": "I can't tell whether that's a rock or sleeping toad.",
+  "which": "Which dragon ate the last waffle this morning?",
+  "while": "While the cake cooled, the squirrels gathered outside.",
+  "white": "A snowy white owl carried away the lost mitten.",
+  "who": "Who put a goldfish in the soup pot?",
+  "whole": "The whole pumpkin pie was eaten by one tiny raccoon.",
+  "whose": "Whose pancake is wearing this jelly mustache?",
+  "why": "Why does the goose carry a tiny suitcase?",
+  "wide": "The hippo opened her wide pink mouth and yawned.",
+  "wife": "Farmer Joe's wife taught the goose to fetch slippers.",
+  "wild": "A wild raccoon waltzed across the porch with a doughnut.",
+  "will": "The wizard will turn this turnip into a teapot.",
+  "win": "The snail will always win when patience is the prize.",
+  "wind": ["The wind laughed and tossed everyone's hats sky-high.", "Nature"],
+  "window": "A squirrel pressed his nose right to the window.",
+  "wings": ["The dragonfly's wings shimmered like stained glass windows.", "Bugs"],
+  "winter": ["In winter, the bunnies wear tiny scarves of frost.", "Nature"],
+  "wire": "A pigeon balanced on the wire like a tiny acrobat.",
+  "wish": "Make a wish before the dandelion fluff floats away.",
+  "with": "She danced with a broom and a startled cat.",
+  "within": "Within the hat lived a family of curious mice.",
+  "without": "He left without his hat, his keys, or his pants.",
+  "woman": "The woman with the parrot orders coffee in chirps.",
+  "women": "Three women in raincoats chased one runaway umbrella.",
+  "won't": "The cat won't move off my warm laptop keyboard.",
+  "wonder": "I wonder if the moon ever gets dizzy.",
+  "wood": "A woodpecker drummed on Grandpa's wood porch all morning.",
+  "words": ["The parrot collects words like other birds collect twigs.", "Brain"],
+  "work": "Ants work hard, then dance secretly in the dark.",
+  "workers": ["The bee workers buzz from flower to flower nonstop.", "Bugs"],
+  "world": "The snail carries her whole world up the wall.",
+  "would": "Would a giraffe really wear a tiny knitted hat?",
+  "wouldn't": "The cat wouldn't budge from the warm sunny windowsill.",
+  "write": ["Snails write secret notes in slow silver lines.", "Bugs"],
+  "written": "A note was written in glitter pen on the fridge.",
+  "wrong": "Something's wrong — the toaster spit out a sock.",
+  "wrote": "The squid wrote his name with seventeen wiggly tentacles.",
+  "yard": "In our yard, three rabbits run a tiny dandelion shop.",
+  "years": "Tortoises live for hundreds of slow, sunny years.",
+  "yellow": "A yellow duckling waddled into the puddle and quacked twice.",
+  "yes": "Yes, the goldfish really did blow a heart-shaped bubble.",
+  "yet": "The puppy hasn't learned to bark yet — only squeak.",
+  "you": "You jumped higher than the porch swing!",
+  "you're": "You're standing on the sleeping caterpillar — please move slowly.",
+  "young": ["A young fox practiced pouncing on dandelion fluff.", "Animals"],
+  "your": "Your shoes are full of dandelion fluff again.",
+  "yourself": "Pour yourself a glass of pineapple lightning lemonade.",
 };
 
 // Generic templates for words not in WORD_SENTENCES. {w} is substituted with
@@ -6708,6 +8545,7 @@ let _wonderRecent = [];          // last few mission indices, avoid repeats
 let _wonderTimer  = null;
 let _wonderOnDone = null;
 let _wonderCurrentSpeech = "";
+let _wonderSession = 0;          // bumped on each show — guards stale callbacks
 
 function pickWonderMission(preferCategory) {
   const matching = WONDER_MISSIONS
@@ -6726,6 +8564,9 @@ function pickWonderMission(preferCategory) {
 }
 
 // Show the Wonder Card. onDone is called when card dismisses (auto or by tap).
+// Dismiss timing: max(audio-end + 1s hold, 4s minimum), with a hard 9s cap.
+// The 4s minimum gives the kid time to read the mission text even on short
+// audio; the audio-end gate prevents Jane from being cut off mid-sentence.
 function showWonderCard(preferCategory, onDone) {
   _wonderOnDone = onDone || null;
   const m = pickWonderMission(preferCategory || "Wonder");
@@ -6736,14 +8577,38 @@ function showWonderCard(preferCategory, onDone) {
   _wonderCurrentSpeech = m.m;
   _twemojify(wonderEl);
   wonderEl.classList.add("show");
-  setTimeout(() => speakWord(_wonderCurrentSpeech), 360);
-  if (_wonderTimer) clearTimeout(_wonderTimer);
-  _wonderTimer = setTimeout(() => dismissWonderCard(), 4000);
+
+  const session = ++_wonderSession;
+  if (_wonderTimer) { clearTimeout(_wonderTimer); _wonderTimer = null; }
+
+  const WONDER_MIN_VISIBLE_MS    = 4000;
+  const WONDER_HOLD_AFTER_SPEECH = 1000;
+  const WONDER_SAFETY_CAP_MS     = 9000;
+  const shownAt = Date.now();
+
+  const dismissIfMine = () => {
+    if (session !== _wonderSession) return;
+    if (!wonderEl.classList.contains("show")) return;
+    dismissWonderCard();
+  };
+
+  setTimeout(() => {
+    if (session !== _wonderSession) return;
+    speakWord(_wonderCurrentSpeech, () => {
+      if (session !== _wonderSession) return;
+      // Honor the 4s minimum even if audio finishes early.
+      const elapsed = Date.now() - shownAt;
+      const wait = Math.max(WONDER_HOLD_AFTER_SPEECH, WONDER_MIN_VISIBLE_MS - elapsed);
+      setTimeout(dismissIfMine, wait);
+    }, { rate: AZURE_RATE_WONDER });
+  }, 360);
+
+  _wonderTimer = setTimeout(dismissIfMine, WONDER_SAFETY_CAP_MS);
 }
 
 function dismissWonderCard() {
   if (_wonderTimer) { clearTimeout(_wonderTimer); _wonderTimer = null; }
-  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  cancelSpeech();
   wonderEl.classList.remove("show");
   const cb = _wonderOnDone; _wonderOnDone = null;
   // 500ms fade matches the CSS transition
@@ -6767,11 +8632,18 @@ wonderEl.addEventListener("click", (ev) => {
 const sentenceCardEl   = document.getElementById("sentence-card");
 const sentenceBubbleEl = document.getElementById("sentence-bubble");
 
-const SENTENCE_DISPLAY_MS = 2600;  // auto-dismiss after this (tap-to-skip wins)
-const SENTENCE_FADE_MS    = 360;   // matches CSS transition
+// Card dismisses when TTS audio actually ends (+ a brief hold so the kid
+// finishes seeing the highlighted word), with a hard cap so we never hang.
+// HOLD_AFTER_SPEECH_MS gives ~0.6s of "afterglow" after Jane stops talking;
+// SAFETY_CAP_MS catches the case where audio never reports end (offline,
+// blocked autoplay, browser quirk).
+const SENTENCE_HOLD_AFTER_SPEECH_MS = 600;
+const SENTENCE_SAFETY_CAP_MS        = 7500;
+const SENTENCE_FADE_MS              = 360;   // matches CSS transition
 
-let _sentenceTimer  = null;
-let _sentenceOnDone = null;
+let _sentenceTimer    = null;
+let _sentenceOnDone   = null;
+let _sentenceSession  = 0;     // bumped on each show — guards stale callbacks
 
 // Escape user-supplied text before injecting into innerHTML.
 function _escHtml(s) {
@@ -6823,15 +8695,40 @@ function showSentenceCard(word, onDone) {
   _sentenceOnDone = onDone || null;
   sentenceBubbleEl.innerHTML = built.html;
   sentenceCardEl.classList.add("show");
+
+  // New session — invalidate any in-flight callbacks from a previous card.
+  const session = ++_sentenceSession;
+  if (_sentenceTimer) { clearTimeout(_sentenceTimer); _sentenceTimer = null; }
+
+  // Dismissal gate: either speech ends naturally (preferred), or the safety
+  // cap fires. Whichever wins, the other becomes a no-op via session check.
+  const dismissIfMine = () => {
+    if (session !== _sentenceSession) return;          // newer card already started
+    if (!sentenceCardEl.classList.contains("show")) return;  // already dismissed
+    dismissSentenceCard();
+  };
+
   // Slight delay so the bounce animation reads before TTS starts.
-  setTimeout(() => speakWord(built.raw), 280);
-  if (_sentenceTimer) clearTimeout(_sentenceTimer);
-  _sentenceTimer = setTimeout(() => dismissSentenceCard(), SENTENCE_DISPLAY_MS);
+  // Sentences read at AZURE_RATE_SENTENCE (slower than word reads) so the
+  // kid can follow along and the highlighted word lingers long enough to
+  // process — this is reading practice, not a podcast.
+  setTimeout(() => {
+    if (session !== _sentenceSession) return;
+    speakWord(built.raw, () => {
+      // Audio ended (or errored) — hold ~600ms so kid catches the final
+      // highlight bounce, then dismiss.
+      if (session !== _sentenceSession) return;
+      setTimeout(dismissIfMine, SENTENCE_HOLD_AFTER_SPEECH_MS);
+    }, { rate: AZURE_RATE_SENTENCE });
+  }, 280);
+
+  // Hard safety cap so we never hang waiting for an audio-end that never comes.
+  _sentenceTimer = setTimeout(dismissIfMine, SENTENCE_SAFETY_CAP_MS);
 }
 
 function dismissSentenceCard() {
   if (_sentenceTimer) { clearTimeout(_sentenceTimer); _sentenceTimer = null; }
-  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  cancelSpeech();
   sentenceCardEl.classList.remove("show");
   const cb = _sentenceOnDone; _sentenceOnDone = null;
   setTimeout(() => { if (cb) cb(); }, SENTENCE_FADE_MS);
@@ -7143,31 +9040,287 @@ function levelStars(lvl) {
   return "⭐⭐⭐⭐⭐⭐";
 }
 
-// Speak a word using the browser's text-to-speech.
-// Pitch/rate tuned for kid clarity. Safari needs a user-gesture-triggered
-// utterance, which our cube-tap handler provides.
-let _atlasVoice = null;
-function speakWord(word) {
+// =====================================================================
+// Speech — Azure Neural TTS (if key configured) with Web Speech fallback
+// =====================================================================
+// Set up Azure once via DevTools, persists across reloads:
+//   localStorage.setItem('azureKey', '<your AZURE_SPEECH_KEY>');
+//   localStorage.setItem('azureRegion', 'eastus');           // optional
+//   localStorage.setItem('azureVoice',  'en-US-JaneNeural'); // optional
+// Same REST endpoint + SSML shape MyBuddy uses (see /lib/voice/azure.ts).
+// No key → falls back to Web Speech API silently. Key fetch failures
+// also fall back, so the game keeps reading aloud no matter what.
+// =====================================================================
+let _atlasVoice = null;        // Web Speech voice cache
+let _azureAudio = null;        // currently-playing HTMLAudioElement
+const _azureCache = new Map(); // ("voice|text") → object URL of MP3 blob
+
+function _azureConfig() {
   try {
-    if (!window.speechSynthesis) return;
-    // Lazy-pick a clear English voice (prefer en-US "Samantha" / "Karen" / default)
-    if (!_atlasVoice) {
-      const voices = window.speechSynthesis.getVoices();
-      _atlasVoice =
-        voices.find(v => /en[-_]US/i.test(v.lang) && /samantha|karen|alex|moira/i.test(v.name)) ||
-        voices.find(v => /en[-_]US/i.test(v.lang)) ||
-        voices.find(v => /^en/i.test(v.lang)) ||
-        null;
-    }
-    window.speechSynthesis.cancel();   // stop any in-flight speech
-    const u = new SpeechSynthesisUtterance(word);
-    if (_atlasVoice) u.voice = _atlasVoice;
-    u.rate = 0.9;
-    u.pitch = 1.1;
-    u.volume = 1;
-    window.speechSynthesis.speak(u);
-  } catch (e) { /* speech unavailable — silent fail */ }
+    const key = (localStorage.getItem("azureKey") || "").trim();
+    if (!key) return null;
+    return {
+      key,
+      region: (localStorage.getItem("azureRegion") || "eastus").trim(),
+      voice:  (localStorage.getItem("azureVoice")  || "en-US-JaneNeural").trim(),
+    };
+  } catch (e) { return null; }
 }
+
+// Default Azure prosody rates per context. Tuned for kid clarity:
+//   single word reads stay slightly brisk; full sentences slow down so the
+//   kid can follow along and the highlight bounce has time to read.
+const AZURE_RATE_DEFAULT  = "+5%";    // word reads, quiz prompts
+const AZURE_RATE_SENTENCE = "-18%";   // sentence card (kid follow-along pace)
+const AZURE_RATE_WONDER   = "-10%";   // wonder mission card
+
+function _azureSSML(voice, text, rate) {
+  const lang = (voice.match(/^[a-z]{2,3}-[A-Z]{2}/) || ["en-US"])[0];
+  const esc = String(text)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+  const r = rate || AZURE_RATE_DEFAULT;
+  return "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='"+lang+"'>" +
+         "<voice xml:lang='"+lang+"' name='"+voice+"'>" +
+         "<prosody rate='" + r + "'>" + esc + "</prosody>" +
+         "</voice></speak>";
+}
+
+async function _azureFetchMp3(text, cfg, rate) {
+  const r = rate || AZURE_RATE_DEFAULT;
+  // Rate is part of the cache key — same text at +5% vs -18% are DIFFERENT MP3s.
+  const cacheKey = cfg.voice + "|" + r + "|" + text;
+  if (_azureCache.has(cacheKey)) return _azureCache.get(cacheKey);
+  const url = "https://" + cfg.region + ".tts.speech.microsoft.com/cognitiveservices/v1";
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Ocp-Apim-Subscription-Key": cfg.key,
+      "Content-Type": "application/ssml+xml",
+      "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
+      "User-Agent": "wordbattle/1",
+    },
+    body: _azureSSML(cfg.voice, text, r),
+  });
+  if (!res.ok) throw new Error("azure tts " + res.status);
+  const blob = await res.blob();
+  const objUrl = URL.createObjectURL(blob);
+  // FIFO eviction at ~80 cached sentences (avoid blob URL leak on long plays)
+  if (_azureCache.size >= 80) {
+    const oldest = _azureCache.keys().next().value;
+    try { URL.revokeObjectURL(_azureCache.get(oldest)); } catch (e) {}
+    _azureCache.delete(oldest);
+  }
+  _azureCache.set(cacheKey, objUrl);
+  return objUrl;
+}
+
+// Unified stop — call this anywhere we used to call speechSynthesis.cancel().
+// Stops BOTH engines so swapping voices mid-game doesn't double-speak.
+function cancelSpeech() {
+  try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+  if (_azureAudio) {
+    try { _azureAudio.pause(); _azureAudio.src = ""; } catch (e) {}
+    _azureAudio = null;
+  }
+}
+
+// Convert an Azure "+5%"/"-18%" rate string into a Web Speech rate multiplier.
+// Web Speech rate is 0.1..10 (1 = default). Our baseline is 0.9 (slightly
+// slow for kid clarity); the % offset is applied on top.
+function _webSpeechRate(rateStr) {
+  const base = 0.9;
+  if (!rateStr) return base;
+  const m = String(rateStr).match(/^([+-]?\d+)%$/);
+  if (!m) return base;
+  const pct = parseInt(m[1], 10);
+  return Math.max(0.4, Math.min(1.6, base * (1 + pct / 100)));
+}
+
+function _speakViaWebSpeech(text, onEnd, opts) {
+  if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
+  if (!_atlasVoice) {
+    const voices = window.speechSynthesis.getVoices();
+    _atlasVoice =
+      voices.find(v => /en[-_]US/i.test(v.lang) && /samantha|karen|alex|moira/i.test(v.name)) ||
+      voices.find(v => /en[-_]US/i.test(v.lang)) ||
+      voices.find(v => /^en/i.test(v.lang)) ||
+      null;
+  }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (_atlasVoice) u.voice = _atlasVoice;
+  u.rate = _webSpeechRate(opts && opts.rate);
+  u.pitch = 1.1;
+  u.volume = 1;
+  if (onEnd) {
+    let fired = false;
+    const fire = () => { if (!fired) { fired = true; onEnd(); } };
+    u.onend = fire;
+    u.onerror = fire;
+  }
+  window.speechSynthesis.speak(u);
+}
+
+// Public API:
+//   speakWord(text)                 — fire-and-forget
+//   speakWord(text, onEnd)          — notified when speech ends
+//   speakWord(text, onEnd, {rate})  — override prosody rate ("+5%", "-18%")
+// onEnd fires exactly once, for either engine, on natural end OR error
+// (so callers don't hang). Pitch/rate tuned for kid clarity.
+function speakWord(word, onEnd, opts) {
+  try {
+    cancelSpeech();
+    const text = String(word || "");
+    if (!text) { if (onEnd) onEnd(); return; }
+    const rate = (opts && opts.rate) || AZURE_RATE_DEFAULT;
+    const cfg = _azureConfig();
+    if (!cfg) { _speakViaWebSpeech(text, onEnd, opts); return; }
+    // Azure path — async. While the MP3 is fetching, another speakWord
+    // may fire and cancelSpeech() us; check _azureAudio identity before
+    // firing the end callback so we don't end a stale utterance.
+    _azureFetchMp3(text, cfg, rate)
+      .then(objUrl => {
+        const audio = new Audio(objUrl);
+        _azureAudio = audio;
+        let fired = false;
+        const fire = () => {
+          if (fired) return; fired = true;
+          if (_azureAudio === audio) _azureAudio = null;
+          if (onEnd) onEnd();
+        };
+        audio.onended = fire;
+        audio.onerror = fire;
+        // play() can reject under browser autoplay policy — fall back then.
+        audio.play().catch(() => { if (!fired) { fired = true; _speakViaWebSpeech(text, onEnd, opts); } });
+      })
+      .catch(err => {
+        try { console.warn("[wb] azure tts failed, using Web Speech:", err && err.message); } catch (e) {}
+        _speakViaWebSpeech(text, onEnd, opts);
+      });
+  } catch (e) { if (onEnd) onEnd(); }
+}
+
+// One-line console hint at boot so the user knows which engine is live.
+try {
+  const _wbCfg = _azureConfig();
+  if (_wbCfg) console.log("[wb] Azure TTS (" + _wbCfg.voice + " @ " + _wbCfg.region + ")");
+  else        console.log("[wb] Web Speech fallback — tap 🎙 to set Azure key");
+} catch (e) {}
+
+// =====================================================================
+// Voice settings modal — 🎙 button opens, save key+voice+region, test it.
+// Saves to localStorage; speakWord picks it up immediately on next call
+// (no reload needed because _azureConfig reads on every call).
+// =====================================================================
+(function setupVoiceSettings() {
+  const overlay   = document.getElementById("voice-overlay");
+  const toggleBtn = document.getElementById("voice-toggle");
+  const closeBtn  = document.getElementById("voice-close");
+  const keyInput  = document.getElementById("voice-key-input");
+  const voiceSel  = document.getElementById("voice-name-select");
+  const regInput  = document.getElementById("voice-region-input");
+  const saveBtn   = document.getElementById("voice-save");
+  const clearBtn  = document.getElementById("voice-clear");
+  const statusEl  = document.getElementById("voice-status");
+
+  function setStatus(text, cls) {
+    statusEl.className = "voice-status" + (cls ? " " + cls : "");
+    statusEl.textContent = text || "";
+  }
+
+  function loadIntoForm() {
+    let cfg = null;
+    try { cfg = _azureConfig(); } catch (e) {}
+    if (cfg) {
+      keyInput.value = cfg.key;
+      voiceSel.value = cfg.voice;
+      regInput.value = cfg.region;
+      // If the saved voice isn't in our dropdown, prepend it so it stays selected.
+      if (voiceSel.value !== cfg.voice) {
+        const opt = document.createElement("option");
+        opt.value = cfg.voice;
+        opt.textContent = cfg.voice;
+        voiceSel.insertBefore(opt, voiceSel.firstChild);
+        voiceSel.value = cfg.voice;
+      }
+      setStatus("Currently using Azure Neural voice ✓", "ok");
+    } else {
+      keyInput.value = "";
+      regInput.value = "eastus";
+      voiceSel.value = "en-US-JaneNeural";
+      setStatus("No key set — Mac default voice is in use.", "");
+    }
+  }
+
+  function openVoiceSettings() {
+    loadIntoForm();
+    overlay.classList.add("show");
+  }
+  function closeVoiceSettings() { overlay.classList.remove("show"); }
+
+  toggleBtn.addEventListener("click", () => {
+    try { ensureAudio(); noteUserGesture(); } catch (e) {}
+    openVoiceSettings();
+  });
+  closeBtn.addEventListener("click", closeVoiceSettings);
+  overlay.addEventListener("click", (ev) => { if (ev.target === overlay) closeVoiceSettings(); });
+
+  clearBtn.addEventListener("click", () => {
+    try {
+      localStorage.removeItem("azureKey");
+      localStorage.removeItem("azureRegion");
+      localStorage.removeItem("azureVoice");
+    } catch (e) {}
+    // Reset cache so a stale MP3 isn't reused after voice change
+    try {
+      _azureCache.forEach((u) => { try { URL.revokeObjectURL(u); } catch (e) {} });
+      _azureCache.clear();
+    } catch (e) {}
+    loadIntoForm();
+    setStatus("Cleared. Now using the Mac default voice.", "");
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    const key    = (keyInput.value || "").trim();
+    const voice  = (voiceSel.value || "en-US-JaneNeural").trim();
+    const region = (regInput.value || "eastus").trim();
+    if (!key) { setStatus("Paste your Azure Speech key first.", "err"); keyInput.focus(); return; }
+    saveBtn.disabled = true;
+    setStatus("Saving + testing…", "busy");
+    try {
+      localStorage.setItem("azureKey",    key);
+      localStorage.setItem("azureRegion", region);
+      localStorage.setItem("azureVoice",  voice);
+      // Clear the cache so the test plays against the new voice, not a cached
+      // MP3 from the previous configuration.
+      _azureCache.forEach((u) => { try { URL.revokeObjectURL(u); } catch (e) {} });
+      _azureCache.clear();
+      // Verify by actually fetching + playing a sample. Pick a short, kid-friendly line.
+      const sample = "Hi! I'm your new reading buddy.";
+      const cfg = _azureConfig();
+      const objUrl = await _azureFetchMp3(sample, cfg);
+      cancelSpeech();
+      const audio = new Audio(objUrl);
+      _azureAudio = audio;
+      audio.onended = () => { if (_azureAudio === audio) _azureAudio = null; };
+      audio.onerror = () => { if (_azureAudio === audio) _azureAudio = null; };
+      await audio.play();
+      setStatus("✓ Connected — that's " + voice.replace(/^[a-z]{2}-[A-Z]{2}-/, "").replace(/Neural$/, "") + " talking.", "ok");
+    } catch (err) {
+      const msg = (err && err.message) || String(err);
+      if (/401/.test(msg))      setStatus("✗ Key rejected (401) — double-check the key.", "err");
+      else if (/403/.test(msg)) setStatus("✗ Forbidden (403) — check the region matches the key.", "err");
+      else if (/429/.test(msg)) setStatus("✗ Rate-limited (429) — try again in a moment.", "err");
+      else                      setStatus("✗ " + msg, "err");
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  // Enter key in the key field triggers Save & Test
+  keyInput.addEventListener("keydown", (ev) => { if (ev.key === "Enter") saveBtn.click(); });
+})();
 
 function buildWordAtlas() {
   atlasGridEl.innerHTML = "";
@@ -8181,6 +10334,10 @@ function bossHpTakeOne() {
 // + screen shake but no defeat animation, no advance to next word until
 // `next_word` is triggered manually after the goblin recovers.
 function bossIntermediateHit() {
+  // Snapshot the word the kid JUST read, before advance() moves the index —
+  // boss partial-hits also get the in-context sentence card (otherwise reads
+  // against a boss skip reinforcement entirely).
+  const justReadWord = currentWord();
   // CRITICAL: clear the attack phase immediately so tick() stops re-firing
   // onProjectileHit. The flight check `t >= 1` would otherwise pulse every frame.
   anim.attackPhase = "idle";
@@ -8201,10 +10358,14 @@ function bossIntermediateHit() {
     }
   }, 220);
   voiceBossRoar();
-  // Small bonus score for the partial hit (the +5 boss bonus is in onProjectileHit)
-  // Advance to next word — boss stays on screen until HP === 0
+  // Sentence card on partial boss hits too. Skip on the last word so
+  // finish() / mission finale / Wonder Card sequence isn't crowded —
+  // mirrors the defeatGoblin branch.
+  const wordCount = (game.words ? game.words.length : 0);
+  const isLastWord = (game.wordIndex + 1) >= wordCount;
   setTimeout(() => {
-    advance();
+    if (isLastWord) advance();
+    else            showSentenceCard(justReadWord, advance);
   }, 600);
 }
 
