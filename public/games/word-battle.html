@@ -6286,7 +6286,7 @@ const WORD_SENTENCES = {
   "been":    "It's been a wonderful day.",
   "but":     "I like cookies, but prefer cake.",
   "by":      "The book is by the lamp.",
-  "called":  "She called the puppy 'Hope.'",
+  "called":  ["She called the puppy 'Hope.'", "Character"],
   "can":     "Yes, you can do it!",
   "come":    "Come see the rainbow!",
   "could":   "We could build a fort!",
@@ -6295,7 +6295,7 @@ const WORD_SENTENCES = {
   "do":      "We can do anything we try.",
   "down":    "Sit down for storytime.",
   "each":    "Each kid gets a sticker.",
-  "find":    "Can you find the cookie?",
+  "find":    ["Can you find the cookie?", "Brain"],
   "first":   "You came in first place!",
   "for":     "This gift is for you.",
   "from":    "A letter from my friend!",
@@ -6318,9 +6318,9 @@ const WORD_SENTENCES = {
   "its":     "The cat lost its toy.",
   "like":    "I really like rainy days.",
   "long":    "What a long silly day!",
-  "look":    "Look at the bright stars.",
+  "look":    ["Look at the bright stars.", "Brain"],
   "made":    "I made this just for you.",
-  "make":    "Let's make a snowman!",
+  "make":    ["Let's make a snowman!", "Brain"],
   "many":    "Many stars fill the sky.",
   "may":     "We may see a deer!",
   "more":    "Just one more story, please!",
@@ -6328,7 +6328,7 @@ const WORD_SENTENCES = {
   "no":      "No worries, you got this.",
   "not":     "It's not scary at all.",
   "now":     "It's playtime right now!",
-  "number":  "What's your favorite number?",
+  "number":  ["What's your favorite number?", "Brain"],
   "of":      "A piece of cake, please.",
   "on":      "The bird sits on a branch.",
   "one":     "You are one brave kid!",
@@ -6336,9 +6336,9 @@ const WORD_SENTENCES = {
   "other":   "Try the other door instead.",
   "out":     "Let's go out and play.",
   "part":    "You're a special part of us.",
-  "people":  "Friendly people make me happy.",
+  "people":  ["Friendly people make me happy.", "Character"],
   "said":    "Mom said dinner is ready.",
-  "see":     "Can you see the unicorn?",
+  "see":     ["Can you see the unicorn?", "Brain"],
   "she":     "She is my best friend.",
   "so":      "I love you so much.",
   "some":    "Can I have some water?",
@@ -6358,7 +6358,7 @@ const WORD_SENTENCES = {
   "up":      "Look up, the moon!",
   "use":     "Please use your inside voice.",
   "was":     "Yesterday was my best day.",
-  "water":   "Splash in the water today!",
+  "water":   ["Splash in the water today!", "Nature"],
   "way":     "There's always a way through.",
   "we":      "We can do this!",
   "were":    "Yesterday we were at home.",
@@ -6373,6 +6373,216 @@ const WORD_SENTENCES = {
   "write":   "Let's write a silly story.",
   "you":     "You are very brave today.",
   "your":    "Your drawing is beautiful!",
+
+  // ============================================================
+  //   Fry-2 (Levels ~4-6): tuple form [sentence, skill] tags the
+  //   word to a Curiosity Layer skill so reading it grows the
+  //   "Sparked today" counter (same skills as Wonder Cards).
+  // ============================================================
+  "after":     "Let's play after dinner!",
+  "again":     "Read me that story again!",
+  "air":       ["Take a deep breath of fresh air.", "Body"],
+  "also":      "I love cookies, also pancakes.",
+  "america":   "America has tall mountains.",
+  "animal":    ["What's your favorite animal?", "Animals"],
+  "another":   ["Want another giant hug?", "Character"],
+  "answer":    ["Try to answer with your heart.", "Brain"],
+  "any":       "You can pick any color!",
+  "around":    ["Look around for the hidden star!", "Brain"],
+  "ask":       ["Ask if you need a hug.", "Character"],
+  "away":      ["The clouds floated away slowly.", "Nature"],
+  "back":      ["Pat your friend on the back.", "Character"],
+  "because":   ["I smiled because you smiled.", "Character"],
+  "before":    ["Wash your hands before dinner.", "Body"],
+  "big":       ["What a big dinosaur roar!", "Dinosaurs"],
+  "boy":       "That boy made a sandcastle.",
+  "came":      ["A puppy came to visit!", "Animals"],
+  "change":    ["I can change the world with kindness.", "Character"],
+  "different": ["Every snowflake is different.", "Nature"],
+  "does":      ["Where does the river end?", "Nature"],
+  "end":       "The story has a happy end.",
+  "even":      ["Even tiny seeds grow tall trees.", "Nature"],
+  "follow":    "Follow me to the rainbow!",
+  "form":      ["Clouds form fluffy shapes today.", "Nature"],
+  "found":     ["I found a shiny rock!", "Brain"],
+  "give":      ["Give your dog a treat!", "Character"],
+  "good":      ["You did a good job today.", "Character"],
+  "great":     "What a great adventure!",
+  "hand":      ["Hold your friend's hand tight.", "Character"],
+  "help":      ["Can you help me find my socks?", "Character"],
+  "here":      ["Come here for a giant hug!", "Character"],
+  "home":      ["Our home is full of love.", "Character"],
+  "house":     "Build a fort house with pillows!",
+  "just":      "I just need one more cookie.",
+  "kind":      ["Be kind to every creature.", "Character"],
+  "know":      ["I know you can do it!", "Character"],
+  "land":      ["Astronauts will land on the moon.", "Space"],
+  "large":     ["That whale is so large!", "Animals"],
+  "learn":     ["Let's learn something new today!", "Brain"],
+  "letter":    ["Send Grandma a sweet letter.", "Character"],
+  "line":      "Stand in a wiggly line!",
+  "little":    ["Even little kids can be brave.", "Character"],
+  "live":      ["Bears live in cozy caves.", "Animals"],
+  "man":       ["That kind man helped us.", "Character"],
+  "me":        "Sing a song with me!",
+  "means":     ["A hug means 'I love you.'", "Character"],
+  "men":       "The men built a sandcastle.",
+  "most":      ["Most stars are far away.", "Space"],
+  "mother":    ["Mother hugs are the warmest.", "Character"],
+  "move":      ["Let's move our wiggle bodies!", "Body"],
+  "much":      ["I love you so much!", "Character"],
+  "must":      ["We must brush our teeth nightly.", "Body"],
+  "name":      ["Your name is wonderful.", "Character"],
+  "need":      ["I need a giant snuggle.", "Character"],
+  "new":       ["Try one new food today!", "Food"],
+  "off":       "Take your wet boots off.",
+  "old":       "My old teddy is my favorite.",
+  "only":      ["You are the only you!", "Character"],
+  "our":       ["This is our cozy home.", "Character"],
+  "over":      ["The rainbow arched over the field.", "Nature"],
+  "page":      ["Turn the page slowly.", "Brain"],
+  "picture":   ["Draw a happy family picture.", "Character"],
+  "place":     ["Your heart is a safe place.", "Character"],
+  "play":      ["Let's play outside today!", "Body"],
+  "point":     ["Point to the brightest star.", "Space"],
+  "put":       "Put your shoes by the door.",
+  "read":      ["Read me one more story!", "Brain"],
+  "right":     ["You did the right thing.", "Character"],
+  "same":      ["We have the same favorite color!", "Character"],
+  "say":       ["Say something kind today.", "Character"],
+  "sentence":  ["Make a sentence about your day.", "Brain"],
+  "set":       ["Set the table for dinner.", "Character"],
+  "should":    ["We should help each other.", "Character"],
+  "show":      ["Show me your biggest smile.", "Character"],
+  "small":     ["Even small acts can be big.", "Character"],
+  "sound":     ["The waves make a soothing sound.", "Nature"],
+  "spell":     ["Let's spell our favorite word.", "Brain"],
+  "still":     ["Stand very still like a tree.", "Body"],
+  "study":     ["I love to study bugs in dirt.", "Bugs"],
+  "such":      "We had such a fun day!",
+  "take":      ["Take a deep, calm breath.", "Body"],
+  "tell":      ["Tell me your favorite story.", "Character"],
+  "things":    ["Tiny things bring big joy.", "Wonder"],
+  "think":     ["Think big, brave thoughts!", "Brain"],
+  "three":     ["Three little kittens lost their mittens.", "Animals"],
+  "through":   ["We walked through the magic forest.", "Nature"],
+  "too":       ["I love you too, dear.", "Character"],
+  "try":       ["Always try your best.", "Character"],
+  "turn":      ["It's your turn to lead!", "Character"],
+  "us":        ["There's a hug just for us.", "Character"],
+  "very":      ["You are very brave today.", "Character"],
+  "want":      "What do you want for breakfast?",
+  "well":      ["You did the job well!", "Character"],
+  "went":      "We went to the playground.",
+  "where":     ["Where does the rainbow end?", "Nature"],
+  "why":       ["Ask why and learn forever.", "Brain"],
+  "work":      ["Hard work grows strong hearts.", "Character"],
+  "world":     ["The world is full of wonder.", "Wonder"],
+  "years":     ["Two years pass between birthdays.", "Body"],
+
+  // ============================================================
+  //   Fry-3 (Levels ~7-9)
+  // ============================================================
+  "above":     ["Look at the clouds above!", "Nature"],
+  "add":       ["Let's add some sprinkles!", "Food"],
+  "almost":    "We are almost there!",
+  "along":     ["Let's walk along the beach.", "Nature"],
+  "always":    ["Always be your sweet self.", "Character"],
+  "began":     ["The story began with magic.", "Brain"],
+  "begin":     "Let's begin our adventure!",
+  "being":     ["Being kind makes us happy.", "Character"],
+  "below":     ["Look below for hidden shells!", "Nature"],
+  "between":   ["A friend between two best buds.", "Character"],
+  "book":      ["Read a brand-new book today!", "Brain"],
+  "both":      ["I love you both so much.", "Character"],
+  "car":       ["Buckle up in the car!", "Body"],
+  "carry":     ["Carry the groceries together!", "Character"],
+  "children":  ["Children dream big dreams.", "Wonder"],
+  "city":      "Our city has tall buildings.",
+  "close":     ["Hold me close, please.", "Character"],
+  "country":   "Our country has tall mountains.",
+  "cut":       ["Cut the cake into pieces.", "Food"],
+  "don't":     ["Don't worry, you got this!", "Character"],
+  "earth":     ["Our Earth is so beautiful.", "Nature"],
+  "eat":       ["Let's eat fresh strawberries!", "Food"],
+  "enough":    ["You are more than enough.", "Character"],
+  "every":     ["Every kid is special.", "Character"],
+  "example":   ["Set a kind example today.", "Character"],
+  "eyes":      ["Your eyes sparkle like stars!", "Body"],
+  "face":      ["Make your silliest face!", "Body"],
+  "family":    ["Family hugs are the best.", "Character"],
+  "far":       ["The stars are very far.", "Space"],
+  "father":    ["Father gives the best hugs.", "Character"],
+  "feet":      ["Wiggle your tiny feet!", "Body"],
+  "few":       ["Just a few cookies left.", "Food"],
+  "food":      ["What food makes you smile?", "Food"],
+  "four":      ["Four puppies bouncing around!", "Animals"],
+  "girl":      ["That girl built a treehouse!", "Character"],
+  "got":       ["You got this, brave kid!", "Character"],
+  "group":     ["Our group plays together.", "Character"],
+  "grow":      ["Plants grow toward the sunshine.", "Nature"],
+  "hard":      ["Try hard and you will shine.", "Character"],
+  "head":      ["Pat your head, then your knees!", "Body"],
+  "hear":      ["I hear birds singing outside.", "Nature"],
+  "high":      ["Jump as high as you can!", "Body"],
+  "idea":      ["What a wonderful idea!", "Brain"],
+  "important": ["You are so important to me.", "Character"],
+  "indian":    ["The Indian elephant is gentle.", "Animals"],
+  "it's":      "It's a brand-new day!",
+  "keep":      ["Keep being your sweet self.", "Character"],
+  "last":      ["Save the last cookie for me!", "Food"],
+  "late":      ["Don't stay up too late.", "Body"],
+  "leave":     ["Leave a little for tomorrow.", "Money"],
+  "left":      ["Wave with your left hand!", "Body"],
+  "let":       ["Let your imagination soar!", "Brain"],
+  "life":      ["Every life is a treasure.", "Character"],
+  "light":     "Turn on the cozy light.",
+  "list":      ["Let's make a fun list!", "Brain"],
+  "might":     "You might find a treasure!",
+  "mile":      ["We walked a whole mile!", "Body"],
+  "miss":      ["I miss you when you're gone.", "Character"],
+  "mountains": ["The mountains touch the clouds.", "Nature"],
+  "near":      ["Stay near so I can hug you!", "Character"],
+  "never":     ["Never stop being curious.", "Brain"],
+  "next":      ["Who's next for a hug?", "Character"],
+  "night":     ["Stars shine bright at night!", "Space"],
+  "often":     ["I often think about you.", "Character"],
+  "once":      ["Once upon a magical time…", "Brain"],
+  "open":      "Open the gift with care.",
+  "own":       "This is your very own teddy.",
+  "paper":     ["Fold paper into airplanes!", "Brain"],
+  "plant":     ["Let's plant a tiny seed!", "Nature"],
+  "real":      ["Your love is real magic.", "Character"],
+  "river":     ["The river sparkles in sunshine.", "Nature"],
+  "run":       ["Let's run through the sprinklers!", "Body"],
+  "saw":       ["I saw a rainbow today!", "Nature"],
+  "school":    ["School is full of friends.", "Character"],
+  "sea":       ["Sea waves crash on shore.", "Nature"],
+  "second":    ["You came in second place!", "Character"],
+  "seem":      ["You seem extra happy today.", "Character"],
+  "side":      ["Stand by my side, brave kid.", "Character"],
+  "something": ["Try something brand-new today!", "Brain"],
+  "sometimes": ["Sometimes hugs cure everything.", "Character"],
+  "song":      ["Sing me your favorite song!", "Wonder"],
+  "soon":      ["I'll be home very soon.", "Character"],
+  "start":     "Let's start a new game!",
+  "state":     "Our state has tall trees.",
+  "stop":      ["Stop and smell the flowers!", "Nature"],
+  "story":     ["Tell me your wildest story!", "Wonder"],
+  "talk":      ["Let's talk about your day.", "Character"],
+  "those":     ["Look at those fluffy clouds!", "Nature"],
+  "thought":   ["What a kind thought!", "Character"],
+  "together":  ["We grow stronger together.", "Character"],
+  "took":      ["I took a big, brave breath.", "Body"],
+  "tree":      ["That tree is taller than us!", "Nature"],
+  "under":     "Hide under the cozy blanket!",
+  "until":     ["Sing until the song ends.", "Wonder"],
+  "walk":      ["Walk slowly through the garden.", "Nature"],
+  "watch":     ["Watch the butterflies dance!", "Bugs"],
+  "while":     ["Read a while before bed.", "Brain"],
+  "white":     ["White clouds float by.", "Nature"],
+  "without":   ["Without you, my heart is small.", "Character"],
+  "young":     ["Stay young at heart forever.", "Character"],
 };
 
 // Generic templates for words not in WORD_SENTENCES. {w} is substituted with
@@ -6570,15 +6780,26 @@ function _escHtml(s) {
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
-// Look up (or generate) a sentence for the given word, returning both the
-// raw sentence text (for TTS) and an HTML version with the target word
-// wrapped in <span class="sentence-hl">…</span>.
+// Look up (or generate) a sentence for the given word. Returns:
+//   { raw, html, skill }
+// where raw is the plain sentence (for TTS), html is the sentence with the
+// target word wrapped in <span class="sentence-hl">…</span>, and skill is
+// an optional Curiosity Layer category (Money/Character/Brain/...) that
+// showSentenceCard will bump via bumpSkill() — letting themed reads grow
+// the "Sparked today" counter the same way Wonder Cards do.
+//
+// WORD_SENTENCES entries can be either a plain string (no skill tag, for
+// neutral function words) or a [sentence, skill] tuple.
 function buildSentenceForWord(word) {
   const w = String(word || "").trim();
   if (!w) return null;
-  const key = w.toLowerCase();
-  let raw = WORD_SENTENCES[key];
-  if (!raw) {
+  const key   = w.toLowerCase();
+  const entry = WORD_SENTENCES[key];
+  let raw, skill = null;
+  if (entry) {
+    if (Array.isArray(entry)) { raw = entry[0]; skill = entry[1] || null; }
+    else                      { raw = entry; }
+  } else {
     const tpl = FALLBACK_SENTENCES[Math.floor(Math.random() * FALLBACK_SENTENCES.length)];
     raw = tpl.replace("{w}", w);
   }
@@ -6589,12 +6810,16 @@ function buildSentenceForWord(word) {
   // already plain word characters, so escaping doesn't affect it).
   const safe = _escHtml(raw);
   const html = safe.replace(re, '<span class="sentence-hl">$1</span>');
-  return { raw, html };
+  return { raw, html, skill };
 }
 
 function showSentenceCard(word, onDone) {
   const built = buildSentenceForWord(word);
   if (!built) { if (onDone) onDone(); return; }
+  // Themed sentences grow the "Sparked today" Curiosity Layer counter on
+  // every read (Wonder Cards only bump it at session end). Skill remains
+  // null for neutral function words so the counter doesn't get noisy.
+  if (built.skill) bumpSkill(built.skill);
   _sentenceOnDone = onDone || null;
   sentenceBubbleEl.innerHTML = built.html;
   sentenceCardEl.classList.add("show");
