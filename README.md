@@ -1,4 +1,4 @@
-# Business Model Learning Lab — MomTalk
+# Business Learning Lab — MomTalk
 
 > A kid-facing web app that teaches business and money concepts via 29 interactive lessons, real-world missions, and a collectible card system.
 
