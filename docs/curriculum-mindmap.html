@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Business Model Learning — Curriculum Mind Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ─── MomTalk Lush Memphis tokens ─── */
+    :root {
+      --green: #2D9B6E;
+      --green-deep: #1a6b48;
+      --pink: #FF65C5;
+      --yellow: #FFCB65;
+      --blue: #65C9FF;
+      --lavender: #7C5CFC;
+      --coral: #FF6B6B;
+      --mint: #CCFBF1;
+      --canvas: #FFF5EC;
+      --ink: #1E293B;
+      --white: #FFFFFF;
+
+      --bg-foundation: #FFF5DB;
+      --bg-money:      #E5F5EC;
+      --bg-business:   #E0F2FE;
+      --bg-hustles:    #FFE5EC;
+      --bg-skills:     #EDE9FE;
+      --bg-advanced:   #FFE8E0;
+
+      --accent-foundation: var(--yellow);
+      --accent-money:      var(--green);
+      --accent-business:   var(--blue);
+      --accent-hustles:    var(--pink);
+      --accent-skills:     var(--lavender);
+      --accent-advanced:   var(--coral);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Fredoka', system-ui, -apple-system, sans-serif;
+      background: var(--canvas);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 32px 16px 80px;
+      line-height: 1.4;
+    }
+
+    .num, code { font-family: 'Space Mono', ui-monospace, monospace; }
+
+    /* ─── Header ─── */
+    header.page {
+      max-width: 1480px;
+      margin: 0 auto 36px;
+      text-align: center;
+    }
+    header.page h1 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.02em;
+      margin: 0 0 10px;
+    }
+    header.page .subtitle {
+      font-size: clamp(14px, 1.4vw, 18px);
+      color: var(--ink);
+      font-weight: 500;
+      max-width: 760px;
+      margin: 0 auto 24px;
+    }
+    .legend {
+      display: inline-flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: var(--white);
+      border: 3px solid var(--green);
+      border-radius: 999px;
+      padding: 8px 16px;
+      box-shadow: 5px 5px 0 var(--green);
+    }
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .legend-swatch {
+      width: 18px; height: 18px;
+      border: 2px solid var(--green);
+      border-radius: 6px;
+    }
+    .legend-swatch.shipped { background: var(--mint); }
+    .legend-swatch.brainstormed {
+      background: var(--white);
+      border-style: dashed;
+    }
+
+    /* ─── Root node + connector ─── */
+    .center-stage {
+      max-width: 1480px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .root-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .root {
+      position: relative;
+      background: var(--white);
+      border: 4px solid var(--green);
+      border-radius: 36px;
+      padding: 18px 28px;
+      box-shadow: 8px 8px 0 var(--green-deep);
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      z-index: 2;
+    }
+    .root .label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--pink);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .root .title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.01em;
+    }
+    .root .count {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .root .count b { color: var(--coral); font-size: 16px; }
+
+    /* SVG connector overlay — radiates from root center to each category */
+    .connector {
+      position: absolute;
+      top: 90px;       /* sits below root, above categories */
+      left: 0; right: 0;
+      height: 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .connector path {
+      fill: none;
+      stroke: var(--green);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 6 6;
+      opacity: 0.5;
+    }
+
+    /* ─── Category columns ─── */
+    .branches {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 60px;
+    }
+    @media (max-width: 1280px) {
+      .branches { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 720px) {
+      .branches { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 480px) {
+      .branches { grid-template-columns: 1fr; }
+    }
+
+    .branch {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .branch-header {
+      background: var(--bg-foundation);
+      border: 3px solid var(--green);
+      border-radius: 24px;
+      padding: 14px 14px 12px;
+      text-align: center;
+      box-shadow: 4px 4px 0 var(--green);
+      position: relative;
+    }
+    .branch-header .emoji {
+      font-size: 32px;
+      line-height: 1;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .branch-header .name {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: 0.02em;
+      line-height: 1.15;
+    }
+    .branch-header .count {
+      display: inline-block;
+      margin-top: 6px;
+      background: var(--white);
+      border: 2px solid var(--green);
+      border-radius: 999px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    /* Per-category accent (recolors the header) */
+    .branch.foundation .branch-header { background: var(--bg-foundation); }
+    .branch.money      .branch-header { background: var(--bg-money); }
+    .branch.business   .branch-header { background: var(--bg-business); }
+    .branch.hustles    .branch-header { background: var(--bg-hustles); }
+    .branch.skills     .branch-header { background: var(--bg-skills); }
+    .branch.advanced   .branch-header { background: var(--bg-advanced); }
+
+    /* ─── Lesson nodes ─── */
+    .lesson {
+      background: var(--white);
+      border: 2px solid var(--green);
+      border-radius: 16px;
+      padding: 10px 12px;
+      box-shadow: 3px 3px 0 var(--green);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .lesson:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0 var(--green);
+    }
+    .lesson .emoji {
+      font-size: 22px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .lesson .meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .lesson .title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1.2;
+      word-break: break-word;
+    }
+    .lesson .concept {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink);
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+    .lesson .status {
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--white);
+      background: var(--green);
+    }
+    .lesson .status.new {
+      background: var(--white);
+      color: var(--pink);
+      border: 2px solid var(--pink);
+    }
+
+    /* Brainstormed cards get a dashed outline + faint tint */
+    .lesson.brainstormed {
+      border-style: dashed;
+      background: var(--canvas);
+    }
+
+    /* Faint background tint per category column on the lessons */
+    .branch.foundation .lesson { background: var(--white); }
+    .branch.money      .lesson { background: var(--white); }
+    .branch.business   .lesson { background: var(--white); }
+    .branch.hustles    .lesson { background: var(--white); }
+    .branch.skills     .lesson { background: var(--white); }
+    .branch.advanced   .lesson { background: var(--white); }
+    .branch.foundation .lesson.brainstormed { background: var(--bg-foundation); }
+    .branch.money      .lesson.brainstormed { background: var(--bg-money); }
+    .branch.business   .lesson.brainstormed { background: var(--bg-business); }
+    .branch.hustles    .lesson.brainstormed { background: var(--bg-hustles); }
+    .branch.skills     .lesson.brainstormed { background: var(--bg-skills); }
+    .branch.advanced   .lesson.brainstormed { background: var(--bg-advanced); }
+
+    /* ─── Summary footer ─── */
+    .summary {
+      max-width: 1480px;
+      margin: 60px auto 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 720px) {
+      .summary { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat {
+      background: var(--white);
+      border: 3px solid var(--green);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 5px 5px 0 var(--green);
+      text-align: center;
+    }
+    .stat .num-big {
+      font-family: 'Space Mono', monospace;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+      display: block;
+    }
+    .stat .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    .footer-note {
+      max-width: 760px;
+      margin: 40px auto 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--ink);
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <header class="page">
+    <h1>🃏 Business Model Learning — Curriculum Mind Map</h1>
+    <p class="subtitle">
+      Every lesson, shipped and brainstormed, grouped into the 6 skill lanes
+      that define the curriculum. <strong>56 modules total</strong> — 29 live
+      on <code>main</code>, 27 on the table.
+    </p>
+    <div class="legend" role="region" aria-label="Legend">
+      <span class="legend-item">
+        <span class="legend-swatch shipped" aria-hidden="true"></span> Shipped
+      </span>
+      <span class="legend-item">
+        <span class="legend-swatch brainstormed" aria-hidden="true"></span> Brainstormed
+      </span>
+    </div>
+  </header>
+
+  <main class="center-stage">
+    <div class="root-wrap">
+      <div class="root">
+        <span class="label">The Lab</span>
+        <span class="title">Business Model Learning</span>
+        <span class="count"><b>29</b> shipped &nbsp;·&nbsp; <b>27</b> brainstormed &nbsp;·&nbsp; <b>56</b> total</span>
+      </div>
+    </div>
+
+    <!-- Connector lines from root down to each category header -->
+    <svg class="connector" viewBox="0 0 1480 60" preserveAspectRatio="none">
+      <!-- Lines fan out from center top to 6 column tops -->
+      <path d="M 740 0 Q 740 30 123 60" />
+      <path d="M 740 0 Q 740 30 370 60" />
+      <path d="M 740 0 Q 740 30 617 60" />
+      <path d="M 740 0 Q 740 30 863 60" />
+      <path d="M 740 0 Q 740 30 1110 60" />
+      <path d="M 740 0 Q 740 30 1357 60" />
+    </svg>
+
+    <div class="branches">
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- FOUNDATION -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch foundation" aria-label="Foundation">
+        <div class="branch-header">
+          <span class="emoji">🧠</span>
+          <div class="name">Foundation</div>
+          <span class="count">1 lesson</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🧠</span>
+          <div class="meta">
+            <div class="title">Business 101</div>
+            <div class="concept">5 building blocks of every business</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- PERSONAL FINANCE & MONEY CONCEPTS -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch money" aria-label="Personal Finance and Money Concepts">
+        <div class="branch-header">
+          <span class="emoji">💰</span>
+          <div class="name">Money &amp;<br />Personal Finance</div>
+          <span class="count">11 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">🏦</span>
+          <div class="meta">
+            <div class="title">Piggy Bank Power-Up</div>
+            <div class="concept">Compound interest</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">📈</span>
+          <div class="meta">
+            <div class="title">Stock Market Adventure</div>
+            <div class="concept">Owning a real company</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🏛️</span>
+          <div class="meta">
+            <div class="title">Tax Town</div>
+            <div class="concept">Public goods + collective action</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🛡️</span>
+          <div class="meta">
+            <div class="title">Risk Pool Island</div>
+            <div class="concept">Insurance &amp; risk pooling</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🔁</span>
+          <div class="meta">
+            <div class="title">Subscription Sense</div>
+            <div class="concept">Recurring revenue + churn</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">💳</span>
+          <div class="meta">
+            <div class="title">Credit &amp; Debt</div>
+            <div class="concept">Borrowing money costs money</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🏦</span>
+          <div class="meta">
+            <div class="title">Banking Basics</div>
+            <div class="concept">Checking, savings, FDIC, ATMs</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">📊</span>
+          <div class="meta">
+            <div class="title">Inflation</div>
+            <div class="concept">Money buys less over time</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">⚖️</span>
+          <div class="meta">
+            <div class="title">Supply &amp; Demand</div>
+            <div class="concept">Scarce + popular = expensive</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🤝</span>
+          <div class="meta">
+            <div class="title">Bonds</div>
+            <div class="concept">Lending to companies + governments</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">📊</span>
+          <div class="meta">
+            <div class="title">Index Funds</div>
+            <div class="concept">Buy them all — Buffett's trick</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- FAMOUS BUSINESSES -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch business" aria-label="Famous Business Deep-Dives">
+        <div class="branch-header">
+          <span class="emoji">🏢</span>
+          <div class="name">Famous<br />Businesses</div>
+          <span class="count">15 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">🐔</span>
+          <div class="meta">
+            <div class="title">Chick-fil-A</div>
+            <div class="concept">Service language as moat</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🍔</span>
+          <div class="meta">
+            <div class="title">McDonald's</div>
+            <div class="concept">Real estate is the real business</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🎮</span>
+          <div class="meta">
+            <div class="title">Roblox</div>
+            <div class="concept">Platform &gt; product</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🛍️</span>
+          <div class="meta">
+            <div class="title">Costco</div>
+            <div class="concept">Fee = entire profit engine</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🚚</span>
+          <div class="meta">
+            <div class="title">Amazon</div>
+            <div class="concept">Speed IS the product</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🧱</span>
+          <div class="meta">
+            <div class="title">Lego</div>
+            <div class="concept">Compatibility as moat (68 yrs)</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🐭</span>
+          <div class="meta">
+            <div class="title">Disney</div>
+            <div class="concept">IP that compounds 100 years</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">🍎</span>
+          <div class="meta">
+            <div class="title">Apple</div>
+            <div class="concept">Ecosystem lock-in + services flywheel</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🔍</span>
+          <div class="meta">
+            <div class="title">Google / Search</div>
+            <div class="concept">Ads as the actual product</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🎵</span>
+          <div class="meta">
+            <div class="title">TikTok</div>
+            <div class="concept">Algorithm IS the business</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🛒</span>
+          <div class="meta">
+            <div class="title">Walmart</div>
+            <div class="concept">Scale + low margin = empire</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🚗</span>
+          <div class="meta">
+            <div class="title">Tesla</div>
+            <div class="concept">Mission-driven brand premium</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🪑</span>
+          <div class="meta">
+            <div class="title">IKEA</div>
+            <div class="concept">DIY = cost-shifting to customer</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🛍️</span>
+          <div class="meta">
+            <div class="title">Trader Joe's</div>
+            <div class="concept">Private label + curation</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">⚡</span>
+          <div class="meta">
+            <div class="title">Pokemon</div>
+            <div class="concept">IP across cards + games + media</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- KID HUSTLES -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch hustles" aria-label="Kid Hustles">
+        <div class="branch-header">
+          <span class="emoji">💪</span>
+          <div class="name">Kid<br />Hustles</div>
+          <span class="count">13 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">🏷️</span>
+          <div class="meta">
+            <div class="title">Garage Sale</div>
+            <div class="concept">Pricing + selling stuff you own</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🍋</span>
+          <div class="meta">
+            <div class="title">Lemonade Stand</div>
+            <div class="concept">Unit economics + first principles</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🐾</span>
+          <div class="meta">
+            <div class="title">Pet Shop</div>
+            <div class="concept">Service biz + repeat customers</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🎬</span>
+          <div class="meta">
+            <div class="title">YouTube Creator</div>
+            <div class="concept">Niche audiences pay better</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🍪</span>
+          <div class="meta">
+            <div class="title">Cookie Bakery</div>
+            <div class="concept">Economies of scale</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🌱</span>
+          <div class="meta">
+            <div class="title">Farm Stand</div>
+            <div class="concept">Sun + time + seeds = $$</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">❄️</span>
+          <div class="meta">
+            <div class="title">Snow Day Hustle</div>
+            <div class="concept">Seasonal demand windows</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🪡</span>
+          <div class="meta">
+            <div class="title">Etsy Shop</div>
+            <div class="concept">Handmade + marketplace fees</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🍕</span>
+          <div class="meta">
+            <div class="title">Pizza Place</div>
+            <div class="concept">Food cost % + labor + rent</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">🎓</span>
+          <div class="meta">
+            <div class="title">Tutor Trade</div>
+            <div class="concept">Selling what you know</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">☕</span>
+          <div class="meta">
+            <div class="title">Hot Cocoa Stand</div>
+            <div class="concept">Winter Lemonade — seasonality</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">📚</span>
+          <div class="meta">
+            <div class="title">Library Card Power</div>
+            <div class="concept">Free Costco for knowledge</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">💻</span>
+          <div class="meta">
+            <div class="title">Coding Gig</div>
+            <div class="concept">Build a real thing for someone</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SOFT SKILLS & META -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch skills" aria-label="Soft Skills and Meta-skills">
+        <div class="branch-header">
+          <span class="emoji">🎯</span>
+          <div class="name">Soft Skills<br />&amp; Meta-skills</div>
+          <span class="count">10 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">💡</span>
+          <div class="meta">
+            <div class="title">Inventor's Lab</div>
+            <div class="concept">Design thinking + iteration</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🤝</span>
+          <div class="meta">
+            <div class="title">Deal Maker</div>
+            <div class="concept">Negotiation (BATNA, win-win)</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">❤️</span>
+          <div class="meta">
+            <div class="title">Charity Lab</div>
+            <div class="concept">Mission-driven project execution</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">📣</span>
+          <div class="meta">
+            <div class="title">Marketing Mountain</div>
+            <div class="concept">AIDA funnel + word of mouth</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">📋</span>
+          <div class="meta">
+            <div class="title">Survey Master</div>
+            <div class="concept">Ask before you build</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">💪</span>
+          <div class="meta">
+            <div class="title">Failure &amp; Bounce Back</div>
+            <div class="concept">Failure is data, not identity</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🎯</span>
+          <div class="meta">
+            <div class="title">SMART Goals</div>
+            <div class="concept">Specific + Measurable + Timed</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🎤</span>
+          <div class="meta">
+            <div class="title">Public Speaking</div>
+            <div class="concept">Skill, not talent — built by reps</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">⏱️</span>
+          <div class="meta">
+            <div class="title">Time Management</div>
+            <div class="concept">Same 24h — different outcomes</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🔄</span>
+          <div class="meta">
+            <div class="title">Habit Building</div>
+            <div class="concept">1% better daily = 37× per year</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- ADVANCED / BIG PICTURE -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch advanced" aria-label="Advanced and Big Picture">
+        <div class="branch-header">
+          <span class="emoji">🚀</span>
+          <div class="name">Advanced<br />&amp; Big Picture</div>
+          <span class="count">6 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">🦄</span>
+          <div class="meta">
+            <div class="title">Startup Pitch</div>
+            <div class="concept">Equity, dilution, 60-sec pitch</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">📱</span>
+          <div class="meta">
+            <div class="title">App Maker</div>
+            <div class="concept">Software margins (marginal $0)</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">🤖</span>
+          <div class="meta">
+            <div class="title">AI &amp; Jobs</div>
+            <div class="concept">What AI changes / creates / replaces</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">₿</span>
+          <div class="meta">
+            <div class="title">Cryptocurrency</div>
+            <div class="concept">Digital scarcity, blockchains</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🏠</span>
+          <div class="meta">
+            <div class="title">Real Estate</div>
+            <div class="concept">Buying a home + mortgages</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🌍</span>
+          <div class="meta">
+            <div class="title">Globalization</div>
+            <div class="concept">Your stuff's 5-country journey</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─── Summary stats ─── -->
+    <div class="summary">
+      <div class="stat">
+        <span class="num-big">56</span>
+        <div class="label">Total Modules</div>
+      </div>
+      <div class="stat">
+        <span class="num-big">29</span>
+        <div class="label">Shipped ✓</div>
+      </div>
+      <div class="stat">
+        <span class="num-big">27</span>
+        <div class="label">Brainstormed ✨</div>
+      </div>
+      <div class="stat">
+        <span class="num-big">6</span>
+        <div class="label">Skill Lanes</div>
+      </div>
+    </div>
+
+    <p class="footer-note">
+      Generated 2026-05-29 from <code>src/data/lessons/*.ts</code> and
+      <code>docs/specs/2026-05-29-new-modules-brainstorm-v2.md</code>.<br />
+      Open <code>docs/curriculum-mindmap.html</code> in any browser to view.
+    </p>
+  </main>
+</body>
+</html>
