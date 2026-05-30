@@ -18,7 +18,7 @@ What's good is the **curriculum**. The strategy is to keep the lessons exactly a
 
 This grounds everything below — much of what a "10×" plan would "add" already exists:
 
-- **30 shipped lessons** as data (`src/data/lessons/*.ts`), each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
+- **44 shipped lessons** as data (`src/data/lessons/*.ts`), each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
 - **Adaptive difficulty** built in — every lesson carries `easy / medium / hard` text (`useAdaptive`).
 - **Momo** the character already exists (`Momo.tsx`, `MomoMentorBubble.tsx`) — today he speaks *canned* lesson text.
 - **Cards** with rarity + skill lanes including an **Investing** lane (`cards.ts`); **quizzes** award XP + skill scores.
@@ -51,18 +51,18 @@ A dedicated lane so investing literacy is a coherent arc, not scattered. Foundat
 |---|---|---|---|
 | 1 | Stock Market Adventure | A stock = owning a slice of a real company | ✅ shipped |
 | 2 | **Index Funds — Buy Them ALL** | Buffett's trick: own every company at once | ✅ **shipped (built 2026-05-30)** |
-| 3 | Don't Put All Eggs in One Basket | Diversification & spreading risk | 🆕 brainstormed |
-| 4 | The Long Game | Time in the market beats timing it | 🆕 brainstormed |
-| 5 | Dividends | Getting paid just to own a share | 🆕 brainstormed |
-| 6 | Bulls & Bears | Markets rise & fall — stay calm | 🆕 brainstormed |
-| 7 | Bonds | Lending to companies + governments | 🆕 brainstormed |
-| 8 | Build Your First Portfolio | Pick, track & diversify (capstone) | 🆕 brainstormed |
+| 3 | Don't Put All Eggs in One Basket | Diversification & spreading risk | ✅ shipped |
+| 4 | The Long Game | Time in the market beats timing it | ✅ shipped |
+| 5 | Dividends | Getting paid just to own a share | ✅ shipped |
+| 6 | Bulls & Bears | Markets rise & fall — stay calm | ✅ shipped |
+| 7 | Bonds | Lending to companies + governments | ✅ shipped |
+| 8 | Build Your First Portfolio | Pick, track & diversify (capstone) | ✅ shipped |
 
-Lesson #2 (Index Funds) is fully built and wired end-to-end (lesson + theme + card + page + route + map stop), tests green (`30 shipped`), and renders live. The remaining 6 follow the same `LessonDef` pattern.
+**All 8 Kids Investing lessons are built and wired end-to-end** (lesson + theme + card + page + route + map stop), tsc clean, tests green (`44 shipped`), and rendering live.
 
 ## The Stock Analysis category (NEW)
 
-A second investing lane — not "what is a stock" but **"how do you size up a company?"** This is your professional craft shrunk to kid scale, and it plugs straight into the Famous Businesses lane: the kid learns to *decode a company themselves* instead of being told the answer. All brainstormed; same `LessonDef` pattern.
+A second investing lane — not "what is a stock" but **"how do you size up a company?"** This is your professional craft shrunk to kid scale, and it plugs straight into the Famous Businesses lane: the kid learns to *decode a company themselves* instead of being told the answer. **All 8 built and shipped** (same `LessonDef` pattern, tsc clean, tests green).
 
 | # | Lesson | Concept |
 |---|---|---|
@@ -124,7 +124,7 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Phased rollout (engines wrap the lessons, in order)
 
-1. **Finish the Kids Investing lane** (6 remaining lessons) and start the **Stock Analysis** lane — pure content, same pattern as Index Funds. Highest-confidence, your domain.
+1. ✅ **Done — Kids Investing (8) + Stock Analysis (8) lanes fully built** (44 shipped lessons, tests green). Next content: author the remaining brainstormed lessons in the other lanes (Apple, Google, AI & Jobs, etc.).
 2. **Engine 1 — Momo coach** at 3 surfaces: lesson intro ("last time we…"), a stuck-moment nudge, and an "Ask Momo." Conservative, guardrailed.
 3. **Engine 2 — Kid Capital + pretend portfolio**, anchored on the Stock Investing lane.
 4. **Engine 3 — Family Mode** weekly briefing + mission co-pilot.
@@ -140,4 +140,4 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Summary
 
-Keep the 30 lessons (now including Kids Investing + Stock Analysis lanes) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
+Keep the 44 lessons (now including fully-built Kids Investing + Stock Analysis lanes) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
