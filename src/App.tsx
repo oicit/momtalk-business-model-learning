@@ -24,6 +24,31 @@ import MoatTestPage from './pages/MoatTestPage';
 import CheapOrExpensivePage from './pages/CheapOrExpensivePage';
 import SpotTheTrendPage from './pages/SpotTheTrendPage';
 import StockDetectivePage from './pages/StockDetectivePage';
+import CreditDebtPage from './pages/CreditDebtPage';
+import BankingBasicsPage from './pages/BankingBasicsPage';
+import InflationPage from './pages/InflationPage';
+import SupplyDemandPage from './pages/SupplyDemandPage';
+import ApplePage from './pages/ApplePage';
+import GoogleSearchPage from './pages/GoogleSearchPage';
+import TikTokPage from './pages/TikTokPage';
+import WalmartPage from './pages/WalmartPage';
+import TeslaPage from './pages/TeslaPage';
+import IkeaPage from './pages/IkeaPage';
+import TraderJoesPage from './pages/TraderJoesPage';
+import PokemonPage from './pages/PokemonPage';
+import TutorTradePage from './pages/TutorTradePage';
+import HotCocoaStandPage from './pages/HotCocoaStandPage';
+import LibraryCardPage from './pages/LibraryCardPage';
+import CodingGigPage from './pages/CodingGigPage';
+import FailureBounceBackPage from './pages/FailureBounceBackPage';
+import SmartGoalsPage from './pages/SmartGoalsPage';
+import PublicSpeakingPage from './pages/PublicSpeakingPage';
+import TimeManagementPage from './pages/TimeManagementPage';
+import HabitBuildingPage from './pages/HabitBuildingPage';
+import AiAndJobsPage from './pages/AiAndJobsPage';
+import CryptocurrencyPage from './pages/CryptocurrencyPage';
+import RealEstatePage from './pages/RealEstatePage';
+import GlobalizationPage from './pages/GlobalizationPage';
 import McDonaldsPage from './pages/McDonaldsPage';
 import InventorsLabPage from './pages/InventorsLabPage';
 import DealMakerPage from './pages/DealMakerPage';
@@ -83,6 +108,31 @@ export default function App() {
       <Route path="/cheap-or-expensive" element={<CheapOrExpensivePage />} />
       <Route path="/spot-the-trend" element={<SpotTheTrendPage />} />
       <Route path="/stock-detective" element={<StockDetectivePage />} />
+      <Route path="/credit-debt" element={<CreditDebtPage />} />
+      <Route path="/banking-basics" element={<BankingBasicsPage />} />
+      <Route path="/inflation" element={<InflationPage />} />
+      <Route path="/supply-demand" element={<SupplyDemandPage />} />
+      <Route path="/apple" element={<ApplePage />} />
+      <Route path="/google-search" element={<GoogleSearchPage />} />
+      <Route path="/tiktok" element={<TikTokPage />} />
+      <Route path="/walmart" element={<WalmartPage />} />
+      <Route path="/tesla" element={<TeslaPage />} />
+      <Route path="/ikea" element={<IkeaPage />} />
+      <Route path="/trader-joes" element={<TraderJoesPage />} />
+      <Route path="/pokemon" element={<PokemonPage />} />
+      <Route path="/tutor-trade" element={<TutorTradePage />} />
+      <Route path="/hot-cocoa-stand" element={<HotCocoaStandPage />} />
+      <Route path="/library-card" element={<LibraryCardPage />} />
+      <Route path="/coding-gig" element={<CodingGigPage />} />
+      <Route path="/failure-bounce-back" element={<FailureBounceBackPage />} />
+      <Route path="/smart-goals" element={<SmartGoalsPage />} />
+      <Route path="/public-speaking" element={<PublicSpeakingPage />} />
+      <Route path="/time-management" element={<TimeManagementPage />} />
+      <Route path="/habit-building" element={<HabitBuildingPage />} />
+      <Route path="/ai-and-jobs" element={<AiAndJobsPage />} />
+      <Route path="/cryptocurrency" element={<CryptocurrencyPage />} />
+      <Route path="/real-estate" element={<RealEstatePage />} />
+      <Route path="/globalization" element={<GlobalizationPage />} />
       <Route path="/mcdonalds" element={<McDonaldsPage />} />
       <Route path="/inventors-lab" element={<InventorsLabPage />} />
       <Route path="/deal-maker" element={<DealMakerPage />} />

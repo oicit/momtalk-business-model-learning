@@ -33,6 +33,31 @@ import moatTest from '../moat-test';
 import cheapOrExpensive from '../cheap-or-expensive';
 import spotTheTrend from '../spot-the-trend';
 import stockDetective from '../stock-detective';
+import creditDebt from '../credit-debt';
+import bankingBasics from '../banking-basics';
+import inflation from '../inflation';
+import supplyDemand from '../supply-demand';
+import apple from '../apple';
+import googleSearch from '../google-search';
+import tiktok from '../tiktok';
+import walmart from '../walmart';
+import tesla from '../tesla';
+import ikea from '../ikea';
+import traderJoes from '../trader-joes';
+import pokemon from '../pokemon';
+import tutorTrade from '../tutor-trade';
+import hotCocoaStand from '../hot-cocoa-stand';
+import libraryCard from '../library-card';
+import codingGig from '../coding-gig';
+import failureBounceBack from '../failure-bounce-back';
+import smartGoals from '../smart-goals';
+import publicSpeaking from '../public-speaking';
+import timeManagement from '../time-management';
+import habitBuilding from '../habit-building';
+import aiAndJobs from '../ai-and-jobs';
+import cryptocurrency from '../cryptocurrency';
+import realEstate from '../real-estate';
+import globalization from '../globalization';
 import mcdonalds from '../mcdonalds';
 import inventorsLab from '../inventors-lab';
 import dealMaker from '../deal-maker';
@@ -63,6 +88,11 @@ const ALL_LESSONS: LessonDef[] = [
   diversification, longGame, dividends, bullsBears, bonds, firstPortfolio,
   greatCompany, companyDetective, isItGrowing, doesItMakeMoney, moatTest,
   cheapOrExpensive, spotTheTrend, stockDetective,
+  creditDebt, bankingBasics, inflation, supplyDemand,
+  apple, googleSearch, tiktok, walmart, tesla, ikea, traderJoes, pokemon,
+  tutorTrade, hotCocoaStand, libraryCard, codingGig,
+  failureBounceBack, smartGoals, publicSpeaking, timeManagement, habitBuilding,
+  aiAndJobs, cryptocurrency, realEstate, globalization,
   mcdonalds, inventorsLab, dealMaker,
   charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco,
   amazon, lego, disney, farmStand, snowDayHustle, marketingMountain,
@@ -70,8 +100,8 @@ const ALL_LESSONS: LessonDef[] = [
 ];
 
 describe('lesson registry', () => {
-  it('has 44 shipped lessons', () => {
-    expect(ALL_LESSONS).toHaveLength(44);
+  it('has 69 shipped lessons', () => {
+    expect(ALL_LESSONS).toHaveLength(69);
   });
 
   it('each lesson has a unique id', () => {
