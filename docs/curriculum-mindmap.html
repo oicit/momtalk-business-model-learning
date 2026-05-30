@@ -32,6 +32,8 @@
       --bg-hustles:    #FFE5EC;
       --bg-skills:     #EDE9FE;
       --bg-advanced:   #FFE8E0;
+      --bg-stocks:     #CFF8EC;
+      --bg-analysis:   #E5E1FB;
 
       --accent-foundation: var(--yellow);
       --accent-money:      var(--green);
@@ -40,6 +42,8 @@
       --accent-hustles:    var(--pink);
       --accent-skills:     var(--lavender);
       --accent-advanced:   var(--coral);
+      --accent-stocks:     var(--green-deep);
+      --accent-analysis:   var(--lavender);
     }
 
     * { box-sizing: border-box; }
@@ -174,7 +178,7 @@
     /* ─── Category columns ─── */
     .branches {
       display: grid;
-      grid-template-columns: repeat(7, minmax(0, 1fr));
+      grid-template-columns: repeat(9, minmax(0, 1fr));
       gap: 14px;
       margin-top: 60px;
     }
@@ -238,6 +242,8 @@
     .branch.hustles    .branch-header { background: var(--bg-hustles); }
     .branch.skills     .branch-header { background: var(--bg-skills); }
     .branch.advanced   .branch-header { background: var(--bg-advanced); }
+    .branch.stocks     .branch-header { background: var(--bg-stocks); }
+    .branch.analysis   .branch-header { background: var(--bg-analysis); }
 
     /* Industries lane uses 'kingdom' nodes: each card is a real-world
        industry CATEGORY waiting for lessons, not a single lesson. */
@@ -339,6 +345,8 @@
     .branch.hustles    .lesson.brainstormed { background: var(--bg-hustles); }
     .branch.skills     .lesson.brainstormed { background: var(--bg-skills); }
     .branch.advanced   .lesson.brainstormed { background: var(--bg-advanced); }
+    .branch.stocks     .lesson.brainstormed { background: var(--bg-stocks); }
+    .branch.analysis   .lesson.brainstormed { background: var(--bg-analysis); }
 
     /* ─── Summary footer ─── */
     .summary {
@@ -390,10 +398,10 @@
   <header class="page">
     <h1>🃏 Business Learning — Curriculum Mind Map</h1>
     <p class="subtitle">
-      Every lesson, shipped and brainstormed, grouped into 6 skill lanes — plus
-      a 7th lane for the <strong>10 real-world industry kingdoms</strong> from
-      Momo's World (a separate category to build out, distinct from the
-      concept-based 6 lanes).
+      Every lesson, shipped and brainstormed, grouped into 8 skill lanes — including
+      dedicated <strong>Kids Investing</strong> and <strong>Stock Analysis</strong> lanes — plus
+      a 9th lane for the <strong>10 real-world industry kingdoms</strong> from Momo's World
+      (a separate category to build out, distinct from the concept-based 8 lanes).
     </p>
     <div class="legend" role="region" aria-label="Legend">
       <span class="legend-item">
@@ -413,20 +421,22 @@
       <div class="root">
         <span class="label">The Lab</span>
         <span class="title">Business Learning</span>
-        <span class="count"><b>29</b> shipped &nbsp;·&nbsp; <b>27</b> brainstormed &nbsp;·&nbsp; <b>10</b> kingdoms</span>
+        <span class="count"><b>30</b> shipped &nbsp;·&nbsp; <b>39</b> brainstormed &nbsp;·&nbsp; <b>10</b> kingdoms</span>
       </div>
     </div>
 
     <!-- Connector lines from root down to each category header -->
     <svg class="connector" viewBox="0 0 1480 60" preserveAspectRatio="none">
-      <!-- Lines fan out from center top to 7 column tops -->
-      <path d="M 740 0 Q 740 30 106 60" />
-      <path d="M 740 0 Q 740 30 317 60" />
-      <path d="M 740 0 Q 740 30 528 60" />
+      <!-- Lines fan out from center top to 9 column tops -->
+      <path d="M 740 0 Q 740 30 82 60" />
+      <path d="M 740 0 Q 740 30 247 60" />
+      <path d="M 740 0 Q 740 30 411 60" />
+      <path d="M 740 0 Q 740 30 575 60" />
       <path d="M 740 0 Q 740 30 740 60" />
-      <path d="M 740 0 Q 740 30 952 60" />
-      <path d="M 740 0 Q 740 30 1163 60" />
-      <path d="M 740 0 Q 740 30 1374 60" />
+      <path d="M 740 0 Q 740 30 904 60" />
+      <path d="M 740 0 Q 740 30 1069 60" />
+      <path d="M 740 0 Q 740 30 1233 60" />
+      <path d="M 740 0 Q 740 30 1398 60" />
     </svg>
 
     <div class="branches">
@@ -457,7 +467,7 @@
         <div class="branch-header">
           <span class="emoji">💰</span>
           <div class="name">Money &amp;<br />Personal Finance</div>
-          <span class="count">11 lessons</span>
+          <span class="count">8 lessons</span>
         </div>
 
         <div class="lesson">
@@ -465,14 +475,6 @@
           <div class="meta">
             <div class="title">Piggy Bank Power-Up</div>
             <div class="concept">Compound interest</div>
-          </div>
-          <span class="status" title="Shipped">✓</span>
-        </div>
-        <div class="lesson">
-          <span class="emoji">📈</span>
-          <div class="meta">
-            <div class="title">Stock Market Adventure</div>
-            <div class="concept">Owning a real company</div>
           </div>
           <span class="status" title="Shipped">✓</span>
         </div>
@@ -533,6 +535,67 @@
           </div>
           <span class="status new" title="Brainstormed">✨</span>
         </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- STOCK INVESTING -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch stocks" aria-label="Kids Investing">
+        <div class="branch-header">
+          <span class="emoji">📈</span>
+          <div class="name">Kids<br />Investing</div>
+          <span class="count">8 lessons</span>
+        </div>
+
+        <div class="lesson">
+          <span class="emoji">📈</span>
+          <div class="meta">
+            <div class="title">Stock Market Adventure</div>
+            <div class="concept">Owning a slice of a real company</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+        <div class="lesson">
+          <span class="emoji">🧺</span>
+          <div class="meta">
+            <div class="title">Index Funds</div>
+            <div class="concept">Buy them ALL — Buffett's trick</div>
+          </div>
+          <span class="status" title="Shipped">✓</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">🥚</span>
+          <div class="meta">
+            <div class="title">Don't Put All Eggs in One Basket</div>
+            <div class="concept">Diversification &amp; spreading risk</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">⏳</span>
+          <div class="meta">
+            <div class="title">The Long Game</div>
+            <div class="concept">Time in the market beats timing it</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">💵</span>
+          <div class="meta">
+            <div class="title">Dividends</div>
+            <div class="concept">Getting paid just to own a share</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🐂</span>
+          <div class="meta">
+            <div class="title">Bulls &amp; Bears</div>
+            <div class="concept">Markets rise &amp; fall — stay calm</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
         <div class="lesson brainstormed">
           <span class="emoji">🤝</span>
           <div class="meta">
@@ -542,10 +605,86 @@
           <span class="status new" title="Brainstormed">✨</span>
         </div>
         <div class="lesson brainstormed">
-          <span class="emoji">📊</span>
+          <span class="emoji">🧩</span>
           <div class="meta">
-            <div class="title">Index Funds</div>
-            <div class="concept">Buy them all — Buffett's trick</div>
+            <div class="title">Build Your First Portfolio</div>
+            <div class="concept">Pick, track &amp; diversify (capstone)</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- STOCK ANALYSIS -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="branch analysis" aria-label="Stock Analysis">
+        <div class="branch-header">
+          <span class="emoji">🔎</span>
+          <div class="name">Stock<br />Analysis</div>
+          <span class="count">8 lessons</span>
+        </div>
+
+        <div class="lesson brainstormed">
+          <span class="emoji">🏆</span>
+          <div class="meta">
+            <div class="title">What Makes a Great Company?</div>
+            <div class="concept">Winners, moats &amp; staying power</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🔍</span>
+          <div class="meta">
+            <div class="title">Company Detective</div>
+            <div class="concept">Decode what it sells &amp; how it wins</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">📈</span>
+          <div class="meta">
+            <div class="title">Is It Growing?</div>
+            <div class="concept">More customers &amp; sales each year</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">💰</span>
+          <div class="meta">
+            <div class="title">Does It Make Money?</div>
+            <div class="concept">Revenue − cost on real companies</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🏰</span>
+          <div class="meta">
+            <div class="title">The Moat Test</div>
+            <div class="concept">What keeps copycats away</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">⚖️</span>
+          <div class="meta">
+            <div class="title">Cheap or Expensive?</div>
+            <div class="concept">Price vs value — what's it worth?</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🔭</span>
+          <div class="meta">
+            <div class="title">Spot the Trend</div>
+            <div class="concept">Notice what's changing &amp; popular</div>
+          </div>
+          <span class="status new" title="Brainstormed">✨</span>
+        </div>
+        <div class="lesson brainstormed">
+          <span class="emoji">🕵️</span>
+          <div class="meta">
+            <div class="title">Stock Detective (Capstone)</div>
+            <div class="concept">Analyze a company you love</div>
           </div>
           <span class="status new" title="Brainstormed">✨</span>
         </div>
@@ -1054,11 +1193,11 @@
     <!-- ─── Summary stats ─── -->
     <div class="summary">
       <div class="stat">
-        <span class="num-big">29</span>
+        <span class="num-big">30</span>
         <div class="label">Shipped Lessons ✓</div>
       </div>
       <div class="stat">
-        <span class="num-big">27</span>
+        <span class="num-big">39</span>
         <div class="label">Brainstormed Lessons ✨</div>
       </div>
       <div class="stat">
@@ -1066,14 +1205,15 @@
         <div class="label">Industry Kingdoms 🏰</div>
       </div>
       <div class="stat">
-        <span class="num-big">7</span>
+        <span class="num-big">9</span>
         <div class="label">Categories</div>
       </div>
     </div>
 
     <p class="footer-note">
-      Generated 2026-05-29 from <code>src/data/lessons/*.ts</code> and
-      <code>docs/specs/2026-05-29-new-modules-brainstorm-v2.md</code>.<br />
+      Generated 2026-05-30 from <code>src/data/lessons/*.ts</code> and
+      <code>docs/specs/2026-05-30-lessons-as-heart-strategy.md</code>.<br />
+      Added <strong>Kids Investing</strong> + <strong>Stock Analysis</strong> lanes; Index Funds now shipped.<br />
       Open <code>docs/curriculum-mindmap.html</code> in any browser to view.
     </p>
   </main>
