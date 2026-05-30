@@ -90,6 +90,7 @@ export const themes = {
   company: { accent: T.blue, bg: gradient('#E8F4FD') },
   stocks: { accent: T.pink, bg: gradient('#FDE8F4') },
   bonds: { accent: T.lavender, bg: gradient('#F0E8FD') },
+  'index-funds': { accent: T.green, bg: gradient(T.mint) },
   saving: { accent: T.pink, bg: gradient('#FFF0F5') },
   taxes: { accent: T.coral, bg: gradient('#FFF5F0') },
   budget: { accent: T.yellow, bg: gradient('#FFFFF0') },

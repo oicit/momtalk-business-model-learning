@@ -424,6 +424,16 @@ export const cardData: CardDef[] = [
     awardedBy: 'stock-market',
   },
   {
+    id: 'index-fund-investor',
+    skill: 'Investing',
+    emoji: '🧺',
+    title: 'Index Investor',
+    fact: 'One S&P 500 fund owns 500 companies at once!',
+    color: '#E5FAF1',
+    rarity: 'Rare',
+    awardedBy: 'index-funds',
+  },
+  {
     id: 'entrepreneur',
     skill: 'Foundations',
     emoji: '🦄',

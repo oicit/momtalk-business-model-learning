@@ -18,6 +18,7 @@ import youtubeCreator from '../youtube-creator';
 import cookieBakery from '../cookie-bakery';
 import piggyBank from '../piggy-bank';
 import stockMarket from '../stock-market';
+import indexFunds from '../index-funds';
 import mcdonalds from '../mcdonalds';
 import inventorsLab from '../inventors-lab';
 import dealMaker from '../deal-maker';
@@ -44,15 +45,15 @@ import { cardData, earnedCardFor, milestoneCards, milestoneCardsEarned } from '.
 
 const ALL_LESSONS: LessonDef[] = [
   business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator,
-  cookieBakery, piggyBank, stockMarket, mcdonalds, inventorsLab, dealMaker,
+  cookieBakery, piggyBank, stockMarket, indexFunds, mcdonalds, inventorsLab, dealMaker,
   charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco,
   amazon, lego, disney, farmStand, snowDayHustle, marketingMountain,
   surveyMaster, etsyShop, pizzaPlace, startupPitch, appMaker,
 ];
 
 describe('lesson registry', () => {
-  it('has 29 shipped lessons', () => {
-    expect(ALL_LESSONS).toHaveLength(29);
+  it('has 30 shipped lessons', () => {
+    expect(ALL_LESSONS).toHaveLength(30);
   });
 
   it('each lesson has a unique id', () => {

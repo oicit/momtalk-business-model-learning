@@ -137,6 +137,16 @@ export const portalStops: MapStop[] = [
     progressKey: 'stock-market',
   },
   {
+    id: 'index-funds',
+    emoji: '🧺',
+    title: 'Index\nFunds',
+    color: '#E5FAF1',
+    themeKey: 'index-funds',
+    path: '/index-funds',
+    status: 'available',
+    progressKey: 'index-funds',
+  },
+  {
     id: 'mcdonalds',
     emoji: '🍔',
     title: 'McDonald\'s',

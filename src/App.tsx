@@ -9,6 +9,7 @@ import YouTubeCreatorPage from './pages/YouTubeCreatorPage';
 import CookieBakeryPage from './pages/CookieBakeryPage';
 import PiggyBankPage from './pages/PiggyBankPage';
 import StockMarketPage from './pages/StockMarketPage';
+import IndexFundsPage from './pages/IndexFundsPage';
 import McDonaldsPage from './pages/McDonaldsPage';
 import InventorsLabPage from './pages/InventorsLabPage';
 import DealMakerPage from './pages/DealMakerPage';
@@ -53,6 +54,7 @@ export default function App() {
       <Route path="/cookie-bakery" element={<CookieBakeryPage />} />
       <Route path="/piggy-bank" element={<PiggyBankPage />} />
       <Route path="/stock-market" element={<StockMarketPage />} />
+      <Route path="/index-funds" element={<IndexFundsPage />} />
       <Route path="/mcdonalds" element={<McDonaldsPage />} />
       <Route path="/inventors-lab" element={<InventorsLabPage />} />
       <Route path="/deal-maker" element={<DealMakerPage />} />
