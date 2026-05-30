@@ -58,6 +58,16 @@ import aiAndJobs from '../ai-and-jobs';
 import cryptocurrency from '../cryptocurrency';
 import realEstate from '../real-estate';
 import globalization from '../globalization';
+import wildEarth from '../wild-earth';
+import powerCore from '../power-core';
+import machineForge from '../machine-forge';
+import megaBuild from '../mega-build';
+import digitalUniverse from '../digital-universe';
+import tradeRoutes from '../trade-routes';
+import wisdomAcademy from '../wisdom-academy';
+import civilizationCouncil from '../civilization-council';
+import healingLife from '../healing-life';
+import futureFrontier from '../future-frontier';
 import mcdonalds from '../mcdonalds';
 import inventorsLab from '../inventors-lab';
 import dealMaker from '../deal-maker';
@@ -93,6 +103,8 @@ const ALL_LESSONS: LessonDef[] = [
   tutorTrade, hotCocoaStand, libraryCard, codingGig,
   failureBounceBack, smartGoals, publicSpeaking, timeManagement, habitBuilding,
   aiAndJobs, cryptocurrency, realEstate, globalization,
+  wildEarth, powerCore, machineForge, megaBuild, digitalUniverse,
+  tradeRoutes, wisdomAcademy, civilizationCouncil, healingLife, futureFrontier,
   mcdonalds, inventorsLab, dealMaker,
   charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco,
   amazon, lego, disney, farmStand, snowDayHustle, marketingMountain,
@@ -100,8 +112,8 @@ const ALL_LESSONS: LessonDef[] = [
 ];
 
 describe('lesson registry', () => {
-  it('has 69 shipped lessons', () => {
-    expect(ALL_LESSONS).toHaveLength(69);
+  it('has 79 shipped lessons', () => {
+    expect(ALL_LESSONS).toHaveLength(79);
   });
 
   it('each lesson has a unique id', () => {

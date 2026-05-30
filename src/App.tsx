@@ -49,6 +49,16 @@ import AiAndJobsPage from './pages/AiAndJobsPage';
 import CryptocurrencyPage from './pages/CryptocurrencyPage';
 import RealEstatePage from './pages/RealEstatePage';
 import GlobalizationPage from './pages/GlobalizationPage';
+import WildEarthPage from './pages/WildEarthPage';
+import PowerCorePage from './pages/PowerCorePage';
+import MachineForgePage from './pages/MachineForgePage';
+import MegaBuildPage from './pages/MegaBuildPage';
+import DigitalUniversePage from './pages/DigitalUniversePage';
+import TradeRoutesPage from './pages/TradeRoutesPage';
+import WisdomAcademyPage from './pages/WisdomAcademyPage';
+import CivilizationCouncilPage from './pages/CivilizationCouncilPage';
+import HealingLifePage from './pages/HealingLifePage';
+import FutureFrontierPage from './pages/FutureFrontierPage';
 import McDonaldsPage from './pages/McDonaldsPage';
 import InventorsLabPage from './pages/InventorsLabPage';
 import DealMakerPage from './pages/DealMakerPage';
@@ -133,6 +143,16 @@ export default function App() {
       <Route path="/cryptocurrency" element={<CryptocurrencyPage />} />
       <Route path="/real-estate" element={<RealEstatePage />} />
       <Route path="/globalization" element={<GlobalizationPage />} />
+      <Route path="/wild-earth" element={<WildEarthPage />} />
+      <Route path="/power-core" element={<PowerCorePage />} />
+      <Route path="/machine-forge" element={<MachineForgePage />} />
+      <Route path="/mega-build" element={<MegaBuildPage />} />
+      <Route path="/digital-universe" element={<DigitalUniversePage />} />
+      <Route path="/trade-routes" element={<TradeRoutesPage />} />
+      <Route path="/wisdom-academy" element={<WisdomAcademyPage />} />
+      <Route path="/civilization-council" element={<CivilizationCouncilPage />} />
+      <Route path="/healing-life" element={<HealingLifePage />} />
+      <Route path="/future-frontier" element={<FutureFrontierPage />} />
       <Route path="/mcdonalds" element={<McDonaldsPage />} />
       <Route path="/inventors-lab" element={<InventorsLabPage />} />
       <Route path="/deal-maker" element={<DealMakerPage />} />
