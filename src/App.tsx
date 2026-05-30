@@ -10,6 +10,20 @@ import CookieBakeryPage from './pages/CookieBakeryPage';
 import PiggyBankPage from './pages/PiggyBankPage';
 import StockMarketPage from './pages/StockMarketPage';
 import IndexFundsPage from './pages/IndexFundsPage';
+import DiversificationPage from './pages/DiversificationPage';
+import LongGamePage from './pages/LongGamePage';
+import DividendsPage from './pages/DividendsPage';
+import BullsBearsPage from './pages/BullsBearsPage';
+import BondsPage from './pages/BondsPage';
+import FirstPortfolioPage from './pages/FirstPortfolioPage';
+import GreatCompanyPage from './pages/GreatCompanyPage';
+import CompanyDetectivePage from './pages/CompanyDetectivePage';
+import IsItGrowingPage from './pages/IsItGrowingPage';
+import DoesItMakeMoneyPage from './pages/DoesItMakeMoneyPage';
+import MoatTestPage from './pages/MoatTestPage';
+import CheapOrExpensivePage from './pages/CheapOrExpensivePage';
+import SpotTheTrendPage from './pages/SpotTheTrendPage';
+import StockDetectivePage from './pages/StockDetectivePage';
 import McDonaldsPage from './pages/McDonaldsPage';
 import InventorsLabPage from './pages/InventorsLabPage';
 import DealMakerPage from './pages/DealMakerPage';
@@ -55,6 +69,20 @@ export default function App() {
       <Route path="/piggy-bank" element={<PiggyBankPage />} />
       <Route path="/stock-market" element={<StockMarketPage />} />
       <Route path="/index-funds" element={<IndexFundsPage />} />
+      <Route path="/diversification" element={<DiversificationPage />} />
+      <Route path="/long-game" element={<LongGamePage />} />
+      <Route path="/dividends" element={<DividendsPage />} />
+      <Route path="/bulls-bears" element={<BullsBearsPage />} />
+      <Route path="/bonds" element={<BondsPage />} />
+      <Route path="/first-portfolio" element={<FirstPortfolioPage />} />
+      <Route path="/great-company" element={<GreatCompanyPage />} />
+      <Route path="/company-detective" element={<CompanyDetectivePage />} />
+      <Route path="/is-it-growing" element={<IsItGrowingPage />} />
+      <Route path="/does-it-make-money" element={<DoesItMakeMoneyPage />} />
+      <Route path="/moat-test" element={<MoatTestPage />} />
+      <Route path="/cheap-or-expensive" element={<CheapOrExpensivePage />} />
+      <Route path="/spot-the-trend" element={<SpotTheTrendPage />} />
+      <Route path="/stock-detective" element={<StockDetectivePage />} />
       <Route path="/mcdonalds" element={<McDonaldsPage />} />
       <Route path="/inventors-lab" element={<InventorsLabPage />} />
       <Route path="/deal-maker" element={<DealMakerPage />} />

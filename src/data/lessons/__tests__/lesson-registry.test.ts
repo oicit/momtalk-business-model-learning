@@ -19,6 +19,20 @@ import cookieBakery from '../cookie-bakery';
 import piggyBank from '../piggy-bank';
 import stockMarket from '../stock-market';
 import indexFunds from '../index-funds';
+import diversification from '../diversification';
+import longGame from '../long-game';
+import dividends from '../dividends';
+import bullsBears from '../bulls-bears';
+import bonds from '../bonds';
+import firstPortfolio from '../first-portfolio';
+import greatCompany from '../great-company';
+import companyDetective from '../company-detective';
+import isItGrowing from '../is-it-growing';
+import doesItMakeMoney from '../does-it-make-money';
+import moatTest from '../moat-test';
+import cheapOrExpensive from '../cheap-or-expensive';
+import spotTheTrend from '../spot-the-trend';
+import stockDetective from '../stock-detective';
 import mcdonalds from '../mcdonalds';
 import inventorsLab from '../inventors-lab';
 import dealMaker from '../deal-maker';
@@ -45,15 +59,19 @@ import { cardData, earnedCardFor, milestoneCards, milestoneCardsEarned } from '.
 
 const ALL_LESSONS: LessonDef[] = [
   business101, garageSale, lemonadeStand, chickFilA, petShop, youtubeCreator,
-  cookieBakery, piggyBank, stockMarket, indexFunds, mcdonalds, inventorsLab, dealMaker,
+  cookieBakery, piggyBank, stockMarket, indexFunds,
+  diversification, longGame, dividends, bullsBears, bonds, firstPortfolio,
+  greatCompany, companyDetective, isItGrowing, doesItMakeMoney, moatTest,
+  cheapOrExpensive, spotTheTrend, stockDetective,
+  mcdonalds, inventorsLab, dealMaker,
   charityLab, riskPoolIsland, taxTown, subscriptionSense, roblox, costco,
   amazon, lego, disney, farmStand, snowDayHustle, marketingMountain,
   surveyMaster, etsyShop, pizzaPlace, startupPitch, appMaker,
 ];
 
 describe('lesson registry', () => {
-  it('has 30 shipped lessons', () => {
-    expect(ALL_LESSONS).toHaveLength(30);
+  it('has 44 shipped lessons', () => {
+    expect(ALL_LESSONS).toHaveLength(44);
   });
 
   it('each lesson has a unique id', () => {
