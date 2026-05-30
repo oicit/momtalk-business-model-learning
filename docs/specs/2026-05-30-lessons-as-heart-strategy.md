@@ -18,7 +18,7 @@ What's good is the **curriculum**. The strategy is to keep the lessons exactly a
 
 This grounds everything below — much of what a "10×" plan would "add" already exists:
 
-- **69 shipped lessons** as data (`src/data/lessons/*.ts`) — the entire curriculum is now built, 0 brainstormed remaining — each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
+- **79 shipped lessons** as data (`src/data/lessons/*.ts`) — the entire curriculum is now built (all 8 concept lanes + the 10 Real-World Industry lessons), 0 brainstormed remaining — each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
 - **Adaptive difficulty** built in — every lesson carries `easy / medium / hard` text (`useAdaptive`).
 - **Momo** the character already exists (`Momo.tsx`, `MomoMentorBubble.tsx`) — today he speaks *canned* lesson text.
 - **Cards** with rarity + skill lanes including an **Investing** lane (`cards.ts`); **quizzes** award XP + skill scores.
@@ -36,7 +36,7 @@ The lessons are the asset. The engines are the leverage.
 | 📈 **Kids Investing** | 8 | investing concepts & behavior — see below |
 | 🔎 **Stock Analysis** | 8 | **NEW** — sizing up companies, kid-style — see below |
 | 🏢 Famous Businesses | 15 | Chick-fil-A, McDonald's, Disney, … |
-| 🏰 Real-World Industries | 10 kingdoms | Momo's World — industries awaiting lessons |
+| 🏰 Real-World Industries | 10 | Momo's World — Wild Earth, Power Core, Digital Universe… (built) |
 | 💪 Kid Hustles | 13 | Lemonade, Garage Sale, Pizza Place, … |
 | 🎯 Soft Skills & Meta | 10 | Negotiation, marketing, resilience, … |
 | 🚀 Advanced & Big Picture | 6 | Startup Pitch, App Maker, AI & Jobs, … |
@@ -124,7 +124,7 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Phased rollout (engines wrap the lessons, in order)
 
-1. ✅ **Content DONE — all 69 lessons across 8 lanes are built, wired, tsc-clean, tested, and rendering live** (0 brainstormed remaining). The curriculum is complete; the work now shifts entirely to the five engines below.
+1. ✅ **Content DONE — all 79 lessons across 9 lanes are built, wired, tsc-clean, tested, and rendering live** (including the 10 Real-World Industry lessons; 0 brainstormed remaining). The curriculum is complete; the work now shifts entirely to the five engines below.
 2. **Engine 1 — Momo coach** at 3 surfaces: lesson intro ("last time we…"), a stuck-moment nudge, and an "Ask Momo." Conservative, guardrailed.
 3. **Engine 2 — Kid Capital + pretend portfolio**, anchored on the Stock Investing lane.
 4. **Engine 3 — Family Mode** weekly briefing + mission co-pilot.
@@ -140,4 +140,4 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Summary
 
-Keep the 69 lessons (the full curriculum across 8 lanes — now 100% built) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
+Keep the 79 lessons (the full curriculum across 9 lanes — now 100% built) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
