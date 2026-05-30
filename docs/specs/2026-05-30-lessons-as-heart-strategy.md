@@ -18,7 +18,7 @@ What's good is the **curriculum**. The strategy is to keep the lessons exactly a
 
 This grounds everything below — much of what a "10×" plan would "add" already exists:
 
-- **44 shipped lessons** as data (`src/data/lessons/*.ts`), each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
+- **69 shipped lessons** as data (`src/data/lessons/*.ts`) — the entire curriculum is now built, 0 brainstormed remaining — each a sequence of rich *beats*: `intro → think-deeper → concept-cards → decision → calc-challenge → quiz → outro → real-world-mission`.
 - **Adaptive difficulty** built in — every lesson carries `easy / medium / hard` text (`useAdaptive`).
 - **Momo** the character already exists (`Momo.tsx`, `MomoMentorBubble.tsx`) — today he speaks *canned* lesson text.
 - **Cards** with rarity + skill lanes including an **Investing** lane (`cards.ts`); **quizzes** award XP + skill scores.
@@ -58,7 +58,7 @@ A dedicated lane so investing literacy is a coherent arc, not scattered. Foundat
 | 7 | Bonds | Lending to companies + governments | ✅ shipped |
 | 8 | Build Your First Portfolio | Pick, track & diversify (capstone) | ✅ shipped |
 
-**All 8 Kids Investing lessons are built and wired end-to-end** (lesson + theme + card + page + route + map stop), tsc clean, tests green (`44 shipped`), and rendering live.
+**All 8 Kids Investing lessons are built and wired end-to-end** (lesson + theme + card + page + route + map stop), tsc clean, tests green (`69 shipped`), and rendering live.
 
 ## The Stock Analysis category (NEW)
 
@@ -124,7 +124,7 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Phased rollout (engines wrap the lessons, in order)
 
-1. ✅ **Done — Kids Investing (8) + Stock Analysis (8) lanes fully built** (44 shipped lessons, tests green). Next content: author the remaining brainstormed lessons in the other lanes (Apple, Google, AI & Jobs, etc.).
+1. ✅ **Content DONE — all 69 lessons across 8 lanes are built, wired, tsc-clean, tested, and rendering live** (0 brainstormed remaining). The curriculum is complete; the work now shifts entirely to the five engines below.
 2. **Engine 1 — Momo coach** at 3 surfaces: lesson intro ("last time we…"), a stuck-moment nudge, and an "Ask Momo." Conservative, guardrailed.
 3. **Engine 2 — Kid Capital + pretend portfolio**, anchored on the Stock Investing lane.
 4. **Engine 3 — Family Mode** weekly briefing + mission co-pilot.
@@ -140,4 +140,4 @@ Everything stays **education-first**: points/coins/stars and a **pretend** portf
 
 ## Summary
 
-Keep the 44 lessons (now including fully-built Kids Investing + Stock Analysis lanes) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
+Keep the 69 lessons (the full curriculum across 8 lanes — now 100% built) as the heart. Wrap them in five engines — Momo as a live coach, symbolic points + a pretend portfolio, a family layer, a careful social layer, and live real-world data — to turn a strong static curriculum into a living, personal, shared one. No venture, no ledger, no "run a business." Same lessons. Far more alive.
